@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { CategoryTabs } from "@/components/my9specs/CategoryTabs";
 import { My9SpecsResultPanel } from "@/components/my9specs/My9SpecsResultPanel";
@@ -17,6 +17,7 @@ import {
   getSelectedSpecs,
   MY9_SPECS_MAX_SELECTION,
   removeCustomSpec,
+  serializeMy9SpecsSearchParams,
   togglePresetSpec,
 } from "@/lib/my9specs";
 import { getMy9SpecsBuilderPath } from "@/lib/my9specs-share";
@@ -39,6 +40,24 @@ function formatLivePercentage(value: number) {
   return `${value.toFixed(2)}%`;
 }
 
+async function saveMy9SpecsSnapshot(payload: {
+  targetGender: "male" | "female";
+  presetIds: string[];
+  customInputs: CustomSpecInput[];
+}) {
+  const response = await fetch("/api/my9specs-stats", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`匿名統計の保存に失敗しました (${response.status})`);
+  }
+}
+
 export function My9SpecsApp({
   initialTargetGender = "male",
   initialPresetIds = [],
@@ -53,6 +72,8 @@ export function My9SpecsApp({
   const [showResult, setShowResult] = useState(false);
   const [selectionPanelOpen, setSelectionPanelOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const savedSnapshotKeysRef = useRef(new Set<string>());
+  const pendingSnapshotKeysRef = useRef(new Set<string>());
 
   const selected = getSelectedSpecs(presetIds, customInputs);
   const liveEstimate = getMy9SpecsEstimate(selected, targetGender);
@@ -82,6 +103,26 @@ export function My9SpecsApp({
   function handleGenerate() {
     if (!isComplete) {
       return;
+    }
+
+    const snapshotKey = serializeMy9SpecsSearchParams(targetGender, presetIds, customInputs);
+    if (!savedSnapshotKeysRef.current.has(snapshotKey) && !pendingSnapshotKeysRef.current.has(snapshotKey)) {
+      pendingSnapshotKeysRef.current.add(snapshotKey);
+
+      void saveMy9SpecsSnapshot({
+        targetGender,
+        presetIds,
+        customInputs,
+      })
+        .then(() => {
+          savedSnapshotKeysRef.current.add(snapshotKey);
+        })
+        .catch((error) => {
+          console.warn("Failed to persist anonymous my9specs stats", error);
+        })
+        .finally(() => {
+          pendingSnapshotKeysRef.current.delete(snapshotKey);
+        });
     }
 
     setShowResult(true);

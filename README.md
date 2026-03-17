@@ -75,6 +75,9 @@ npm run dev
 - `MARKET_STATS_RECORD_RETENTION`
   - 任意
   - 婚活スペック年収換算の匿名スナップショット保持件数。`0` で無効
+- `MY9SPECS_STATS_RECORD_RETENTION`
+  - 任意
+  - My 9 Specs の匿名スナップショット保持件数。`0` で無効
 
 ## 本番投入前チェック
 
@@ -126,6 +129,7 @@ MAX_DAILY_REQUESTS=
 STATS_RECORD_RETENTION=500
 CONDITIONS_STATS_RECORD_RETENTION=3000
 MARKET_STATS_RECORD_RETENTION=3000
+MY9SPECS_STATS_RECORD_RETENTION=3000
 ```
 
 ## 運用メモ
@@ -134,6 +138,7 @@ MARKET_STATS_RECORD_RETENTION=3000
 - `/api/read-filter` は条件スクショの読み取り専用
 - `/api/conditions-stats` は条件リアリティチェックの匿名スナップショット保存
 - `/api/market-stats` は婚活スペック年収換算の匿名スナップショット保存
+- `/api/my9specs-stats` は My 9 Specs の匿名スナップショット保存
 - レスポンスには `X-Analyze-Request-Id` と `Server-Timing` を付与
 - Vercel logs には構造化ログを出すので、遅延・失敗率の確認に使える
 - 統計ページは KV 未設定でもゼロ件表示で動く
