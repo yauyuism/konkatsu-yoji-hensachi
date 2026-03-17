@@ -1,0 +1,10 @@
+.git
+.next
+.next-build-bak-*
+node_modules
+test-results
+tests
+coverage
+.env.local
+.env*.local
+*.log

@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# やうゆの婚活診断
 
-## Getting Started
+婚活・マッチングアプリ向けの診断シリーズです。現在は主に以下を含みます。
 
-First, run the development server:
+- `/prof`: プロフィール偏差値診断
+- `/prof/stats`: 匿名化された統計ページ
+- `/conditions`: 条件リアリティチェック
+- `/market`: 婚活スペック年収換算
+- `/`: 質問型のアプリ偏差値
+- `/yoji`: 婚活四字熟語診断
+
+プロフィール偏差値診断は、プロフィール文を Claude で分析して、偏差値、5軸スコア、ハイライト、刺さる相手、改善案まで返します。条件リアリティチェックは、年齢・年収・身長・学歴・エリア条件から、未婚者全体の何%に当たるかと人数を即時計算します。婚活スペック年収換算は、年齢・年収・身長・学歴・居住地の希少性を年収相当に置き換えて見せます。スクショ読み取りを使う場合のみ Claude を使います。
+
+## 技術スタック
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS
+- Anthropic Claude API
+- Vercel KV
+- Recharts
+- html2canvas
+- Playwright
+
+## ローカル開発
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- ホーム: [http://localhost:3000/](http://localhost:3000/)
+- 条件リアリティチェック: [http://localhost:3000/conditions](http://localhost:3000/conditions)
+- 婚活スペック年収換算: [http://localhost:3000/market](http://localhost:3000/market)
+- プロフィール偏差値診断: [http://localhost:3000/prof](http://localhost:3000/prof)
+- 統計: [http://localhost:3000/prof/stats](http://localhost:3000/prof/stats)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 環境変数
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+`.env.local` に設定します。
 
-## Learn More
+- `ANTHROPIC_API_KEY`
+  - 必須
+  - `/api/analyze` と `/api/read-filter` で使用
+- `ANALYZE_TOKEN_SECRET`
+  - 任意
+  - staged analysis token の署名用。未設定時は API key を代用
+- `NEXT_PUBLIC_SITE_URL`
+  - 本番URL
+  - canonical / OGP / sitemap の基準URL
+- `NEXT_PUBLIC_URL`
+  - 互換用エイリアス。通常は不要
+- `NEXT_PUBLIC_GA_ID`
+  - 任意
+  - GA4 Measurement ID
+- `NEXT_PUBLIC_X_URL`
+  - X プロフィールURL
+- `NEXT_PUBLIC_NOTE_URL`
+  - note プロフィールURL
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+- `KV_REST_API_READ_ONLY_TOKEN`
+  - 任意
+  - Upstash / Vercel KV 用
+- `MAX_DAILY_REQUESTS`
+  - 任意
+  - 1日の診断数上限
+- `STATS_RECORD_RETENTION`
+  - 任意
+  - 匿名統計の生レコード保持件数。`0` で無効
+- `CONDITIONS_STATS_RECORD_RETENTION`
+  - 任意
+  - 条件リアリティチェックの匿名スナップショット保持件数。`0` で無効
+- `MARKET_STATS_RECORD_RETENTION`
+  - 任意
+  - 婚活スペック年収換算の匿名スナップショット保持件数。`0` で無効
 
-To learn more about Next.js, take a look at the following resources:
+## 本番投入前チェック
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run build
+npm run test:e2e
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Playwright 初回のみ:
 
-## Deploy on Vercel
+```bash
+npx playwright install chromium
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## E2E テスト
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Playwright は `tests/e2e` にあります。
+
+- `/conditions` の基本フロー
+- `/prof` の基本フロー
+- 入力バリデーション
+- 初回分析エラー表示
+- `/prof/stats` の主要導線
+
+ローカルで既存サーバーを使う場合:
+
+```bash
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
+```
+
+## Vercel デプロイ
+
+1. GitHub リポジトリを Vercel に Import
+2. Environment Variables を設定
+3. Production Domain を設定
+4. `/conditions`、`/prof`、`/prof/stats` を本番確認
+
+最低限必要な本番環境変数:
+
+```bash
+ANTHROPIC_API_KEY=
+ANALYZE_TOKEN_SECRET=
+NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_GA_ID=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+MAX_DAILY_REQUESTS=
+STATS_RECORD_RETENTION=500
+CONDITIONS_STATS_RECORD_RETENTION=3000
+MARKET_STATS_RECORD_RETENTION=3000
+```
+
+## 運用メモ
+
+- `/api/analyze` は初回分析と詳細分析の2段階
+- `/api/read-filter` は条件スクショの読み取り専用
+- `/api/conditions-stats` は条件リアリティチェックの匿名スナップショット保存
+- `/api/market-stats` は婚活スペック年収換算の匿名スナップショット保存
+- レスポンスには `X-Analyze-Request-Id` と `Server-Timing` を付与
+- Vercel logs には構造化ログを出すので、遅延・失敗率の確認に使える
+- 統計ページは KV 未設定でもゼロ件表示で動く
+- 匿名統計にはプロフィール原文を保存しない
+- 条件リアリティチェックの匿名統計にはスクショ画像そのものを保存しない
+- 婚活スペック年収換算の匿名統計には入力スペックのスナップショットだけを保存し、個人識別情報は保存しない
