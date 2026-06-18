@@ -1,51 +1,77 @@
-export type ToolCategory = "measure" | "research" | "discover";
+import { getSpecOptionCountForGender } from "@/data/spec-options";
 
-export type ToolId = "prof" | "weight" | "my9specs" | "conditions" | "market" | "hensachi" | "type";
+export type ToolCategory = "question" | "paste" | "number";
+
+export type ToolId = "deaiFit" | "prof" | "weight" | "check" | "my9specs" | "conditions" | "market" | "hensachi" | "type";
 
 export type ToolStatus = "live" | "coming_soon";
 
 export interface Tool {
   id: ToolId;
   path: string;
-  label: string;
   name: string;
+  catch: string;
   description: string;
-  promoDescription: string;
+  homeName?: string;
+  homeCatch?: string;
+  homeDescription?: string;
   tags: string[];
   category: ToolCategory;
+  cta: string;
   isNew: boolean;
   newUntil?: string;
   order: number;
   status: ToolStatus;
 }
 
-export const CATEGORY_ORDER: ToolCategory[] = ["measure", "research", "discover"];
+export const CATEGORY_ORDER: ToolCategory[] = ["question", "paste", "number"];
+
+const MY9_SPECS_OPTION_COUNT = getSpecOptionCountForGender("male");
 
 export const CATEGORIES = {
-  measure: {
-    label: "測る",
-    description: "実際のデータを貼って分析するツール",
+  paste: {
+    label: "貼って分析",
+    description: "スクショを貼ると、数字で現実が返ってくるツール",
   },
-  research: {
-    label: "調べる",
-    description: "数字を入力して、統計データから事実を算出するツール",
+  number: {
+    label: "数字で確認",
+    description: "数字を入れると、信じたくない事実が統計で返ってくるツール",
   },
-  discover: {
-    label: "知る",
-    description: "質問に答えて、自分のタイプや傾向を知るツール",
+  question: {
+    label: "質問で診断",
+    description: "質問に答えるだけで、恋愛や婚活の癖を言語化するツール",
   },
 } as const satisfies Record<ToolCategory, { label: string; description: string }>;
 
 export const TOOLS: Tool[] = [
   {
+    id: "deaiFit",
+    path: "/diagnoses/deai-fit",
+    name: "自分に合う出会い方診断",
+    catch: "普通の婚活に、自分を合わせなくていい",
+    description: "マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場。あなたの恋愛スタイルに合う出会い方を診断します。",
+    homeCatch: "あなたに合う出会い方、どこにある？",
+    homeDescription: "条件検索、関係性、生活圏、価値観発信、併用設計の5タイプから、自分に合う会い方を整理します。",
+    tags: ["約2分", "10問", "アイカタ監修"],
+    category: "question",
+    cta: "診断する →",
+    isNew: true,
+    newUntil: "2026-12-31",
+    order: 0,
+    status: "live",
+  },
+  {
     id: "prof",
     path: "/prof",
-    label: "PROFILE CHECK",
-    name: "プロフィール偏差値診断",
-    description: "プロフ文を貼ってAIが5軸で採点",
-    promoDescription: "プロフィール文を貼るだけで、偏差値と改善ポイントを返します。",
-    tags: ["本文貼り付け", "約2分", "AI分析"],
-    category: "measure",
+    name: "プロフ偏差値",
+    catch: "異性からどう見えてるか、点数で出る",
+    description: "プロフ文を貼るだけ。5つの観点で偏差値と改善案が出ます",
+    homeName: "プロフィール偏差値診断",
+    homeCatch: "あなたのプロフ、異性からは何点に見えてる？",
+    homeDescription: "プロフ文を貼るだけ。5つの観点で偏差値が出ます。自信作ほど点が低い傾向があります。",
+    tags: ["約2分"],
+    category: "paste",
+    cta: "やってみる →",
     isNew: false,
     order: 1,
     status: "live",
@@ -53,40 +79,61 @@ export const TOOLS: Tool[] = [
   {
     id: "weight",
     path: "/weight",
-    label: "MESSAGE WEIGHT",
-    name: "LINEメッセージ重量測定",
-    description: "やりとりを貼ってメッセージの重さをkg測定",
-    promoDescription: "実際のやりとりを貼るだけで、会話の重さをkg単位で可視化します。",
-    tags: ["テキスト貼り付け", "約1分", "重量測定"],
-    category: "measure",
-    isNew: true,
-    newUntil: "2026-04-15",
+    name: "LINEの重さ測定",
+    catch: "あなたのLINE、どれくらい重い？",
+    description: "スクショを貼るだけ。メッセージの重さがkgで出ます",
+    homeCatch: "あなたのLINE、相手にとって何kgですか？",
+    homeDescription: "やりとりを貼るだけ。「重い」を重量で数値化します。3kg超えたら黄色信号です。",
+    tags: ["約1分"],
+    category: "paste",
+    cta: "やってみる →",
+    isNew: false,
     order: 2,
+    status: "live",
+  },
+  {
+    id: "check",
+    path: "/check",
+    name: "この人、大丈夫？",
+    catch: "相手の地雷度と脈アリ度をまとめて判定",
+    description: "相手のプロフやスクショを貼るだけで分かります",
+    homeCatch: "その人、大丈夫じゃないかもしれません。",
+    homeDescription: "相手のプロフやスクショを貼るだけ。地雷度と脈アリ度を同時に判定します。",
+    tags: ["約1分"],
+    category: "paste",
+    cta: "チェックする →",
+    isNew: true,
+    newUntil: "2026-05-01",
+    order: 3,
     status: "live",
   },
   {
     id: "my9specs",
     path: "/my9specs",
-    label: "MY 9 SPECS",
-    name: "私が譲れない9つの条件",
-    description: "60個から9つ選ぶと、理想条件の画像と人数を同時に返す",
-    promoDescription: "譲れない条件を9つ選ぶだけで、3×3カード画像と推計人数を返します。",
-    tags: ["9つ選ぶ", "約1分", "画像シェア"],
-    category: "research",
+    name: "My 9 Specs",
+    catch: "9つ選ぶと、理想のタイプが1枚の画像になります",
+    description: `${MY9_SPECS_OPTION_COUNT}個の条件から9つ選ぶと、その条件を満たす人数も出ます`,
+    homeCatch: "あなたの「譲れない9条件」、1枚の画像にします。",
+    homeDescription: `${MY9_SPECS_OPTION_COUNT}個から9つ選ぶだけ。その条件を全部満たす人が日本に何人いるかも出ます。0人って出ても泣かないでください。`,
+    tags: ["約2分"],
+    category: "number",
+    cta: "やってみる →",
     isNew: true,
-    newUntil: "2026-04-30",
+    newUntil: "2026-05-01",
     order: 1,
     status: "live",
   },
   {
     id: "conditions",
     path: "/conditions",
-    label: "CONDITION CHECK",
-    name: "条件リアリティチェッカー",
-    description: "相手の条件を入力→何人いるかをリアルタイム算出",
-    promoDescription: "理想条件を入れると、その条件に合う未婚者が何人いるかを計算します。",
-    tags: ["スライダー操作", "約1分", "リアルタイム算出"],
-    category: "research",
+    name: "理想の高さチェッカー",
+    catch: 'あなたが考える"普通"の異性が、日本に何人いる？',
+    description: "相手の条件をスライダーで入れるだけ。人数がリアルタイムで出ます",
+    homeCatch: "あなたの言う「普通の人でいい」の\"普通\"、日本に何人いるか知ってますか？",
+    homeDescription: "スライダーで条件を動かすたびに、人数がリアルタイムで減っていきます。",
+    tags: ["約1分"],
+    category: "number",
+    cta: "やってみる →",
     isNew: false,
     order: 2,
     status: "live",
@@ -94,12 +141,14 @@ export const TOOLS: Tool[] = [
   {
     id: "market",
     path: "/market",
-    label: "MARKET VALUE",
-    name: "婚活スペック年収換算",
-    description: "自分のスペックのレア度を年収で換算",
-    promoDescription: "自分の婚活スペックのレア度を、年収という物差しで見直せます。",
-    tags: ["フォーム入力", "約30秒", "年収換算"],
-    category: "research",
+    name: "スペック年収換算",
+    catch: "自分のレア度を年収に例えると？",
+    description: "年齢・年収・身長・学歴・エリア・婚姻歴・喫煙の7項目から、婚活市場での通りやすさを年収に換算します。",
+    homeCatch: "あなたのスペック、年収に換算するといくら？",
+    homeDescription: "年齢・年収・身長・学歴・エリア・婚姻歴・喫煙の7項目から、婚活市場での通りやすさを年収に換算します。",
+    tags: ["約30秒"],
+    category: "number",
+    cta: "やってみる →",
     isNew: false,
     order: 3,
     status: "live",
@@ -107,12 +156,14 @@ export const TOOLS: Tool[] = [
   {
     id: "hensachi",
     path: "/hensachi",
-    label: "APP HENSACHI",
-    name: "マッチングアプリ偏差値診断",
-    description: "16問でアプリの使い方を5科目の偏差値で採点",
-    promoDescription: "16問に答えるだけで、アプリの使い方を5科目の偏差値で見直せます。",
-    tags: ["全16問", "約3分", "質問型"],
-    category: "discover",
+    name: "マチアプMBTI",
+    catch: "アプリの使い方を4軸16タイプで見る",
+    description: "20問の4択に答えるだけ。約3〜4分で結果が出ます",
+    homeCatch: "あなたのアプリの使い方、何タイプ？",
+    homeDescription: "20問・約3〜4分。中立をなくした4択で、メッセージの熱量、相手の見方、判断の癖、進め方の違いを4軸16タイプで整理します。",
+    tags: ["約3〜4分"],
+    category: "question",
+    cta: "やってみる →",
     isNew: false,
     order: 1,
     status: "live",
@@ -120,12 +171,14 @@ export const TOOLS: Tool[] = [
   {
     id: "type",
     path: "/type",
-    label: "MATCHING APP TYPE",
-    name: "マチアプMBTI診断",
-    description: "16問でアプリの使い方を16タイプに分類",
-    promoDescription: "16問でアプリの使い方をタイプ分けして、自分の傾向を見つけます。",
-    tags: ["全16問", "約3分", "スライダー型"],
-    category: "discover",
+    name: "マチアプMBTI",
+    catch: "アプリの使い方を4軸16タイプで見る",
+    description: "20問の4択に答えるだけ。自分のアプリの癖をタイプで整理できます",
+    homeCatch: "あなたのアプリの使い方、何タイプ？",
+    homeDescription: "20問・約3〜4分。中立をなくした4択で、メッセージの熱量、相手の見方、判断の癖、進め方の違いを4軸16タイプで整理します。",
+    tags: ["約3〜4分"],
+    category: "question",
+    cta: "やってみる →",
     isNew: true,
     newUntil: "2026-04-30",
     order: 2,
@@ -133,7 +186,7 @@ export const TOOLS: Tool[] = [
   },
 ];
 
-export const FEATURED_TOOL_ID: ToolId = "hensachi";
+export const FEATURED_TOOL_ID: ToolId = "deaiFit";
 
 export type HomeAnnouncement = {
   id: string;
@@ -144,15 +197,36 @@ export type HomeAnnouncement = {
 
 export const HOME_ANNOUNCEMENTS: HomeAnnouncement[] = [
   {
+    id: "deai-fit",
+    text: "自分に合う出会い方診断を公開しました",
+    url: "/diagnoses/deai-fit",
+    expiresAt: "2026-12-31",
+  },
+  {
+    id: "person-check",
+    text: "この人、大丈夫？を公開しました",
+    url: "/check",
+    expiresAt: "2026-05-01",
+  },
+  {
+    id: "my9specs",
+    text: "My 9 Specs を公開しました",
+    url: "/my9specs",
+    expiresAt: "2026-05-01",
+  },
+  {
     id: "line-weight",
-    text: "LINEメッセージ重量測定をリリースしました",
+    text: "LINEの重さ測定を公開しました",
     url: "/weight",
     expiresAt: "2026-04-15",
   },
 ];
 
-export type ToolGuide = {
+export type ProblemGuide = {
+  id: string;
+  emoji: string;
   title: string;
+  description: string;
   steps: Array<{
     toolId: ToolId;
     label: string;
@@ -160,32 +234,52 @@ export type ToolGuide = {
   note?: string;
 };
 
-export const GUIDES: ToolGuide[] = [
+export const PROBLEMS: ProblemGuide[] = [
   {
-    title: "「スペックは悪くないのにうまくいかない」人へ",
+    id: "person-check",
+    emoji: "🤔",
+    title: "「この人、大丈夫？」と思ったら",
+    description: "相手のプロフとやりとりをまとめて判定。",
     steps: [
-      { toolId: "market", label: "年収換算でスペックを確認" },
-      { toolId: "prof", label: "プロフ偏差値でプロフを改善" },
-      { toolId: "weight", label: "LINE重量で会話を見直す" },
+      { toolId: "check", label: "相手をチェックする" },
+      { toolId: "prof", label: "自分のプロフも確認する" },
     ],
   },
   {
-    title: "「自分の条件が高すぎるのか分からない」人へ",
+    id: "no-progress",
+    emoji: "😥",
+    title: "「スペックは悪くないのに進まない」人",
+    description: "スペックが問題じゃないなら、プロフか会話に原因がある。",
     steps: [
-      { toolId: "my9specs", label: "まずは譲れない9条件を可視化" },
-      { toolId: "conditions", label: "条件チェッカーで人数を把握" },
-      { toolId: "market", label: "年収換算で自分側を確認" },
+      { toolId: "market", label: "スペック年収換算で確認" },
+      { toolId: "prof", label: "プロフ偏差値で改善点を見つける" },
+      { toolId: "weight", label: "LINEの重さ測定で会話を見直す" },
     ],
-    note: "3つの結果を並べると、理想条件と自分側のバランスが見えます。",
   },
   {
-    title: "「自分のアプリの使い方に自信がない」人へ",
+    id: "conditions-too-high",
+    emoji: "🤷",
+    title: "「条件が高すぎるか分からない」人",
+    description: "統計データで実際の人数を見ると判断しやすくなる。",
     steps: [
-      { toolId: "hensachi", label: "偏差値診断で弱点を特定" },
-      { toolId: "prof", label: "プロフ偏差値で入口の改善点を確認" },
+      { toolId: "my9specs", label: "まず譲れない条件を9つ選ぶ" },
+      { toolId: "conditions", label: "理想の高さチェッカーで人数を確認" },
+      { toolId: "market", label: "スペック年収換算で自分側も確認" },
+    ],
+  },
+  {
+    id: "no-confidence",
+    emoji: "😰",
+    title: "「アプリの使い方が合ってるか不安」な人",
+    description: "4軸16タイプで、使い方の癖を客観的に把握できる。",
+    steps: [
+      { toolId: "hensachi", label: "マチアプMBTIで使い方の癖を知る" },
+      { toolId: "prof", label: "プロフ偏差値で入口を整える" },
     ],
   },
 ];
+
+export const GUIDES = PROBLEMS;
 
 function getTodayInTokyo() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -214,6 +308,18 @@ export function isToolNew(tool: Tool, today?: string) {
 
 export function getToolById(toolId: ToolId) {
   return TOOLS.find((tool) => tool.id === toolId);
+}
+
+export function getToolHomeName(tool: Tool) {
+  return tool.homeName ?? tool.name;
+}
+
+export function getToolHomeCatch(tool: Tool) {
+  return tool.homeCatch ?? tool.catch;
+}
+
+export function getToolHomeDescription(tool: Tool) {
+  return tool.homeDescription ?? tool.description;
 }
 
 export function getLiveTools() {
@@ -245,5 +351,5 @@ export function getActiveAnnouncements(today?: string) {
 export function getVisibleGuides() {
   const liveToolIds = new Set(getLiveTools().map((tool) => tool.id));
 
-  return GUIDES.filter((guide) => guide.steps.every((step) => liveToolIds.has(step.toolId)));
+  return PROBLEMS.filter((problem) => problem.steps.every((step) => liveToolIds.has(step.toolId)));
 }
