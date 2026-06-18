@@ -107,7 +107,7 @@ export const TOOLS: Tool[] = [
     isNew: true,
     newUntil: "2026-05-01",
     order: 3,
-    status: "live",
+    status: "coming_soon",
   },
   {
     id: "my9specs",
