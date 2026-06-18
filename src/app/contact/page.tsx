@@ -6,7 +6,7 @@ import { getCreatorLinks } from "@/lib/creator-links";
 
 export const metadata: Metadata = {
   title: "お問い合わせ",
-  description: "やうゆの婚活診断への感想、不具合報告、削除依頼、取材・掲載相談の連絡先です。",
+  description: "婚活診断LAB by アイカタへの感想、不具合報告、削除依頼、取材・掲載相談の連絡先です。",
   alternates: {
     canonical: "/contact",
   },

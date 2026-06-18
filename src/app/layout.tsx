@@ -58,7 +58,7 @@ export const metadata: Metadata = {
         url: "/api/og-top",
         width: 1200,
         height: 630,
-        alt: "SHINDAN LAB",
+        alt: "婚活診断LAB by アイカタ",
       },
     ],
     locale: "ja_JP",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/api/og-top",
-        alt: "SHINDAN LABのトップページOGP画像",
+        alt: "婚活診断LAB by アイカタのトップページOGP画像",
       },
     ],
   },

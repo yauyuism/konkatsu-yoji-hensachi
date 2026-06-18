@@ -80,7 +80,7 @@ export async function GET() {
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", fontSize: 14, fontWeight: 700, letterSpacing: "0.16em", color: ogPalette.accent }}>
-                  SHINDAN LAB
+                  婚活診断LAB
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -146,13 +146,13 @@ export async function GET() {
             gap: 18,
           }}
         >
-          <div style={pillStyle()}>{`SHINDAN LAB`}</div>
+          <div style={pillStyle()}>{`婚活診断LAB by アイカタ`}</div>
           <div style={{ display: "flex", flexDirection: "column", fontSize: 58, fontWeight: 700, lineHeight: 1.18 }}>
             <div style={{ display: "flex" }}>診断で、</div>
-            <div style={{ display: "flex", color: ogPalette.accent }}>自分を丸裸にする。</div>
+            <div style={{ display: "flex", color: ogPalette.accent }}>恋愛や婚活の癖を知る。</div>
           </div>
           <div style={{ display: "flex", maxWidth: 500, fontSize: 24, lineHeight: 1.65, color: ogPalette.textSub }}>
-            恋愛や婚活を感覚ではなく数字で見直すための診断ラボ。偏差値、人数、レア度、重さをまとめて返します。
+            診断は採点ではなく、自己理解の入口。自分に合う出会い方から婚活を組み直すための診断メディアです。
           </div>
           <div style={{ display: "flex", marginTop: 8, fontSize: 22, fontWeight: 700, color: ogPalette.textMain }}>
             shindanlab.jp
