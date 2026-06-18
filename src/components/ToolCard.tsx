@@ -1,13 +1,16 @@
 import Link from "next/link";
 
 type ToolCardProps = {
-  label: string;
-  title: string;
+  label?: string;
+  title?: string;
+  name?: string;
+  catch?: string;
   description: string;
   tags?: string[];
   href: string;
   isNew?: boolean;
   highlightBadge?: string;
+  cta?: string;
   ctaLabel?: string;
   className?: string;
 };
@@ -15,14 +18,21 @@ type ToolCardProps = {
 export function ToolCard({
   label,
   title,
+  name,
+  catch: catchText,
   description,
   tags = [],
   href,
   isNew = false,
   highlightBadge,
+  cta,
   ctaLabel = "診断を開く →",
   className = "",
 }: ToolCardProps) {
+  const resolvedTitle = name ?? title;
+  const resolvedCatch = catchText ?? label;
+  const resolvedCta = cta ?? ctaLabel;
+
   return (
     <Link href={href} className={`card card-interactive group relative flex h-full flex-col p-6 sm:p-7 ${className}`.trim()}>
       {isNew || highlightBadge ? (
@@ -38,8 +48,10 @@ export function ToolCard({
         </div>
       ) : null}
 
-      <p className="font-numeric text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">{label}</p>
-      <h3 className="mt-2 text-[1.05rem] font-bold leading-7 text-[var(--color-text)]">{title}</h3>
+      {resolvedCatch ? <p className="font-numeric text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">{resolvedCatch}</p> : null}
+      <h3 className={resolvedCatch ? "mt-2 text-[1.05rem] font-bold leading-7 text-[var(--color-text)]" : "text-[1.05rem] font-bold leading-7 text-[var(--color-text)]"}>
+        {resolvedTitle}
+      </h3>
       <p className="mt-3 text-sm leading-7 text-[var(--color-text-sub)]">{description}</p>
 
       {tags.length > 0 ? (
@@ -52,7 +64,7 @@ export function ToolCard({
         </div>
       ) : null}
 
-      <p className="text-link mt-auto pt-5">{ctaLabel}</p>
+      <p className="text-link mt-auto pt-5">{resolvedCta}</p>
     </Link>
   );
 }

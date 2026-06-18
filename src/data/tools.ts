@@ -1,4 +1,4 @@
-import { getSpecOptionCountForGender } from "@/data/spec-options";
+import { SPEC_OPTIONS } from "@/data/spec-options";
 
 export type ToolCategory = "question" | "paste" | "number";
 
@@ -9,9 +9,11 @@ export type ToolStatus = "live" | "coming_soon";
 export interface Tool {
   id: ToolId;
   path: string;
+  label?: string;
   name: string;
   catch: string;
   description: string;
+  promoDescription?: string;
   homeName?: string;
   homeCatch?: string;
   homeDescription?: string;
@@ -26,7 +28,7 @@ export interface Tool {
 
 export const CATEGORY_ORDER: ToolCategory[] = ["question", "paste", "number"];
 
-const MY9_SPECS_OPTION_COUNT = getSpecOptionCountForGender("male");
+const MY9_SPECS_OPTION_COUNT = SPEC_OPTIONS.length;
 
 export const CATEGORIES = {
   paste: {
