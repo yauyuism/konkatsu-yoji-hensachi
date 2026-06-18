@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 
 import { getSiteUrl } from "@/lib/site-url";
 
-export const SITE_NAME = "やうゆの婚活診断";
-export const DEFAULT_SITE_TITLE = "SHINDAN LAB";
+export const SITE_NAME = "婚活診断LAB by アイカタ";
+export const DEFAULT_SITE_TITLE = "婚活・恋愛の癖を知る無料診断メディア";
 export const DEFAULT_SITE_DESCRIPTION =
-  "診断で、自分を丸裸にする。恋愛と婚活を感覚ではなく数字で見直す診断ラボです。";
+  "婚活・恋愛の癖を知る無料診断メディア。自分に合わない頑張り方を見直し、自分に合う出会い方を知るための入口です。";
 
 const OGP_IMAGE_WIDTH = 1200;
 const OGP_IMAGE_HEIGHT = 630;

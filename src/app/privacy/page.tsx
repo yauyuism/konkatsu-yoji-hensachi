@@ -6,7 +6,7 @@ import { InfoPageShell } from "@/components/InfoPageShell";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "やうゆの婚活診断で扱う情報、利用目的、外部サービス、結果URLやお問い合わせ方法についての案内です。",
+  description: "婚活診断LAB by アイカタで扱う情報、利用目的、外部サービス、結果URLやお問い合わせ方法についての案内です。",
   alternates: {
     canonical: "/privacy",
   },

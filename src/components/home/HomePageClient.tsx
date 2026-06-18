@@ -8,6 +8,9 @@ import {
   CATEGORY_ORDER,
   getActiveAnnouncements,
   getFeaturedTool,
+  getToolHomeCatch,
+  getToolHomeDescription,
+  getToolHomeName,
   getLiveToolsByCategory,
   getToolById,
   getVisibleGuides,
@@ -15,7 +18,6 @@ import {
   type Tool,
 } from "@/data/tools";
 import { useCompletedTools } from "@/lib/completed-tools";
-import { getCreatorLinks } from "@/lib/creator-links";
 
 function SectionHeading({
   title,
@@ -34,10 +36,12 @@ function SectionHeading({
 
 function GuideCard({
   title,
+  description,
   steps,
   note,
 }: {
   title: string;
+  description: string;
   steps: Array<{ toolId: Tool["id"]; label: string }>;
   note?: string;
 }) {
@@ -47,6 +51,7 @@ function GuideCard({
   return (
     <article className="card p-6 sm:p-7">
       <h3 className="text-lg font-black leading-tight text-[var(--color-text)] sm:text-xl">{title}</h3>
+      <p className="mt-3 text-sm leading-7 text-[var(--color-text-sub)]">{description}</p>
       <ol className="mt-5 grid gap-4">
         {steps.map((step, index) => (
           <li key={`${step.toolId}-${index}`} className="text-sm leading-7 text-[var(--color-text)]">
@@ -75,8 +80,7 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
   const featuredTool = getFeaturedTool();
   const announcements = getActiveAnnouncements();
   const guides = getVisibleGuides();
-  const { noteUrl, xUrl } = getCreatorLinks();
-  const heroHref = "/hensachi?skip=1";
+  const heroHref = "/diagnoses/deai-fit";
 
   return (
     <section data-testid="home-page" className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-10">
@@ -86,7 +90,7 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
           className="text-[2.35rem] font-black leading-tight tracking-[-0.03em] text-[var(--color-text)] sm:text-5xl lg:text-6xl"
         >
           診断で、
-          <span className="block text-[var(--color-main)]">自分を丸裸にする。</span>
+          <span className="block text-[var(--color-main)]">恋愛や婚活の癖を知る。</span>
         </h1>
         <div className="mt-6">
           <Link
@@ -94,13 +98,15 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
             href={heroHref}
             className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-bold sm:text-[15px]"
           >
-            まずは偏差値を測ってみる →
+            自分に合う出会い方を診断する →
           </Link>
         </div>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--color-text-sub)] sm:text-lg">
-          自分の恋愛について感覚じゃなくて数字で客観視すると、だいたい凹みます。
+          婚活がしんどいのは、あなたが悪いからではなく、
+          自分に合わない頑張り方を続けているからかもしれません。
           <br className="hidden sm:block" />
-          でもそこがスタートライン。ぜひ遊んでいってくださいね。
+          出会い方、理想の高さ、LINEの距離感、プロフィールの見せ方を診断しながら、
+          自分に合う婚活の進め方を見つけるきっかけを作ります。
         </p>
 
         {announcements.length > 0 ? (
@@ -123,15 +129,16 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
         <section data-testid="home-first-step" className="mt-12 border-t border-[color:var(--line)] pt-10">
           <SectionHeading
             title="はじめての方へ"
-            description="質問に答えるだけで、自分のアプリの使い方の癖と弱点がいちばんつかみやすい診断です。"
+            description="まずは、自分に合う会い方から整理できる診断です。採点ではなく、今の頑張り方を見直す入口として使ってください。"
           />
           <div className="mt-6 max-w-3xl">
             <ToolCard
-              label={featuredTool.label}
-              title={featuredTool.name}
+              name={featuredTool.name}
+              catch={featuredTool.catch}
               description={featuredTool.description}
               tags={featuredTool.tags}
-              href={featuredTool.id === "hensachi" ? heroHref : featuredTool.path}
+              href={featuredTool.id === "deaiFit" ? heroHref : featuredTool.id === "hensachi" ? "/hensachi?skip=1" : featuredTool.path}
+              cta={featuredTool.cta}
               isNew={isToolNew(featuredTool)}
               highlightBadge="はじめて向け"
             />
@@ -142,7 +149,7 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
       <section id="tool-list" className="mt-12 border-t border-[color:var(--line)] pt-10">
         <SectionHeading
           title="診断・ツール一覧"
-          description="目的ごとに分けてあるので、何から触ればいいか迷いにくくしています。"
+          description="全部無料です。ネタとして遊びつつ、自分に合わない頑張り方を見直すヒントにしてください。"
         />
 
         <div className="mt-8 grid gap-12">
@@ -163,11 +170,12 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
                   {tools.map((tool) => (
                     <ToolCard
                       key={tool.id}
-                      label={tool.label}
-                      title={tool.name}
-                      description={tool.description}
+                      name={getToolHomeName(tool)}
+                      catch={getToolHomeCatch(tool)}
+                      description={getToolHomeDescription(tool)}
                       tags={tool.tags}
-                      href={tool.id === "hensachi" ? heroHref : tool.path}
+                      href={tool.id === "hensachi" ? "/hensachi?skip=1" : tool.path}
+                      cta={tool.cta}
                       isNew={isToolNew(tool)}
                     />
                   ))}
@@ -187,50 +195,45 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
 
           <div className="mt-6 grid gap-5 lg:grid-cols-3">
             {guides.map((guide) => (
-              <GuideCard key={guide.title} title={guide.title} steps={guide.steps} note={guide.note} />
+              <GuideCard
+                key={guide.id}
+                title={guide.title}
+                description={guide.description}
+                steps={guide.steps}
+                note={guide.note}
+              />
             ))}
           </div>
         </section>
       ) : null}
 
-      <section data-testid="home-creator" className="mt-12 border-t border-[color:var(--line)] pt-10">
+      <section data-testid="home-aikata" className="mt-12 border-t border-[color:var(--line)] pt-10">
         <SectionHeading
-          title="@yauyuism"
-          description="恋愛と婚活を、データと数字で考えるコンテンツを作っています。"
+          title="婚活診断LAB by アイカタ"
+          description="婚活相談サービス「アイカタ」が運営する診断メディアです。"
         />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="text-sm leading-8 text-[var(--color-text-sub)] sm:text-base">
-              shindanlab.jp では、マッチングアプリや婚活の悩みを感覚論だけで終わらせず、
-              数字にして見直せる形にしています。日々の短い考察は X、まとまった分析は note に置いています。
+              アイカタでは、診断結果をもとに、マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場まで含めて、
+              自分に合う出会い方を一緒に設計します。
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <a
-                href={xUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary rounded-full px-5 py-3 text-sm font-bold"
-              >
-                Xで @yauyuism をフォロー
-              </a>
-              <a
-                href={noteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary rounded-full px-5 py-3 text-sm font-bold"
-              >
-                noteで やうゆ を読む
-              </a>
+              <Link href="/consultation" className="btn-primary rounded-full px-5 py-3 text-sm font-bold">
+                診断結果をもとに相談する
+              </Link>
             </div>
           </div>
 
           <div className="grid gap-3 text-sm leading-7 text-[var(--color-text-sub)]">
             <p>
-              <span className="font-bold text-[var(--color-text)]">X:</span> 診断の更新や、その日に気づいたことを短く出しています。
+              <span className="font-bold text-[var(--color-text)]">普通の婚活に、自分を合わせなくていい。</span>
+              いい相方に出会うには、自分に合う会い方がいる。
             </p>
             <p>
-              <span className="font-bold text-[var(--color-text)]">note:</span> プロフ、会話、条件設計の考え方をもう少し深く整理しています。
+              <span className="font-bold text-[var(--color-text)]">診断は採点ではありません。</span>
+              自分に合う出会い方を知るための入口です。
             </p>
           </div>
         </div>

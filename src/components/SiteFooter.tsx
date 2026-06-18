@@ -14,13 +14,16 @@ export function SiteFooter() {
     <footer className="mx-auto mt-16 w-full max-w-6xl border-t border-[color:var(--line)] px-4 pb-10 pt-8 sm:px-6 sm:pb-12">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr_0.9fr]">
         <div>
-          <p className="text-sm font-black tracking-[0.18em] text-[var(--accent)]">YAUYUISM DIAGNOSIS</p>
+          <p className="text-sm font-black tracking-[0.18em] text-[var(--accent)]">婚活診断LAB by アイカタ</p>
           <p className="mt-3 text-sm leading-8 text-[var(--text-main)] sm:text-base">
-            マッチングアプリや婚活を、偏差値・人数・レア度・重さのような数字に置き換えて見直すツールを公開しています。
+            婚活・恋愛の癖を知る無料診断メディア。
           </p>
           <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
-            あくまで参考程度に。でも、ちょっと刺さったところは素直に直してみて。プロフィール文には、氏名や連絡先など個人情報を貼らないでください。
+            診断は、あなたを採点するためのものではありません。自分に合わない頑張り方を見直し、自分に合う出会い方を知るための入口です。
           </p>
+          <Link href="/consultation" className="text-link mt-4 inline-flex">
+            診断結果をもとに相談する →
+          </Link>
         </div>
 
         <div>
@@ -44,8 +47,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">運営者</p>
+          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">アイカタ監修</p>
+          <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
+            自分に合う会い方から婚活を組み直す婚活相談サービス
+          </p>
           <div className="mt-3 grid gap-1">
+            <Link href="/consultation" className={footerLinkClass}>
+              60分婚活相談
+            </Link>
             <a href={xUrl} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
               X: @yauyuism
             </a>

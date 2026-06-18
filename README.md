@@ -1,12 +1,14 @@
-# やうゆの婚活診断
+# 婚活診断LAB by アイカタ
 
 婚活・マッチングアプリ向けの診断シリーズです。現在は主に以下を含みます。
 
+- `/diagnoses/deai-fit`: 自分に合う出会い方診断
 - `/prof`: プロフィール偏差値診断
 - `/prof/stats`: 匿名化された統計ページ
 - `/conditions`: 条件リアリティチェック
+- `/check`: この人、大丈夫？チェッカー
 - `/market`: 婚活スペック年収換算
-- `/`: 質問型のアプリ偏差値
+- `/`: 婚活・恋愛の癖を知る無料診断メディア
 - `/yoji`: 婚活四字熟語診断
 
 プロフィール偏差値診断は、プロフィール文を Claude で分析して、偏差値、5軸スコア、ハイライト、刺さる相手、改善案まで返します。条件リアリティチェックは、年齢・年収・身長・学歴・エリア条件から、未婚者全体の何%に当たるかと人数を即時計算します。婚活スペック年収換算は、年齢・年収・身長・学歴・居住地の希少性を年収相当に置き換えて見せます。スクショ読み取りを使う場合のみ Claude を使います。
@@ -42,7 +44,11 @@ npm run dev
 
 - `ANTHROPIC_API_KEY`
   - 必須
-  - `/api/analyze` と `/api/read-filter` で使用
+  - `/api/analyze` `/api/analyze-check` `/api/read-filter` で使用
+- `CHECK_ANALYZE_MOCK`
+  - 任意
+  - `1` を入れると、`/check` だけはローカルでモック判定を返せる
+  - UI 調整用。本番では使わない
 - `ANALYZE_TOKEN_SECRET`
   - 任意
   - staged analysis token の署名用。未設定時は API key を代用
@@ -54,6 +60,10 @@ npm run dev
 - `NEXT_PUBLIC_GA_ID`
   - 任意
   - GA4 Measurement ID
+- `NEXT_PUBLIC_CLARITY_PROJECT_ID`
+  - 任意
+  - Microsoft Clarity Project ID
+  - 未設定時は `vx5e0sqmpt` を使って `shindanlab.jp` 用に読み込み
 - `NEXT_PUBLIC_X_URL`
   - X プロフィールURL
 - `NEXT_PUBLIC_NOTE_URL`
@@ -98,6 +108,7 @@ npx playwright install chromium
 Playwright は `tests/e2e` にあります。
 
 - `/conditions` の基本フロー
+- `/check` の基本フロー
 - `/prof` の基本フロー
 - 入力バリデーション
 - 初回分析エラー表示
@@ -120,9 +131,11 @@ PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
 
 ```bash
 ANTHROPIC_API_KEY=
+CHECK_ANALYZE_MOCK=
 ANALYZE_TOKEN_SECRET=
 NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_GA_ID=
+NEXT_PUBLIC_CLARITY_PROJECT_ID=
 KV_REST_API_URL=
 KV_REST_API_TOKEN=
 MAX_DAILY_REQUESTS=
