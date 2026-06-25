@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 import { FatigueReasonApp } from "@/components/fatigue-reason/FatigueReasonApp";
-import { isFatigueReasonType } from "@/lib/fatigue-reason";
 import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
+import { getFatigueReasonResultSlug, resolveFatigueReasonTypeFromSlug } from "@/lib/fatigue-reason-share";
 import { buildShareMetadata } from "@/lib/metadata";
 
 const title = "婚活疲れ・マチアプ疲れの理由診断";
@@ -30,18 +30,20 @@ const defaultMetadata = buildShareMetadata({
 export async function generateMetadata({ searchParams }: KonkatsuFatiguePageProps): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const resultParam = getSingleParam(resolvedSearchParams.result);
+  const resultType = resolveFatigueReasonTypeFromSlug(resultParam);
 
-  if (!isFatigueReasonType(resultParam)) {
+  if (!resultType) {
     return defaultMetadata;
   }
 
-  const meta = FATIGUE_REASON_DISPLAY_META[resultParam];
+  const meta = FATIGUE_REASON_DISPLAY_META[resultType];
+  const resultSlug = getFatigueReasonResultSlug(resultType);
 
   return buildShareMetadata({
     title: `${meta.resultLabel} | ${title}`,
     description: meta.shareCopy,
-    path: `/diagnoses/konkatsu-fatigue?result=${resultParam}`,
-    imagePath: `/og/fatigue-reason/${resultParam}.png`,
+    path: `/diagnoses/konkatsu-fatigue?result=${resultSlug}`,
+    imagePath: `/og/fatigue-reason/${resultSlug}.png`,
     imageAlt: `${title} ${meta.resultLabel}の診断カード`,
     absoluteTitle: true,
     ogTitle: `婚活疲れ診断の結果は「${meta.resultLabel}」`,
@@ -54,7 +56,7 @@ export async function generateMetadata({ searchParams }: KonkatsuFatiguePageProp
 export default async function KonkatsuFatiguePage({ searchParams }: KonkatsuFatiguePageProps) {
   const resolvedSearchParams = await searchParams;
   const resultParam = getSingleParam(resolvedSearchParams.result);
-  const initialResultType = isFatigueReasonType(resultParam) ? resultParam : null;
+  const initialResultType = resolveFatigueReasonTypeFromSlug(resultParam);
 
   return <FatigueReasonApp initialResultType={initialResultType} />;
 }

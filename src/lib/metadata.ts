@@ -10,7 +10,7 @@ export const DEFAULT_SITE_DESCRIPTION =
 const OGP_IMAGE_WIDTH = 1200;
 const OGP_IMAGE_HEIGHT = 630;
 const OGP_IMAGE_TYPE = "image/png";
-const OGP_CACHE_BUSTER = "20260625";
+const OGP_CACHE_BUSTER = "20260626";
 const X_ACCOUNT = "@yauyuism";
 
 type ShareMetadataOptions = {
