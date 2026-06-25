@@ -1,5 +1,4 @@
-const defaultXUrl = "https://x.com/yauyuism";
-const defaultNoteUrl = "https://note.com/yauyuism";
+import { NOTE_URL, X_URL } from "@/lib/service-links";
 
 function resolveLink(value: string | undefined, fallback: string) {
   const input = value?.trim();
@@ -9,7 +8,7 @@ function resolveLink(value: string | undefined, fallback: string) {
 
 export function getCreatorLinks() {
   return {
-    xUrl: resolveLink(process.env.NEXT_PUBLIC_X_URL, defaultXUrl),
-    noteUrl: resolveLink(process.env.NEXT_PUBLIC_NOTE_URL, defaultNoteUrl),
+    xUrl: resolveLink(process.env.NEXT_PUBLIC_X_URL, X_URL),
+    noteUrl: resolveLink(process.env.NEXT_PUBLIC_NOTE_URL, NOTE_URL),
   };
 }

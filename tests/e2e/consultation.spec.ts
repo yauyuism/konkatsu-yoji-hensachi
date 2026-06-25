@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const reservationUrl = "https://note.com/yauyuism/n/nf5c37e6297f0";
+const reservationUrl = "https://mosh.jp/yauyuism/services";
 
 test("60分婚活相談LPを表示し、予約CTAが指定URLを向いている", async ({ page }) => {
   await page.goto("/consultation");

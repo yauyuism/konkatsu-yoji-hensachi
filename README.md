@@ -1,8 +1,9 @@
-# 婚活診断LAB by アイカタ
+# 婚活診断LAB by やうゆ
 
 婚活・マッチングアプリ向けの診断シリーズです。現在は主に以下を含みます。
 
-- `/diagnoses/deai-fit`: 自分に合う出会い方診断
+- `/diagnoses/deai-fit`: あなたに合う出会い方診断
+- `/diagnoses/konkatsu-fatigue`: 婚活疲れ・マチアプ疲れの理由診断
 - `/prof`: プロフィール偏差値診断
 - `/prof/stats`: 匿名化された統計ページ
 - `/conditions`: 条件リアリティチェック
@@ -33,6 +34,8 @@ npm run dev
 ```
 
 - ホーム: [http://localhost:3000/](http://localhost:3000/)
+- 婚活疲れ・マチアプ疲れの理由診断: [http://localhost:3000/diagnoses/konkatsu-fatigue](http://localhost:3000/diagnoses/konkatsu-fatigue)
+- あなたに合う出会い方診断: [http://localhost:3000/diagnoses/deai-fit](http://localhost:3000/diagnoses/deai-fit)
 - 条件リアリティチェック: [http://localhost:3000/conditions](http://localhost:3000/conditions)
 - 婚活スペック年収換算: [http://localhost:3000/market](http://localhost:3000/market)
 - プロフィール偏差値診断: [http://localhost:3000/prof](http://localhost:3000/prof)
@@ -109,6 +112,8 @@ Playwright は `tests/e2e` にあります。
 
 - `/conditions` の基本フロー
 - `/check` の基本フロー
+- `/diagnoses/konkatsu-fatigue` の基本フローとMOSH導線
+- `/diagnoses/deai-fit` の基本フロー
 - `/prof` の基本フロー
 - 入力バリデーション
 - 初回分析エラー表示

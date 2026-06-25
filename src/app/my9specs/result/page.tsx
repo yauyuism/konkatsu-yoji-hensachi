@@ -34,7 +34,7 @@ export async function generateMetadata({ searchParams }: My9SpecsResultPageProps
       canonical,
     },
     openGraph: {
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: `譲れない条件を9つ選んだ結果、対象は約${estimate.count.toLocaleString()}人でした。`,
       type: "article",
       url: canonicalUrl,
@@ -53,7 +53,7 @@ export async function generateMetadata({ searchParams }: My9SpecsResultPageProps
       card: "summary_large_image",
       site: X_ACCOUNT,
       creator: X_ACCOUNT,
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: `この9条件を全部満たす人は日本に約${estimate.count.toLocaleString()}人。`,
       images: [
         {

@@ -11,6 +11,7 @@ import {
 
 function isToolId(value: string): value is ToolId {
   return (
+    value === "fatigueReason" ||
     value === "deaiFit" ||
     value === "prof" ||
     value === "weight" ||

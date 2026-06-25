@@ -31,7 +31,7 @@ export async function generateMetadata({ searchParams }: MarketResultPageProps):
       canonical,
     },
     openGraph: {
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description,
       type: "article",
       url: canonical,
@@ -46,7 +46,7 @@ export async function generateMetadata({ searchParams }: MarketResultPageProps):
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description,
       images: [ogImageUrl],
     },

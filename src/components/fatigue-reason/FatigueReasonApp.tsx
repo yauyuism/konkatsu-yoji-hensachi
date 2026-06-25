@@ -6,16 +6,30 @@ import { MoshConsultationCta } from "@/components/MoshConsultationCta";
 import { trackEvent } from "@/lib/analytics";
 import { markToolCompleted } from "@/lib/completed-tools";
 import {
-  DEAI_FIT_ANSWER_OPTIONS,
-  DEAI_FIT_AXIS_PAIRS,
-  DEAI_FIT_QUESTIONS,
-  runDeaiFitDiagnosis,
-  type DeaiFitAnswerValue,
-} from "@/lib/deai-fit";
+  FATIGUE_ANSWER_OPTIONS,
+  FATIGUE_REASON_QUESTIONS,
+  FATIGUE_REASON_RESULTS,
+  FATIGUE_REASON_TYPE_ORDER,
+  runFatigueReasonDiagnosis,
+  type FatigueReasonType,
+  type FatigueAnswerValue,
+} from "@/lib/fatigue-reason";
 
-type DeaiFitStage = "intro" | "question" | "result";
+type FatigueReasonStage = "intro" | "question" | "result";
 
 const analyzingDelayMs = 180;
+
+function getFatigueCtaKind(type: FatigueReasonType) {
+  if (type === "wrongPeople") {
+    return "profile";
+  }
+
+  if (type === "reset") {
+    return "twoSessions";
+  }
+
+  return "consultation";
+}
 
 function ResultList({ items }: { items: string[] }) {
   return (
@@ -44,14 +58,14 @@ function ResultSection({
   );
 }
 
-export function DeaiFitApp() {
-  const [stage, setStage] = useState<DeaiFitStage>("intro");
+export function FatigueReasonApp() {
+  const [stage, setStage] = useState<FatigueReasonStage>("intro");
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<DeaiFitAnswerValue[]>([]);
-  const [selectedValue, setSelectedValue] = useState<DeaiFitAnswerValue | null>(null);
+  const [answers, setAnswers] = useState<FatigueAnswerValue[]>([]);
+  const [selectedValue, setSelectedValue] = useState<FatigueAnswerValue | null>(null);
 
-  const diagnosis = useMemo(() => runDeaiFitDiagnosis(answers), [answers]);
-  const question = DEAI_FIT_QUESTIONS[questionIndex];
+  const diagnosis = useMemo(() => runFatigueReasonDiagnosis(answers), [answers]);
+  const question = FATIGUE_REASON_QUESTIONS[questionIndex];
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -62,12 +76,12 @@ export function DeaiFitApp() {
       return;
     }
 
-    markToolCompleted("deaiFit");
+    markToolCompleted("fatigueReason");
   }, [stage]);
 
   const handleStart = () => {
     trackEvent("diagnosis_start", {
-      quiz_name: "deai_fit",
+      quiz_name: "fatigue_reason",
     });
     setAnswers([]);
     setQuestionIndex(0);
@@ -91,7 +105,7 @@ export function DeaiFitApp() {
     setQuestionIndex((current) => current - 1);
   };
 
-  const handleSelect = (value: DeaiFitAnswerValue) => {
+  const handleSelect = (value: FatigueAnswerValue) => {
     if (selectedValue !== null) {
       return;
     }
@@ -100,7 +114,7 @@ export function DeaiFitApp() {
     setSelectedValue(value);
 
     trackEvent("question_answered", {
-      quiz_name: "deai_fit",
+      quiz_name: "fatigue_reason",
       question_id: question.id,
       answer_value: value,
       progress: questionIndex + 1,
@@ -110,10 +124,10 @@ export function DeaiFitApp() {
       setAnswers(nextAnswers);
       setSelectedValue(null);
 
-      if (questionIndex === DEAI_FIT_QUESTIONS.length - 1) {
-        const completed = runDeaiFitDiagnosis(nextAnswers);
+      if (questionIndex === FATIGUE_REASON_QUESTIONS.length - 1) {
+        const completed = runFatigueReasonDiagnosis(nextAnswers);
         trackEvent("diagnosis_complete", {
-          quiz_name: "deai_fit",
+          quiz_name: "fatigue_reason",
           result_type: completed.result.type,
           result_name: completed.result.name,
         });
@@ -127,35 +141,35 @@ export function DeaiFitApp() {
 
   if (stage === "intro") {
     return (
-      <section data-testid="deai-fit-intro" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-12">
+      <section data-testid="fatigue-reason-intro" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-12">
         <div className="mx-auto max-w-4xl text-center">
           <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
             FREE DIAGNOSIS
           </p>
           <h1 className="mt-4 text-3xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
-            あなたに合う出会い方診断
+            婚活疲れ・マチアプ疲れの理由診断
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm font-bold leading-8 text-[var(--text-main)] sm:text-base">
-            マチアプ、相談所、紹介、SNS、外飲み。あなたの恋愛が進みやすい出会い方を16タイプで診断します。
+            会えるのに進まない理由を、現場の声からタイプ別に整理します。
           </p>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-8 text-[var(--text-sub)] sm:text-base">
-            出会い方に正解はありません。でも、自分に合わない出会い方で頑張り続けると、
-            会えるのに進まない、好きになれない、会ったあとに疲れる、という状態になりやすくなります。
+            マチアプで会える。紹介もある。たまに悪くない人もいる。
+            でも、なぜか好きになれない、会ったあとに疲れる、次に進める理由が見つからない。
           </p>
           <p className="mx-auto mt-3 max-w-3xl text-sm leading-8 text-[var(--text-sub)] sm:text-base">
-            オンライン・オフライン、条件・空気感、スピード感、一対一か人間関係経由か。
-            4つの軸から、あなたの恋愛が進みやすい環境を整理します。
+            婚活がしんどいのは、あなたの性格や努力不足だけが理由ではありません。
+            今の出会い方、プロフィール、相手の選び方、判断のタイミングが合っていないだけかもしれません。
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <span className="tag">全24問</span>
-            <span className="tag">約3〜5分</span>
-            <span className="tag">16タイプ</span>
+            <span className="tag">全20問</span>
+            <span className="tag">約3〜4分</span>
             <span className="tag">無料</span>
+            <span className="tag">婚活疲れを整理</span>
           </div>
           <button
             type="button"
             onClick={handleStart}
-            data-testid="deai-fit-start"
+            data-testid="fatigue-reason-start"
             className="btn-primary mt-8 rounded-full px-7 py-4 text-sm font-black"
           >
             診断を始める
@@ -166,13 +180,13 @@ export function DeaiFitApp() {
           <section className="card p-5 sm:p-6">
             <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">この診断で分かること</p>
             <p className="mt-3 text-sm leading-8 text-[var(--text-sub)]">
-              あなたに合いやすい出会い方、主戦場にしすぎると疲れやすい出会い方、今日から試せる行動を返します。
+              速すぎる判断、合わない人の流入、条件検索の疲れ、場所のズレなど、今の婚活でどこがしんどくなっているかを8タイプで返します。
             </p>
           </section>
           <section className="card p-5 sm:p-6">
-            <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">使い方</p>
+            <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">結果の使い方</p>
             <p className="mt-3 text-sm leading-8 text-[var(--text-sub)]">
-              診断は採点ではありません。自分の恋愛が進みやすい環境を知り、合わない頑張り方を減らすためのメモとして使ってください。
+              診断は採点ではありません。自分を責めるためではなく、合っていない頑張り方を見直すためのメモとして使ってください。
             </p>
           </section>
         </div>
@@ -181,10 +195,10 @@ export function DeaiFitApp() {
   }
 
   if (stage === "question") {
-    const progress = ((questionIndex + 1) / DEAI_FIT_QUESTIONS.length) * 100;
+    const progress = ((questionIndex + 1) / FATIGUE_REASON_QUESTIONS.length) * 100;
 
     return (
-      <section data-testid="deai-fit-question" className="screen-shell mx-auto max-w-4xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-12">
+      <section data-testid="fatigue-reason-question" className="screen-shell mx-auto max-w-4xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-12">
         <div className="mx-auto max-w-3xl">
           <div className="flex items-center justify-between gap-4">
             <button
@@ -196,7 +210,7 @@ export function DeaiFitApp() {
               ← 前の質問
             </button>
             <p className="text-sm font-bold tracking-[0.12em] text-[var(--color-text-sub)]">
-              {questionIndex + 1} / {DEAI_FIT_QUESTIONS.length}
+              {questionIndex + 1} / {FATIGUE_REASON_QUESTIONS.length}
             </p>
           </div>
 
@@ -210,7 +224,7 @@ export function DeaiFitApp() {
               {question.text}
             </h1>
             <div className="mt-7 grid gap-3">
-              {DEAI_FIT_ANSWER_OPTIONS.map((option) => {
+              {FATIGUE_ANSWER_OPTIONS.map((option) => {
                 const isSelected = selectedValue === option.value;
 
                 return (
@@ -220,7 +234,7 @@ export function DeaiFitApp() {
                     data-answer-value={option.value}
                     onClick={() => handleSelect(option.value)}
                     disabled={selectedValue !== null}
-                    className={`deai-fit-answer choice-button rounded-[1.1rem] border px-4 py-4 text-left text-sm font-bold leading-7 transition sm:text-base ${
+                    className={`fatigue-answer choice-button rounded-[1.1rem] border px-4 py-4 text-left text-sm font-bold leading-7 transition sm:text-base ${
                       isSelected
                         ? "border-[rgba(201,130,120,0.36)] bg-[rgba(201,130,120,0.08)] text-[var(--accent)]"
                         : "border-[rgba(63,52,46,0.1)] bg-white/88 text-[var(--text-main)]"
@@ -237,87 +251,82 @@ export function DeaiFitApp() {
     );
   }
 
-  const { result, scores } = diagnosis;
+  const { result, normalizedScores } = diagnosis;
 
   return (
-    <section data-testid="deai-fit-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
+    <section data-testid="fatigue-reason-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <div className="mx-auto max-w-4xl">
         <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
           RESULT
         </p>
         <h1 className="mt-4 text-center text-3xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
-          {result.type}
+          あなたは、
           <span className="block text-[var(--accent)]">{result.name}</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm font-bold leading-8 text-[var(--text-main)] sm:text-base">
-          {result.shortCopy}
+          {result.catchCopy}
         </p>
 
         <div className="mt-8 grid gap-4">
-          <ResultSection title="あなたに起きやすいこと">
-            <ResultList items={result.likely} />
-          </ResultSection>
-
-          <ResultSection title="恋愛が進みやすい条件">
-            <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">{result.progressCondition}</p>
+          <ResultSection title="あなたが疲れている理由">
+            <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)]">
+              {result.reason.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </ResultSection>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <ResultSection title="合いやすい出会い方">
-              <ResultList items={result.suited} />
+            <ResultSection title="よくある状態">
+              <ResultList items={result.commonStates} />
             </ResultSection>
 
-            <ResultSection title="主戦場にしすぎると疲れやすい出会い方">
-              <ResultList items={result.notFit} />
+            <ResultSection title="無理に頑張らなくていいこと">
+              <ResultList items={result.stopTrying} />
+            </ResultSection>
+
+            <ResultSection title="見直すと楽になりやすいこと">
+              <ResultList items={result.reviewPoints} />
+            </ResultSection>
+
+            <ResultSection title="向いている出会い方のヒント">
+              <div className="mt-4 flex flex-wrap gap-2">
+                {result.meetingHints.map((hint) => (
+                  <span key={hint} className="tag">
+                    {hint}
+                  </span>
+                ))}
+              </div>
             </ResultSection>
           </div>
 
-          <ResultSection title="疲れやすい婚活パターン">
-            <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">{result.drainPattern}</p>
-          </ResultSection>
-
-          <ResultSection title="今日からできるネクストアクション">
-            <ResultList items={result.nextActions} />
+          <ResultSection title="おすすめの次の一歩">
+            <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{result.nextStep}</p>
           </ResultSection>
 
           <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-            <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">4軸スコア</h2>
+            <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">タイプ一致度</h2>
             <div className="mt-4 grid gap-3">
-              {DEAI_FIT_AXIS_PAIRS.map((pair) => {
-                const leftScore = scores[pair.left];
-                const rightScore = scores[pair.right];
-                const total = Math.max(leftScore + rightScore, 1);
-                const leftPercent = Math.round((leftScore / total) * 100);
-
-                return (
-                  <div key={pair.axis} className="grid gap-2 rounded-[1rem] bg-white/78 px-4 py-3">
-                    <div className="flex items-center justify-between gap-3 text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">
-                      <span>
-                        {pair.left}: {pair.leftLabel}
-                      </span>
-                      <span>
-                        {pair.right}: {pair.rightLabel}
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-[rgba(143,183,161,0.24)]">
-                      <span className="block h-full rounded-full bg-[var(--color-main)]" style={{ width: `${leftPercent}%` }} />
-                    </div>
-                    <p className="text-right font-numeric text-xs font-black text-[var(--text-main)]">
-                      {pair.left}
-                      {leftScore} / {pair.right}
-                      {rightScore}
-                    </p>
-                  </div>
-                );
-              })}
+              {FATIGUE_REASON_TYPE_ORDER.map((type) => (
+                <div key={type} className="grid grid-cols-[minmax(6.5rem,9rem)_1fr_3rem] items-center gap-3 text-sm">
+                  <span className="text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">{FATIGUE_REASON_RESULTS[type].name}</span>
+                  <span className="h-2 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
+                    <span
+                      className="block h-full rounded-full bg-[var(--color-main)]"
+                      style={{ width: `${Math.round(normalizedScores[type] * 100)}%` }}
+                    />
+                  </span>
+                  <span className="font-numeric text-xs font-black text-[var(--text-main)]">{Math.round(normalizedScores[type] * 100)}%</span>
+                </div>
+              ))}
             </div>
           </section>
 
           <MoshConsultationCta
-            placement="deai_fit_result"
-            quizName="あなたに合う出会い方診断"
+            placement="fatigue_reason_result"
+            quizName="婚活疲れ・マチアプ疲れの理由診断"
             resultType={result.type}
-            ctaKind={result.cta.kind === "profile" ? "profile" : "deai"}
+            ctaKind={getFatigueCtaKind(result.type)}
           />
         </div>
 

@@ -1,20 +1,137 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
-test("自分に合う出会い方診断を最後まで進められる", async ({ page }) => {
-  await page.goto("/diagnoses/deai-fit");
+const moshServicesUrl = "https://mosh.jp/yauyuism/services";
 
-  await expect(page.getByTestId("deai-fit-intro")).toBeVisible();
+const ocqdAnswers = [
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+];
+
+const fcqnAnswers = [
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+];
+
+const fvsnAnswers = [
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
+];
+
+async function answerDiagnosis(page: Page, answers: string[]) {
   await page.getByTestId("deai-fit-start").click();
 
-  for (let index = 0; index < 10; index += 1) {
+  for (const answer of answers) {
     await expect(page.getByTestId("deai-fit-question")).toBeVisible();
-    await page.locator("[data-testid='deai-fit-question'] .choice-button").first().click();
+    await page.locator(`[data-testid='deai-fit-question'] .deai-fit-answer[data-answer-value='${answer}']`).click();
   }
 
   await expect(page.getByTestId("deai-fit-result")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /条件検索型/ })).toBeVisible();
-  await expect(page.getByTestId("aikata-consultation-cta").getByRole("link", { name: "60分婚活相談はこちら" })).toHaveAttribute(
+}
+
+test("あなたに合う出会い方診断を最後まで進められる", async ({ page }) => {
+  await page.goto("/diagnoses/deai-fit");
+
+  await expect(page.getByTestId("deai-fit-intro")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "あなたに合う出会い方診断" })).toBeVisible();
+
+  await answerDiagnosis(page, ocqdAnswers);
+
+  await expect(page.getByRole("heading", { name: /O-C-Q-D/ })).toBeVisible();
+  await expect(page.getByText("条件確認スピード婚活タイプ")).toBeVisible();
+  await expect(page.getByTestId("mosh-consultation-cta").getByRole("link", { name: "プロフィール添削を見る" })).toHaveAttribute(
     "href",
-    "/consultation"
+    moshServicesUrl
+  );
+});
+
+test("通常タイプでは出会い方相談CTAを表示する", async ({ page }) => {
+  await page.goto("/diagnoses/deai-fit");
+
+  await answerDiagnosis(page, fcqnAnswers);
+
+  await expect(page.getByRole("heading", { name: /F-C-Q-N/ })).toBeVisible();
+  await expect(page.getByText("紹介即決タイプ")).toBeVisible();
+  await expect(page.getByTestId("mosh-consultation-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
+    "href",
+    moshServicesUrl
+  );
+});
+
+test("生活圏タイプでも出会い方相談CTAを表示する", async ({ page }) => {
+  await page.goto("/diagnoses/deai-fit");
+
+  await answerDiagnosis(page, fvsnAnswers);
+
+  await expect(page.getByRole("heading", { name: /F-V-S-N/ })).toBeVisible();
+  await expect(page.getByText("生活圏でじわじわ好きになるタイプ")).toBeVisible();
+  await expect(page.getByTestId("mosh-consultation-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
+    "href",
+    moshServicesUrl
   );
 });

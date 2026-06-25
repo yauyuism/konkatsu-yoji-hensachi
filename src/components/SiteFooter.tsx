@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getLiveTools } from "@/data/tools";
 import { getCreatorLinks } from "@/lib/creator-links";
+import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 const footerLinkClass =
   "text-sm leading-7 text-[var(--text-sub)] transition-colors hover:text-[var(--text-main)]";
@@ -14,16 +15,16 @@ export function SiteFooter() {
     <footer className="mx-auto mt-16 w-full max-w-6xl border-t border-[color:var(--line)] px-4 pb-10 pt-8 sm:px-6 sm:pb-12">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr_0.9fr]">
         <div>
-          <p className="text-sm font-black tracking-[0.18em] text-[var(--accent)]">婚活診断LAB by アイカタ</p>
+          <p className="text-sm font-black tracking-[0.18em] text-[var(--accent)]">婚活診断LAB by やうゆ</p>
           <p className="mt-3 text-sm leading-8 text-[var(--text-main)] sm:text-base">
             婚活・恋愛の癖を知る無料診断メディア。
           </p>
           <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
             診断は、あなたを採点するためのものではありません。自分に合わない頑張り方を見直し、自分に合う出会い方を知るための入口です。
           </p>
-          <Link href="/consultation" className="text-link mt-4 inline-flex">
-            診断結果をもとに相談する →
-          </Link>
+          <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className="text-link mt-4 inline-flex">
+            診断結果を個別に整理する →
+          </a>
         </div>
 
         <div>
@@ -47,14 +48,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">アイカタ監修</p>
+          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">個別に整理したい方へ</p>
           <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
-            自分に合う会い方から婚活を組み直す婚活相談サービス
+            マチアプ、相談所、紹介、SNS、外飲みまで含めて、婚活の進め方を見直す相談です。
           </p>
           <div className="mt-3 grid gap-1">
-            <Link href="/consultation" className={footerLinkClass}>
-              60分婚活相談
-            </Link>
+            <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
+              やうゆ式 婚活の見直し相談
+            </a>
             <a href={xUrl} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
               X: @yauyuism
             </a>

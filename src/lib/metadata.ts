@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { getSiteUrl } from "@/lib/site-url";
 
-export const SITE_NAME = "婚活診断LAB by アイカタ";
+export const SITE_NAME = "婚活診断LAB by やうゆ";
 export const DEFAULT_SITE_TITLE = "婚活・恋愛の癖を知る無料診断メディア";
 export const DEFAULT_SITE_DESCRIPTION =
   "婚活・恋愛の癖を知る無料診断メディア。自分に合わない頑張り方を見直し、自分に合う出会い方を知るための入口です。";
@@ -19,8 +19,10 @@ type ShareMetadataOptions = {
   path: `/${string}` | "/";
   imagePath: `/${string}`;
   imageAlt: string;
+  absoluteTitle?: boolean;
   ogTitle?: string;
   ogDescription?: string;
+  siteName?: string;
   twitterTitle?: string;
   twitterDescription?: string;
   robots?: Metadata["robots"];
@@ -32,8 +34,10 @@ export function buildShareMetadata({
   path,
   imagePath,
   imageAlt,
+  absoluteTitle,
   ogTitle,
   ogDescription,
+  siteName,
   twitterTitle,
   twitterDescription,
   robots,
@@ -47,9 +51,10 @@ export function buildShareMetadata({
   const resolvedOgDescription = ogDescription ?? description;
   const resolvedTwitterTitle = twitterTitle ?? resolvedOgTitle;
   const resolvedTwitterDescription = twitterDescription ?? resolvedOgDescription;
+  const resolvedSiteName = siteName ?? SITE_NAME;
 
   return {
-    title,
+    title: absoluteTitle ? { absolute: title } : title,
     description,
     robots,
     alternates: {
@@ -60,7 +65,7 @@ export function buildShareMetadata({
       description: resolvedOgDescription,
       url: absolutePageUrl,
       type: "website",
-      siteName: SITE_NAME,
+      siteName: resolvedSiteName,
       locale: "ja_JP",
       images: [
         {

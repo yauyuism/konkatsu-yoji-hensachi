@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: ResultPageProps): Promise<Met
       canonical: `/result/${type}`,
     },
     openGraph: {
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: result.meaning,
       type: "article",
       url: `/result/${type}`,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: ResultPageProps): Promise<Met
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: result.meaning,
       images: [`/api/og?type=${type}`],
     },

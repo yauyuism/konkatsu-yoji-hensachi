@@ -25,7 +25,7 @@ export async function generateMetadata({ searchParams }: HensachiResultPageProps
       canonical: `/hensachi/result?${query}`,
     },
     openGraph: {
-      title: `${pageTitle} | 婚活診断LAB by アイカタ`,
+      title: `${pageTitle} | 婚活診断LAB by やうゆ`,
       description: result.summary,
       type: "article",
       url: `/hensachi/result?${query}`,
@@ -40,7 +40,7 @@ export async function generateMetadata({ searchParams }: HensachiResultPageProps
     },
     twitter: {
       card: "summary_large_image",
-      title: `${pageTitle} | 婚活診断LAB by アイカタ`,
+      title: `${pageTitle} | 婚活診断LAB by やうゆ`,
       description: result.summary,
       images: [ogImageUrl],
     },

@@ -1,6 +1,7 @@
 import { buildShareMetadata } from "@/lib/metadata";
+import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
-const reservationUrl = "https://note.com/yauyuism/n/nf5c37e6297f0";
+const reservationUrl = MOSH_SERVICES_URL;
 
 const recommendedItems = [
   "マッチングアプリで会っても好きになれない",
@@ -62,7 +63,7 @@ const faqs = [
   {
     question: "相談後に無理な勧誘はありますか？",
     answer:
-      "ありません。必要に応じて継続相談や結婚相談所機能をご案内することはありますが、無理に案内することはありません。",
+      "ありません。必要に応じて継続相談をご案内することはありますが、無理に案内することはありません。",
   },
   {
     question: "何を準備すればいいですか？",
@@ -72,12 +73,12 @@ const faqs = [
 ];
 
 export const metadata = buildShareMetadata({
-  title: "60分婚活相談",
-  description: "診断結果をもとに、自分に合う出会い方と次に試す行動を整理するアイカタの60分婚活相談です。",
+  title: "やうゆ式 婚活の見直し相談",
+  description: "診断結果をもとに、自分に合う出会い方と次に試す行動を整理する婚活の見直し相談です。",
   path: "/consultation",
   imagePath: "/api/og-top",
-  imageAlt: "アイカタ60分婚活相談",
-  ogTitle: "60分婚活相談 | 婚活診断LAB by アイカタ",
+  imageAlt: "やうゆ式 婚活の見直し相談",
+  ogTitle: "やうゆ式 婚活の見直し相談 | 婚活診断LAB by やうゆ",
   ogDescription: "診断結果をもとに、あなたに合う会い方と次の2週間で試す行動を一緒に整理します。",
 });
 
@@ -125,12 +126,12 @@ export default function ConsultationPage() {
     <main data-testid="consultation-page" className="screen-shell mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14">
       <section className="grid gap-8 rounded-[1.8rem] border border-[rgba(143,183,161,0.34)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(255,250,245,0.96)_52%,rgba(220,233,223,0.58))] p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
         <div>
-          <p className="text-xs font-black tracking-[0.18em] text-[var(--mint-green)]">AIKATA CONSULTATION</p>
+          <p className="text-xs font-black tracking-[0.18em] text-[var(--mint-green)]">YAUYU CONSULTATION</p>
           <h1 className="mt-4 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">60分婚活相談</h1>
           <div className="mt-6 grid gap-4 text-sm leading-8 text-[var(--text-main)] sm:text-base">
             <p>婚活がしんどいのは、あなたが悪いからではなく、自分に合わない頑張り方を続けているからかもしれません。</p>
             <p>
-              アイカタの60分婚活相談では、マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場まで含めて、あなたに合う出会い方と、次に試す行動を一緒に整理します。
+              やうゆ式の婚活の見直し相談では、マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場まで含めて、あなたに合う出会い方と、次に試す行動を一緒に整理します。
             </p>
           </div>
           <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -170,7 +171,7 @@ export default function ConsultationPage() {
       <section className="mt-12 border-t border-[var(--line)] pt-10">
         <SectionHeading
           eyebrow="PHILOSOPHY"
-          title="アイカタの考え方"
+          title="相談の考え方"
           description="受け身で待つだけの婚活ではなく、自分に合う会い方を見つけ、実際に動きながら結婚につながる関係を作っていくための相談です。"
         />
         <div className="mt-6 grid gap-4 lg:grid-cols-3">

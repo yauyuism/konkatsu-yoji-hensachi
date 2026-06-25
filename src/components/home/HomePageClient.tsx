@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 
+import { MoshConsultationCta } from "@/components/MoshConsultationCta";
 import { ToolCard } from "@/components/ToolCard";
 import {
   CATEGORIES,
   CATEGORY_ORDER,
   getActiveAnnouncements,
-  getFeaturedTool,
   getToolHomeCatch,
   getToolHomeDescription,
   getToolHomeName,
@@ -17,7 +17,8 @@ import {
   isToolNew,
   type Tool,
 } from "@/data/tools";
-import { useCompletedTools } from "@/lib/completed-tools";
+import { trackEvent } from "@/lib/analytics";
+import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 function SectionHeading({
   title,
@@ -74,13 +75,65 @@ type HomePageClientProps = {
   initialHasCompletedAnyTool?: boolean;
 };
 
-export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageClientProps) {
-  const completedTools = useCompletedTools();
-  const showFirstTimeSection = !initialHasCompletedAnyTool && completedTools.length === 0;
-  const featuredTool = getFeaturedTool();
+const courseGuides = [
+  {
+    name: "会えるのに進まない人へ",
+    description:
+      "マチアプで会える。紹介もある。たまに悪くない人もいる。でも、なぜか好きになれない、会ったあとに疲れる。疲れている理由と、合う出会い方を順番に見直します。",
+    steps: ["婚活疲れ・マチアプ疲れの理由診断", "あなたに合う出会い方診断", "個別相談"],
+    cta: "会えるのに進まない理由を診断する",
+    href: "/diagnoses/konkatsu-fatigue",
+  },
+  {
+    name: "マチアプ疲れを整理したい人へ",
+    description:
+      "会う前のメッセージがしんどい。会っても次につながらない。アプリを開くだけで疲れる。今の疲れが、数の問題なのか、出会い方の相性なのかを見直します。",
+    steps: ["婚活疲れ・マチアプ疲れの理由診断", "あなたに合う出会い方診断", "個別相談"],
+    cta: "マチアプ疲れを診断する",
+    href: "/diagnoses/konkatsu-fatigue",
+  },
+  {
+    name: "相談所に入る前に整理したい人へ",
+    description: "マチアプで疲れたから、次は相談所。そう決める前に、自分に合う婚活の進め方を一度整理します。",
+    steps: ["婚活疲れ・マチアプ疲れの理由診断", "あなたに合う出会い方診断", "婚活の見直し相談"],
+    cta: "相談所前に診断する",
+    href: "/diagnoses/konkatsu-fatigue",
+  },
+];
+
+export function HomePageClient({ initialHasCompletedAnyTool: _initialHasCompletedAnyTool = false }: HomePageClientProps) {
+  void _initialHasCompletedAnyTool;
+
   const announcements = getActiveAnnouncements();
   const guides = getVisibleGuides();
-  const heroHref = "/diagnoses/deai-fit";
+  const fatigueTool = getToolById("fatigueReason");
+  const deaiFitTool = getToolById("deaiFit");
+  const mainDiagnosisTools = [fatigueTool, deaiFitTool].filter((tool): tool is Tool => Boolean(tool));
+  const heroHref = fatigueTool?.path ?? "/diagnoses/konkatsu-fatigue";
+  const handleHeroStartClick = () => {
+    trackEvent("top_hero_start_diagnosis_click", {
+      placement: "home_hero",
+      quiz_name: "婚活疲れ・マチアプ疲れの理由診断",
+    });
+  };
+  const handleHeroConsultationClick = () => {
+    trackEvent("top_hero_consultation_click", {
+      placement: "home_hero",
+      cta_kind: "consultation",
+    });
+  };
+  const handleFeaturedDiagnosisClick = (tool: Tool, placement: string) => {
+    trackEvent("featured_diagnosis_click", {
+      placement,
+      quiz_name: tool.name,
+    });
+  };
+  const handleCourseClick = (courseName: string) => {
+    trackEvent("course_cta_click", {
+      placement: "home_course",
+      course_name: courseName,
+    });
+  };
 
   return (
     <section data-testid="home-page" className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-10">
@@ -89,24 +142,34 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
           data-testid="home-hero-heading"
           className="text-[2.35rem] font-black leading-tight tracking-[-0.03em] text-[var(--color-text)] sm:text-5xl lg:text-6xl"
         >
-          診断で、
-          <span className="block text-[var(--color-main)]">恋愛や婚活の癖を知る。</span>
+          婚活の違和感を、
+          <span className="block text-[var(--color-main)]">診断で言語化する。</span>
         </h1>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap gap-3">
           <Link
             data-testid="home-hero-cta"
             href={heroHref}
+            onClick={handleHeroStartClick}
             className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-bold sm:text-[15px]"
           >
-            自分に合う出会い方を診断する →
+            無料診断をはじめる
           </Link>
+          <a
+            data-testid="home-hero-consultation-cta"
+            href={MOSH_SERVICES_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleHeroConsultationClick}
+            className="btn-secondary inline-flex rounded-full px-6 py-3.5 text-sm font-bold text-[var(--color-main)] sm:text-[15px]"
+          >
+            個別相談を見る
+          </a>
         </div>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--color-text-sub)] sm:text-lg">
-          婚活がしんどいのは、あなたが悪いからではなく、
-          自分に合わない頑張り方を続けているからかもしれません。
+          マチアプで会える。紹介もある。たまに悪くない人もいる。
+          でも、なぜか進まない。その理由を、無料診断で整理できます。
           <br className="hidden sm:block" />
-          出会い方、理想の高さ、LINEの距離感、プロフィールの見せ方を診断しながら、
-          自分に合う婚活の進め方を見つけるきっかけを作ります。
+          プロフィール、LINE、条件、出会い方、婚活疲れ。まずは診断で自分の状態を見て、必要なら個別相談で一緒に見直します。
         </p>
 
         {announcements.length > 0 ? (
@@ -125,26 +188,66 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
         ) : null}
       </header>
 
-      {showFirstTimeSection && featuredTool ? (
-        <section data-testid="home-first-step" className="mt-12 border-t border-[color:var(--line)] pt-10">
+      {mainDiagnosisTools.length > 0 ? (
+        <section data-testid="home-main-diagnoses" className="mt-12 border-t border-[color:var(--line)] pt-10">
           <SectionHeading
-            title="はじめての方へ"
-            description="まずは、自分に合う会い方から整理できる診断です。採点ではなく、今の頑張り方を見直す入口として使ってください。"
+            title="まずはこの2つ"
+            description="今しんどい理由を知りたい人は婚活疲れ診断へ。次にどこで出会えばいいか知りたい人は出会い方診断へ。どちらも採点ではなく、合わない頑張り方を減らすための診断です。"
           />
-          <div className="mt-6 max-w-3xl">
-            <ToolCard
-              name={featuredTool.name}
-              catch={featuredTool.catch}
-              description={featuredTool.description}
-              tags={featuredTool.tags}
-              href={featuredTool.id === "deaiFit" ? heroHref : featuredTool.id === "hensachi" ? "/hensachi?skip=1" : featuredTool.path}
-              cta={featuredTool.cta}
-              isNew={isToolNew(featuredTool)}
-              highlightBadge="はじめて向け"
-            />
+          <div className="mt-6 grid auto-rows-fr gap-5 md:grid-cols-2">
+            {mainDiagnosisTools.map((tool, index) => (
+              <ToolCard
+                key={tool.id}
+                name={tool.name}
+                catch={index === 0 ? "今しんどい理由を知りたい人向け" : "次にどこで出会えばいいか知りたい人向け"}
+                description={
+                  index === 0
+                    ? "会えるのに進まない理由を、現場の声からタイプ別に整理します。"
+                    : "マチアプ、相談所、紹介、SNS、外飲み。あなたの恋愛が進みやすい出会い方を16タイプで診断します。"
+                }
+                tags={tool.tags}
+                href={tool.path}
+                cta={index === 0 ? "疲れている理由を診断する" : "合う出会い方を診断する"}
+                isNew={isToolNew(tool)}
+                highlightBadge={index === 0 ? "今しんどい人へ" : "次の出会い方へ"}
+                onClick={() => handleFeaturedDiagnosisClick(tool, "home_main_diagnoses")}
+              />
+            ))}
           </div>
         </section>
       ) : null}
+
+      <section data-testid="home-course-guides" className="mt-12 border-t border-[color:var(--line)] pt-10">
+        <SectionHeading
+          title="どこから診断する？"
+          description="単発で遊んでも大丈夫です。迷う人は、今の悩みに近いコースから順番に回ると、自分の状態と次の動き方が見えやすくなります。"
+        />
+        <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          {courseGuides.map((course) => (
+            <article key={course.name} className="card flex h-full flex-col p-6 sm:p-7">
+              <h3 className="text-lg font-black leading-tight text-[var(--color-text)]">{course.name}</h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--color-text-sub)]">{course.description}</p>
+              <ol className="mt-5 grid gap-3">
+                {course.steps.map((step, index) => (
+                  <li key={step} className="flex gap-3 text-sm leading-7 text-[var(--color-text)]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] font-numeric text-xs font-black text-[var(--accent)]">
+                      {index + 1}
+                    </span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+              <Link
+                href={course.href}
+                onClick={() => handleCourseClick(course.name)}
+                className="text-link mt-auto inline-flex pt-5"
+              >
+                {course.cta} →
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section id="tool-list" className="mt-12 border-t border-[color:var(--line)] pt-10">
         <SectionHeading
@@ -207,35 +310,20 @@ export function HomePageClient({ initialHasCompletedAnyTool = false }: HomePageC
         </section>
       ) : null}
 
-      <section data-testid="home-aikata" className="mt-12 border-t border-[color:var(--line)] pt-10">
-        <SectionHeading
-          title="婚活診断LAB by アイカタ"
-          description="婚活相談サービス「アイカタ」が運営する診断メディアです。"
-        />
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section data-testid="home-consultation" className="mt-12 border-t border-[color:var(--line)] pt-10">
+        <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
           <div>
-            <p className="text-sm leading-8 text-[var(--color-text-sub)] sm:text-base">
-              アイカタでは、診断結果をもとに、マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場まで含めて、
-              自分に合う出会い方を一緒に設計します。
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/consultation" className="btn-primary rounded-full px-5 py-3 text-sm font-bold">
-                診断結果をもとに相談する
-              </Link>
+            <SectionHeading
+              title="診断で分かった違和感を、個別に整理したい人へ。"
+              description="診断だけでは分かりきらないこともあります。今の出会い方を続けるべきか。プロフィールを変えるべきか。相談所に入る前に整理したほうがいいのか。個別に見たい人は、やうゆ式の婚活の見直し相談で一緒に話せます。"
+            />
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="tag">あなたと合う人に届くプロフィール添削</span>
+              <span className="tag">やうゆ式 婚活の見直し相談 60分</span>
+              <span className="tag">やうゆ式 婚活の見直し相談 2回セット</span>
             </div>
           </div>
-
-          <div className="grid gap-3 text-sm leading-7 text-[var(--color-text-sub)]">
-            <p>
-              <span className="font-bold text-[var(--color-text)]">普通の婚活に、自分を合わせなくていい。</span>
-              いい相方に出会うには、自分に合う会い方がいる。
-            </p>
-            <p>
-              <span className="font-bold text-[var(--color-text)]">診断は採点ではありません。</span>
-              自分に合う出会い方を知るための入口です。
-            </p>
-          </div>
+          <MoshConsultationCta placement="home_bottom" ctaKind="consultation" variant="compact" />
         </div>
       </section>
     </section>

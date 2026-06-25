@@ -24,14 +24,14 @@ export const metadata: Metadata = {
     canonical: "/prof/stats",
   },
   openGraph: {
-    title: "みんなのプロフ偏差値 | 婚活診断LAB by アイカタ",
+    title: "みんなのプロフ偏差値 | 婚活診断LAB by やうゆ",
     description: "匿名化された診断結果から、平均偏差値やありがちなミスをまとめた統計ページです。",
     url: "/prof/stats",
     images: [getProfStatsOgImageUrl()],
   },
   twitter: {
     card: "summary_large_image",
-    title: "みんなのプロフ偏差値 | 婚活診断LAB by アイカタ",
+    title: "みんなのプロフ偏差値 | 婚活診断LAB by やうゆ",
     description: "匿名化された診断結果から、平均偏差値やありがちなミスをまとめた統計ページです。",
     images: [getProfStatsOgImageUrl()],
   },

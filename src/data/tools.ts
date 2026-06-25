@@ -2,7 +2,17 @@ import { SPEC_OPTIONS } from "@/data/spec-options";
 
 export type ToolCategory = "question" | "paste" | "number";
 
-export type ToolId = "deaiFit" | "prof" | "weight" | "check" | "my9specs" | "conditions" | "market" | "hensachi" | "type";
+export type ToolId =
+  | "fatigueReason"
+  | "deaiFit"
+  | "prof"
+  | "weight"
+  | "check"
+  | "my9specs"
+  | "conditions"
+  | "market"
+  | "hensachi"
+  | "type";
 
 export type ToolStatus = "live" | "coming_soon";
 
@@ -47,16 +57,35 @@ export const CATEGORIES = {
 
 export const TOOLS: Tool[] = [
   {
+    id: "fatigueReason",
+    path: "/diagnoses/konkatsu-fatigue",
+    name: "婚活疲れ・マチアプ疲れの理由診断",
+    catch: "会えるのに進まない理由を、現場の声からタイプ別に整理します",
+    description:
+      "マチアプで会える。紹介もある。たまに悪くない人もいる。でも、なぜか好きになれない、会ったあとに疲れる。今の婚活がどこでしんどくなっているのかをタイプ別に診断します。",
+    homeCatch: "会えるのに進まないのは、どこで疲れているから？",
+    homeDescription: "マチアプ疲れ、婚活疲れ、相談所前の迷いを、20問で8タイプに整理します。",
+    tags: ["約3〜4分", "20問", "婚活疲れ"],
+    category: "question",
+    cta: "理由を診断する →",
+    isNew: true,
+    newUntil: "2026-12-31",
+    order: -1,
+    status: "live",
+  },
+  {
     id: "deaiFit",
     path: "/diagnoses/deai-fit",
-    name: "自分に合う出会い方診断",
-    catch: "普通の婚活に、自分を合わせなくていい",
-    description: "マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場。あなたの恋愛スタイルに合う出会い方を診断します。",
-    homeCatch: "あなたに合う出会い方、どこにある？",
-    homeDescription: "条件検索、関係性、生活圏、価値観発信、併用設計の5タイプから、自分に合う会い方を整理します。",
-    tags: ["約2分", "10問", "アイカタ監修"],
+    name: "あなたに合う出会い方診断",
+    catch: "マチアプ、相談所、紹介、SNS、外飲み。あなたの恋愛が進みやすい出会い方を16タイプで診断します",
+    description:
+      "出会い方に正解はありません。オンラインかオフラインか、条件か空気感か、早く進めたいか時間をかけたいか。4つの軸から、あなたに合いやすい出会い方と疲れやすい出会い方を診断します。",
+    homeCatch: "次にどこで出会えば、恋愛が進みやすい？",
+    homeDescription:
+      "マチアプ、相談所、紹介、SNS、外飲み。4つの軸から、あなたに合いやすい出会い方と主戦場にしすぎると疲れやすい出会い方を整理します。",
+    tags: ["約3〜5分", "24問", "16タイプ"],
     category: "question",
-    cta: "診断する →",
+    cta: "出会い方を診断する →",
     isNew: true,
     newUntil: "2026-12-31",
     order: 0,
@@ -188,7 +217,7 @@ export const TOOLS: Tool[] = [
   },
 ];
 
-export const FEATURED_TOOL_ID: ToolId = "deaiFit";
+export const FEATURED_TOOL_ID: ToolId = "fatigueReason";
 
 export type HomeAnnouncement = {
   id: string;
@@ -199,8 +228,14 @@ export type HomeAnnouncement = {
 
 export const HOME_ANNOUNCEMENTS: HomeAnnouncement[] = [
   {
+    id: "fatigue-reason",
+    text: "婚活疲れ・マチアプ疲れの理由診断を公開しました",
+    url: "/diagnoses/konkatsu-fatigue",
+    expiresAt: "2026-12-31",
+  },
+  {
     id: "deai-fit",
-    text: "自分に合う出会い方診断を公開しました",
+    text: "あなたに合う出会い方診断を公開しました",
     url: "/diagnoses/deai-fit",
     expiresAt: "2026-12-31",
   },
@@ -237,6 +272,16 @@ export type ProblemGuide = {
 };
 
 export const PROBLEMS: ProblemGuide[] = [
+  {
+    id: "fatigue-reason",
+    emoji: "🧭",
+    title: "「会えるのに進まない」人",
+    description: "出会いの数を増やす前に、どこで疲れているのかを整理。",
+    steps: [
+      { toolId: "fatigueReason", label: "まず婚活疲れの理由を診断する" },
+      { toolId: "prof", label: "入口のズレがあればプロフィールを見直す" },
+    ],
+  },
   {
     id: "person-check",
     emoji: "🤔",

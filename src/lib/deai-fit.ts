@@ -1,210 +1,499 @@
-export type DeaiFitType = "condition" | "relationship" | "lifestyle" | "values" | "hybrid";
+import { MOSH_SERVICES_URL, NOTE_MEMBERSHIP_URL } from "@/lib/service-links";
 
-export type DeaiFitOption = {
+export type DeaiFitAnswerValue = "very" | "somewhat" | "neutral" | "notMuch" | "none";
+
+export type DeaiFitAnswerOption = {
+  value: DeaiFitAnswerValue;
   label: string;
-  type: DeaiFitType;
 };
+
+export type DeaiFitAxis = "onlineOffline" | "conditionVibe" | "quickSlow" | "directNetwork";
+export type DeaiFitLetter = "O" | "F" | "C" | "V" | "Q" | "S" | "D" | "N";
+export type DeaiFitType =
+  | "O-C-Q-D"
+  | "O-C-Q-N"
+  | "O-C-S-D"
+  | "O-C-S-N"
+  | "O-V-Q-D"
+  | "O-V-Q-N"
+  | "O-V-S-D"
+  | "O-V-S-N"
+  | "F-C-Q-D"
+  | "F-C-Q-N"
+  | "F-C-S-D"
+  | "F-C-S-N"
+  | "F-V-Q-D"
+  | "F-V-Q-N"
+  | "F-V-S-D"
+  | "F-V-S-N";
 
 export type DeaiFitQuestion = {
   id: number;
   text: string;
-  options: DeaiFitOption[];
+  axis: DeaiFitAxis;
+  agree: DeaiFitLetter;
+  disagree: DeaiFitLetter;
+};
+
+export type DeaiFitCta = {
+  kind: "profile" | "consultation" | "garden";
+  text: string;
+  button: string;
+  href: string;
 };
 
 export type DeaiFitResult = {
   type: DeaiFitType;
   name: string;
+  shortCopy: string;
+  likely: string[];
+  progressCondition: string;
   suited: string[];
   notFit: string[];
-  drain: string[];
-  action: string;
-  proposal: string;
+  drainPattern: string;
+  nextActions: string[];
+  cta: DeaiFitCta;
 };
 
-export const DEAI_FIT_TYPE_ORDER: DeaiFitType[] = ["condition", "relationship", "lifestyle", "values", "hybrid"];
+export type DeaiFitScores = Record<DeaiFitLetter, number>;
+
+export const DEAI_FIT_ANSWER_OPTIONS: DeaiFitAnswerOption[] = [
+  { value: "very", label: "とても当てはまる" },
+  { value: "somewhat", label: "やや当てはまる" },
+  { value: "neutral", label: "どちらともいえない" },
+  { value: "notMuch", label: "あまり当てはまらない" },
+  { value: "none", label: "ほとんど当てはまらない" },
+];
+
+export const DEAI_FIT_TYPE_ORDER: DeaiFitType[] = [
+  "O-C-Q-D",
+  "O-C-Q-N",
+  "O-C-S-D",
+  "O-C-S-N",
+  "O-V-Q-D",
+  "O-V-Q-N",
+  "O-V-S-D",
+  "O-V-S-N",
+  "F-C-Q-D",
+  "F-C-Q-N",
+  "F-C-S-D",
+  "F-C-S-N",
+  "F-V-Q-D",
+  "F-V-Q-N",
+  "F-V-S-D",
+  "F-V-S-N",
+];
+
+export const DEAI_FIT_AXIS_PAIRS = [
+  { axis: "onlineOffline", left: "O", right: "F", leftLabel: "オンライン起点", rightLabel: "オフライン起点" },
+  { axis: "conditionVibe", left: "C", right: "V", leftLabel: "条件確認", rightLabel: "空気感重視" },
+  { axis: "quickSlow", left: "Q", right: "S", leftLabel: "早めに進めたい", rightLabel: "時間をかけたい" },
+  { axis: "directNetwork", left: "D", right: "N", leftLabel: "一対一集中", rightLabel: "人間関係経由" },
+] as const satisfies Array<{
+  axis: DeaiFitAxis;
+  left: DeaiFitLetter;
+  right: DeaiFitLetter;
+  leftLabel: string;
+  rightLabel: string;
+}>;
+
+const profileCta: DeaiFitCta = {
+  kind: "profile",
+  text:
+    "あなたの場合は、出会い方そのものより先に「届き方」を整えると変わりやすいかもしれません。文章・写真・並びを見直して、あなたと合う人に届くプロフィールにしたい人は、プロフィール添削で見られます。",
+  button: "プロフィール添削を見る",
+  href: MOSH_SERVICES_URL,
+};
+
+const consultationCta: DeaiFitCta = {
+  kind: "consultation",
+  text:
+    "自分に合う出会い方を個別に整理したい人へ。マチアプ、相談所、紹介、SNS、外飲みまで含めて、無理しない進め方を一緒に考えます。",
+  button: "婚活の見直し相談を見る",
+  href: MOSH_SERVICES_URL,
+};
+
+const gardenCta: DeaiFitCta = {
+  kind: "garden",
+  text:
+    "外飲みや生活圏を広げる出会いに興味がある人へ。やうゆの庭では、恋愛・外飲み・人間関係のリアルな話や、読者同士の飲み会も行っています。",
+  button: "やうゆの庭を見る",
+  href: NOTE_MEMBERSHIP_URL,
+};
+
+const profileCtaTypes = new Set<DeaiFitType>(["O-C-Q-D", "O-C-S-D", "O-V-Q-D", "O-V-S-D"]);
+const gardenCtaTypes = new Set<DeaiFitType>(["O-V-Q-N", "O-V-S-N", "F-V-Q-N", "F-V-S-N"]);
+
+function getCta(type: DeaiFitType) {
+  if (profileCtaTypes.has(type)) {
+    return profileCta;
+  }
+
+  if (gardenCtaTypes.has(type)) {
+    return gardenCta;
+  }
+
+  return consultationCta;
+}
+
+function result(
+  type: DeaiFitType,
+  name: string,
+  shortCopy: string,
+  likely: string[],
+  progressCondition: string,
+  suited: string[],
+  notFit: string[],
+  drainPattern: string,
+  nextActions: string[]
+): DeaiFitResult {
+  return {
+    type,
+    name,
+    shortCopy,
+    likely,
+    progressCondition,
+    suited,
+    notFit,
+    drainPattern,
+    nextActions,
+    cta: getCta(type),
+  };
+}
 
 export const DEAI_FIT_QUESTIONS: DeaiFitQuestion[] = [
-  {
-    id: 1,
-    text: "初対面の相手を見るとき、どこが気になりますか？",
-    options: [
-      { type: "condition", label: "年齢や結婚願望など、先に確認したい条件" },
-      { type: "relationship", label: "会話のテンポや一緒にいる時の自然さ" },
-      { type: "lifestyle", label: "場の中での振る舞いや周りへの態度" },
-      { type: "values", label: "考え方や価値観が近いかどうか" },
-      { type: "hybrid", label: "条件も雰囲気も両方見たい" },
-    ],
-  },
-  {
-    id: 2,
-    text: "婚活で安心しやすいのは、どんな状態ですか？",
-    options: [
-      { type: "condition", label: "相手の基本条件や結婚意思が先に分かっている" },
-      { type: "relationship", label: "何度か会う中で、少しずつ人柄が見えてくる" },
-      { type: "lifestyle", label: "恋愛以外の会話やつながりも自然に生まれる" },
-      { type: "values", label: "会う前に言葉や考え方を知れる" },
-      { type: "hybrid", label: "目的も自然さも、どちらもある程度ほしい" },
-    ],
-  },
-  {
-    id: 3,
-    text: "自分の良さが出やすい場はどれですか？",
-    options: [
-      { type: "condition", label: "目的がはっきりしていて、短時間で話せる場" },
-      { type: "relationship", label: "共通の知人や趣味があり、何度か会える場" },
-      { type: "lifestyle", label: "お店やイベントなど、場そのものを楽しめる場" },
-      { type: "values", label: "投稿や文章から人柄を知ってもらえる場" },
-      { type: "hybrid", label: "目的のある場と自然な場を使い分けたい" },
-    ],
-  },
-  {
-    id: 4,
-    text: "相手を知る順番として近いのは？",
-    options: [
-      { type: "condition", label: "条件を確認してから、人柄を見る" },
-      { type: "relationship", label: "何度か話してから、恋愛対象として意識する" },
-      { type: "lifestyle", label: "場での態度や周りとの関係から惹かれる" },
-      { type: "values", label: "考え方や人生観を知ってから会いたくなる" },
-      { type: "hybrid", label: "条件、雰囲気、価値観を並行して見たい" },
-    ],
-  },
-  {
-    id: 5,
-    text: "週末に出会いの予定を入れるなら？",
-    options: [
-      { type: "condition", label: "アプリや相談所で、結婚意思のある人と会う" },
-      { type: "relationship", label: "友人の紹介や趣味の集まりに行く" },
-      { type: "lifestyle", label: "行きつけになりたい店や外飲みに行く" },
-      { type: "values", label: "SNSやnoteで価値観の近い人とやり取りする" },
-      { type: "hybrid", label: "婚活予定と生活圏を広げる予定を両方入れる" },
-    ],
-  },
-  {
-    id: 6,
-    text: "プロフィールで伝えたいのは？",
-    options: [
-      { type: "condition", label: "結婚観、希望、生活条件などの分かりやすさ" },
-      { type: "relationship", label: "一緒にいるときの穏やかさや会話の感じ" },
-      { type: "lifestyle", label: "普段の過ごし方や人との関わり方" },
-      { type: "values", label: "大切にしている考え方や言葉" },
-      { type: "hybrid", label: "条件と人柄のバランス" },
-    ],
-  },
-  {
-    id: 7,
-    text: "疲れやすい婚活はどれですか？",
-    options: [
-      { type: "condition", label: "結婚意思が分からないまま曖昧に続く関係" },
-      { type: "relationship", label: "初回で好きかどうかを急いで決める場" },
-      { type: "lifestyle", label: "出会いが結婚相手探しの作業だけになること" },
-      { type: "values", label: "表面的な会話だけが続くこと" },
-      { type: "hybrid", label: "ひとつのやり方に固定されること" },
-    ],
-  },
-  {
-    id: 8,
-    text: "判断のペースとして合うのは？",
-    options: [
-      { type: "condition", label: "必要な情報がそろえば、比較的早く判断できる" },
-      { type: "relationship", label: "何度か会ってから気持ちが動く" },
-      { type: "lifestyle", label: "場を共有しながら自然に距離が縮まるのがいい" },
-      { type: "values", label: "言葉や考え方のやり取りを重ねてから会いたい" },
-      { type: "hybrid", label: "相手や場所によってペースを変えたい" },
-    ],
-  },
-  {
-    id: 9,
-    text: "出会いが広がったとき、うれしいのは？",
-    options: [
-      { type: "condition", label: "結婚につながる可能性の高い人と効率よく会えること" },
-      { type: "relationship", label: "安心できる人間関係の中で紹介が増えること" },
-      { type: "lifestyle", label: "行きたい場所や知り合いが増えて生活が楽しくなること" },
-      { type: "values", label: "価値観の近い人と自然につながること" },
-      { type: "hybrid", label: "結婚意思のある出会いと自然な出会いが両方増えること" },
-    ],
-  },
-  {
-    id: 10,
-    text: "相談で整理したいことに近いのは？",
-    options: [
-      { type: "condition", label: "自分に合う条件設定や婚活サービスの選び方" },
-      { type: "relationship", label: "紹介やコミュニティで恋愛につなげる動き方" },
-      { type: "lifestyle", label: "生活圏を広げながら出会いを増やす方法" },
-      { type: "values", label: "発信や言語化から相性の良い人と出会う方法" },
-      { type: "hybrid", label: "複数の出会い方をどう組み合わせるか" },
-    ],
-  },
+  { id: 1, text: "会う前にプロフィールや文章で相手の雰囲気を知っておきたい", axis: "onlineOffline", agree: "O", disagree: "F" },
+  { id: 2, text: "実際に会ってみないと、相手を好きになれるか分からない", axis: "onlineOffline", agree: "F", disagree: "O" },
+  { id: 3, text: "SNSや文章から相手の考え方が見えると気になりやすい", axis: "onlineOffline", agree: "O", disagree: "F" },
+  { id: 4, text: "条件やプロフィールより、会ったときの空気感を信じたい", axis: "onlineOffline", agree: "F", disagree: "O" },
+  { id: 5, text: "会う前の情報が少なすぎると不安になる", axis: "onlineOffline", agree: "O", disagree: "F" },
+  { id: 6, text: "友達との関わり方や場での振る舞いを見ると、相手の人柄が分かりやすい", axis: "onlineOffline", agree: "F", disagree: "O" },
+  { id: 7, text: "年齢、居住地、仕事観、子ども観などは早めに知っておきたい", axis: "conditionVibe", agree: "C", disagree: "V" },
+  { id: 8, text: "条件が合っていても、一緒にいて楽しくなければ進めない", axis: "conditionVibe", agree: "V", disagree: "C" },
+  { id: 9, text: "結婚意思や生活観が見えない相手とは不安になる", axis: "conditionVibe", agree: "C", disagree: "V" },
+  { id: 10, text: "会話のテンポや空気感が合うかをかなり重視する", axis: "conditionVibe", agree: "V", disagree: "C" },
+  { id: 11, text: "条件が先に分かる出会い方のほうが安心する", axis: "conditionVibe", agree: "C", disagree: "V" },
+  { id: 12, text: "プロフィールより、実際に話したときの人柄を見たい", axis: "conditionVibe", agree: "V", disagree: "C" },
+  { id: 13, text: "気になる人とは早めに会って、早めに進めたい", axis: "quickSlow", agree: "Q", disagree: "S" },
+  { id: 14, text: "何度か会わないと、好きになれるか分からない", axis: "quickSlow", agree: "S", disagree: "Q" },
+  { id: 15, text: "曖昧な関係が長いと疲れる", axis: "quickSlow", agree: "Q", disagree: "S" },
+  { id: 16, text: "初回や2回目で判断を迫られるとしんどい", axis: "quickSlow", agree: "S", disagree: "Q" },
+  { id: 17, text: "合うと思ったら、自分から誘うほうだ", axis: "quickSlow", agree: "Q", disagree: "S" },
+  { id: 18, text: "友達や知り合いのような時間を経てから恋愛に進むほうが自然だ", axis: "quickSlow", agree: "S", disagree: "Q" },
+  { id: 19, text: "最初から一対一で話すほうが相手を見やすい", axis: "directNetwork", agree: "D", disagree: "N" },
+  { id: 20, text: "友達の友達や場の中で出会うほうが安心する", axis: "directNetwork", agree: "N", disagree: "D" },
+  { id: 21, text: "大人数より、二人で話したときの相性を重視する", axis: "directNetwork", agree: "D", disagree: "N" },
+  { id: 22, text: "店員さんや周りの人への態度を見ると、その人のことが分かる", axis: "directNetwork", agree: "N", disagree: "D" },
+  { id: 23, text: "紹介されたら、早めに一対一で会ってみたい", axis: "directNetwork", agree: "D", disagree: "N" },
+  { id: 24, text: "行きつけやコミュニティのように、何度か顔を合わせる場所が合う", axis: "directNetwork", agree: "N", disagree: "D" },
 ];
 
 export const DEAI_FIT_RESULTS: Record<DeaiFitType, DeaiFitResult> = {
-  condition: {
-    type: "condition",
-    name: "条件検索型",
-    suited: ["マッチングアプリ", "結婚相談所"],
-    notFit: ["条件が見えない偶然任せの出会い", "結婚意思が分からないまま続く関係"],
-    drain: ["条件が見えない出会いだと不安になりやすい", "相手の結婚意思が分からない関係に疲れやすい"],
-    action: "検索条件を3つに絞り、条件を確認したあとに「一緒にいる時の安心感」もメモしてみましょう。",
-    proposal:
-      "あなたは、条件を先に確認できる出会い方と相性が良いタイプです。マッチングアプリや結婚相談所を使いながら、条件だけでなく、一緒にいる時の安心感や相手の時間の使い方も見ていくと良さそうです。",
-  },
-  relationship: {
-    type: "relationship",
-    name: "関係性育成型",
-    suited: ["友達の紹介", "趣味の場", "コミュニティ", "何度か会える場"],
-    notFit: ["初回デートで即判断する婚活", "プロフィールや条件だけで比較される場"],
-    drain: ["初回デートで即判断する婚活に疲れやすい", "プロフィールや条件だけで判断される場では魅力が伝わりにくい"],
-    action: "友人への紹介依頼や趣味の集まりなど、何度か自然に会える予定をひとつ増やしてみましょう。",
-    proposal:
-      "あなたは、関係性の中で魅力が出るタイプです。紹介、趣味の場、コミュニティなど、何度か自然に会える出会い方を増やすと、自分らしく人と向き合いやすくなります。",
-  },
-  lifestyle: {
-    type: "lifestyle",
-    name: "生活圏拡張型",
-    suited: ["外飲み", "行きつけの店", "常連コミュニティ", "友達の友達"],
-    notFit: ["一対一で条件確認だけを続ける婚活", "出会いを結婚相手探しの作業だけにする場"],
-    drain: ["一対一で条件確認をするだけの婚活だと退屈しやすい", "出会いが「結婚相手探しの作業」になると急に苦しくなる"],
-    action: "気になる店やイベントをひとつ決め、恋愛目的だけでなく生活圏を広げる予定として入れてみましょう。",
-    proposal:
-      "あなたは、生活圏が広がる出会い方と相性が良いタイプです。外飲み、行きつけの店、友達の友達など、恋愛だけを目的にしない場で人と出会うことで、自然に魅力が伝わりやすくなります。",
-  },
-  values: {
-    type: "values",
-    name: "価値観発信型",
-    suited: ["SNS", "note", "X", "発信経由の出会い", "価値観が見えるコミュニティ"],
-    notFit: ["条件だけで人を見る婚活", "表面的な会話だけが続く出会い"],
-    drain: ["条件だけで人を見る婚活に違和感を持ちやすい", "表面的な会話が続くと、相手に興味を持ちにくい"],
-    action: "最近考えていることや大切にしたい暮らし方を、短い投稿やプロフィール文に一つ足してみましょう。",
-    proposal:
-      "あなたは、価値観が見える出会い方と相性が良いタイプです。SNSやnoteなどで、自分の考え方や日常を少しずつ出していくことで、条件だけでは出会えない相手とつながりやすくなります。",
-  },
-  hybrid: {
-    type: "hybrid",
-    name: "併用設計型",
-    suited: ["結婚相談所", "マッチングアプリ", "紹介", "外飲み", "SNS", "趣味の場"],
-    notFit: ["出会い方をひとつに固定する婚活", "効率か自然さのどちらかだけに寄せる進め方"],
-    drain: ["どれかひとつの出会い方に固定されると苦しくなる", "婚活の進め方が定まらず、迷いやすい"],
-    action: "結婚意思を確認できる場所と、自然に人間関係が広がる場所を一つずつ選び、今月の動き方に分けてみましょう。",
-    proposal:
-      "あなたは、ひとつの出会い方に絞るより、複数の出会い方を組み合わせるのが向いているタイプです。結婚相談所やマッチングアプリで結婚意思のある人と出会いつつ、紹介、外飲み、SNS、趣味の場などで生活圏も広げていくと、自分に合う相手に近づきやすくなります。",
-  },
+  "O-C-Q-D": result(
+    "O-C-Q-D",
+    "条件確認スピード婚活タイプ",
+    "会う前に条件を確認し、合いそうなら早めに一対一で進めたいタイプです。",
+    [
+      "結婚意思や生活観が見えない相手とのやり取りが長引くと疲れやすい",
+      "必要な条件が見えた相手とは、早めに会って判断したい",
+      "曖昧な外飲みや目的のない出会いより、結婚に向いた場のほうが動きやすい",
+    ],
+    "あなたは、条件や目的がある程度見えていて、二人で話す時間を作れると恋愛が進みやすいタイプです。情報がそろえば動けるので、確認事項を絞るほどスピード感が出ます。",
+    ["結婚相談所", "Pairs", "Omiai", "ヒトオシ", "婚活アプリ", "条件が明確な紹介"],
+    ["目的が曖昧な外飲み", "何度も会わないと進まないSNS恋愛", "ゆるいコミュニティ", "結婚意思が見えにくい出会い"],
+    "結婚意思や生活観が見えない相手と、曖昧なままやり取りを続けることに疲れやすいです。",
+    ["結婚意思、居住地、子ども観など、早めに確認したい条件を3つだけ決める", "プロフィールに譲れない条件を冷たく見えない言葉で入れる", "条件が合う人とは、だらだらやり取りせず早めに会う"]
+  ),
+  "O-C-Q-N": result(
+    "O-C-Q-N",
+    "条件から広げる紹介活用タイプ",
+    "条件は見たいけれど、自分だけで探すより誰かの目を通した出会いが合うタイプです。",
+    [
+      "条件確認から会う判断まで全部ひとりで抱えると消耗しやすい",
+      "紹介者の信用や第三者の視点があると安心して進める",
+      "合いそうな人とは、早めに一対一の時間を作りたい",
+    ],
+    "あなたは、条件の安心感と人の信用が両方あると動きやすいタイプです。紹介者に自分の結婚観を共有できると、合う人に近づきやすくなります。",
+    ["ヒトオシ", "友人紹介", "結婚相談所", "審査制コミュニティ", "少人数の紹介飲み"],
+    ["完全ランダムな飲み会", "目的のない外飲み", "条件が分からないSNS恋愛", "相手の結婚意思が見えない場"],
+    "自分で大量に探して、条件確認から会う判断まで全部ひとりで抱えることに疲れやすいです。",
+    ["「いい人いたら紹介して」ではなく、紹介してほしい相手像を3条件で伝える", "紹介者に、自分の結婚観や生活観を先に共有する", "条件が合う人とは早めに一対一の時間を作る"]
+  ),
+  "O-C-S-D": result(
+    "O-C-S-D",
+    "慎重な条件確認タイプ",
+    "条件は大事。でも、すぐには好きになれないタイプです。",
+    [
+      "条件は合っているのに、気持ちが動く前に判断を迫られると苦しい",
+      "相手の情報は知りたいけれど、恋愛感情はゆっくり育つ",
+      "初回で答えを出すより、2〜3回会ってから考えたい",
+    ],
+    "あなたは、事前情報で安心を作ったうえで、一対一の時間を重ねると進みやすいタイプです。条件確認と気持ちの育つ速度を分けて扱うと楽になります。",
+    ["Pairs", "Omiai", "結婚相談所", "丁寧なプロフィール型アプリ", "価値観を文章で確認できる出会い"],
+    ["即断即決の婚活イベント", "即アポ前提のアプリ運用", "初回で結論を求められるデート", "ノリだけで進む飲み会"],
+    "条件は合っているのに、気持ちが動く前に「次どうする？」を迫られることに疲れやすいです。",
+    ["プロフィールに「何度か話しながら仲良くなりたい」と入れる", "会う人数を増やすより、名前と顔が一致する人数まで絞る", "初回で判断せず、2〜3回会いたいと思える相手だけ残す"]
+  ),
+  "O-C-S-N": result(
+    "O-C-S-N",
+    "条件も安心感もほしい紹介育成タイプ",
+    "条件も大事だけど、誰かの信用や安心感がある中で時間をかけたいタイプです。",
+    [
+      "条件も分からず、信用もない相手とゼロから関係を作ると疲れる",
+      "紹介やコミュニティの安心感があると、少しずつ相手を見やすい",
+      "結論を急がず、何度か会う中で生活観を確認したい",
+    ],
+    "あなたは、条件の安心感と関係性のぬくもりが両方あると恋愛が進みやすいタイプです。紹介やコミュニティで、相手の背景を知りながら育てる出会いが合います。",
+    ["友人紹介", "ヒトオシ", "社会人コミュニティ", "相談所の紹介型", "趣味や価値観が近いコミュニティ"],
+    ["数打ちアプリ", "短期判断の婚活イベント", "完全ランダムな飲み会", "目的のない外飲み"],
+    "条件も分からず、信用もない相手と、ゼロから関係を作り続けることに疲れやすいです。",
+    ["友人に紹介してほしい相手像を具体的に伝える", "条件だけでなく、合う関係性や生活のイメージも言語化する", "紹介やコミュニティで出会った相手とは、すぐ判断せず数回会う"]
+  ),
+  "O-V-Q-D": result(
+    "O-V-Q-D",
+    "SNS即フィーリングタイプ",
+    "文章や投稿の温度感で気になり、会ったら早めに進みたいタイプです。",
+    [
+      "肩書きや条件だけで判断される場では、自分のノリや温度感が伝わりにくい",
+      "投稿や文章の空気が合う相手には、早めに会ってみたくなる",
+      "重すぎる婚活感より、自然な反応から始まる関係が合う",
+    ],
+    "あなたは、会う前に相手の温度感を知り、気になったら一対一で確かめると進みやすいタイプです。発信やプロフィールの空気づくりが入口になります。",
+    ["X", "Threads", "Instagram", "Tinder", "軽めのマチアプ", "投稿や文章から会話が始まる出会い"],
+    ["重い相談所", "条件だらけの婚活プロフィール", "長期間の様子見", "結婚条件だけで進む出会い"],
+    "条件や肩書きだけで判断され、自分の温度感やノリが見えない場所にいることに疲れやすいです。",
+    ["SNSに好きな店、休日の過ごし方、考えていることを出す", "気になる人には重い好意ではなく、投稿への自然な反応から始める", "会いたいと思ったら、軽い誘いで一度会う"]
+  ),
+  "O-V-Q-N": result(
+    "O-V-Q-N",
+    "SNS人脈拡張タイプ",
+    "オンライン上の価値観や空気感から入り、人間関係が広がる中で恋愛に進みやすいタイプです。",
+    [
+      "価値観や空気感が見えない相手と、いきなり一対一で向き合うと疲れやすい",
+      "SNS経由で人間関係が広がると、自然に気になる人が出やすい",
+      "恋愛だけを目的にしすぎない場のほうが動きやすい",
+    ],
+    "あなたは、オンラインで温度感を知り、複数人や人間関係の中で相手を見ると進みやすいタイプです。いきなり恋愛対象にせず、場のつながりから育てるのが合います。",
+    ["X", "Threads", "オンラインコミュニティ", "友達の友達", "SNS経由の飲み会", "趣味の発信から広がる出会い"],
+    ["一対一で詰める婚活", "条件検索メインの相談所", "初回から恋愛対象として審査されるアプリ", "投稿や価値観が見えない出会い"],
+    "価値観や空気感が見えない相手と、いきなり一対一で向き合うことに疲れやすいです。",
+    ["SNSに自分の好きなものや生活の温度を出す", "気になる人の投稿に自然に反応する", "オンラインでつながった人と、複数人の場で一度会う"]
+  ),
+  "O-V-S-D": result(
+    "O-V-S-D",
+    "文章からじわじわ好きになるタイプ",
+    "相手の文章、考え方、日常の出し方から少しずつ気になるタイプです。",
+    [
+      "相手の考え方や生活感が見える前に、会うかどうかを決めると疲れる",
+      "文章の温度が合う人には、会う前から安心感を持ちやすい",
+      "一対一でじっくり話せると、気持ちが育ちやすい",
+    ],
+    "あなたは、言葉や日常の出し方から相手を知り、一対一でゆっくり距離を縮めると進みやすいタイプです。プロフィールや発信で自分の考え方を出すことが大事になります。",
+    ["SNS", "note", "Threads", "丁寧なメッセージ型アプリ", "価値観が文章で伝わる出会い"],
+    ["即アポ前提のアプリ運用", "短期決戦のデート", "ノリだけの飲み会", "条件だけで進む相談所"],
+    "相手の考え方や生活感が見える前に、会うかどうかを決めることに疲れやすいです。",
+    ["プロフィールやSNSに、自分の考え方や好きな時間を入れる", "メッセージで疲れない人数まで絞る", "文章の温度が合う相手を大事にする"]
+  ),
+  "O-V-S-N": result(
+    "O-V-S-N",
+    "オンライン生活圏タイプ",
+    "オンライン上でゆるくつながり、何度も目に入るうちに気になるタイプです。",
+    [
+      "気になる前に、会う・会わない・付き合うかを決めると苦しい",
+      "投稿ややり取りを何度も見るうちに、自然と安心感が育ちやすい",
+      "SNSからオフラインにつながる流れが合いやすい",
+    ],
+    "あなたは、オンライン上の生活圏でゆるくつながり、何度も目に入る中で気持ちが動きやすいタイプです。急に恋愛対象として見るより、温度を育てる関係が合います。",
+    ["X", "Threads", "趣味コミュニティ", "note", "オンラインサロン", "SNSからオフラインにつながる出会い"],
+    ["条件検索だけの婚活", "初回で結論を迫る出会い", "即アポ前提のアプリ", "プロフィールだけで判断される場"],
+    "気になる前に、会う・会わない・付き合う・付き合わないの判断を求められることに疲れやすいです。",
+    ["SNSで自分の好きなものや日常を少しずつ出す", "気になる人をすぐ恋愛対象にせず、生活圏の片隅に置く", "オフラインで会えるきっかけを軽く作る"]
+  ),
+  "F-C-Q-D": result(
+    "F-C-Q-D",
+    "会って条件確認タイプ",
+    "会わないと分からないが、会ったら早めに判断したいタイプです。",
+    [
+      "会うまでに時間がかかりすぎると、気持ちが冷めやすい",
+      "条件確認は必要だけど、最後は会ったときの感覚で決めたい",
+      "関係が曖昧なまま続くより、早めに次を決めたい",
+    ],
+    "あなたは、最低限の条件を確認したうえで、実際に会ったときの感覚を早めに見ると進みやすいタイプです。情報収集より、会って判断する設計が合います。",
+    ["婚活パーティー", "相談所のお見合い", "紹介", "スピード感のあるデート", "条件が分かったうえで会える場"],
+    ["長いやり取りが必要なSNS恋愛", "曖昧な外飲み", "何度も会わないと進まないコミュニティ", "目的が恋愛以外に散らばる場"],
+    "会うまでに時間がかかりすぎたり、会ってからも関係が曖昧なまま続くことに疲れやすいです。",
+    ["条件確認は事前に済ませ、会ったときは空気感を見る", "初回で全部判断せず、次に会いたいかだけ見る", "合わないと感じた相手は早めに手放す"]
+  ),
+  "F-C-Q-N": result(
+    "F-C-Q-N",
+    "紹介即決タイプ",
+    "誰かの信用がある状態で会い、合えば早めに進めたいタイプです。",
+    [
+      "信用のない相手を大量に見て、自分だけで判断し続けると疲れる",
+      "共通の知人がいると、相手の背景を信じやすい",
+      "合うと感じたら、だらだらせず次の約束を作りたい",
+    ],
+    "あなたは、誰かの信用がある場で会い、実際の空気感を見て早めに進めると合いやすいタイプです。紹介者の目を借りることで、判断の負荷が下がります。",
+    ["友人紹介", "職場外の紹介", "ヒトオシ", "少人数飲み会", "共通の知人がいる出会い"],
+    ["完全ランダムなアプリ", "目的のない外飲み", "条件が見えないSNS恋愛", "大人数すぎるイベント"],
+    "信用のない相手を大量に見て、自分で判断し続けることに疲れやすいです。",
+    ["紹介者に「どんな人が合うか」を具体的に伝える", "紹介されたら早めに会って相性を見る", "合えば、だらだらせず次の約束を作る"]
+  ),
+  "F-C-S-D": result(
+    "F-C-S-D",
+    "対面でゆっくり確認タイプ",
+    "会って話したい。でも、すぐには決めたくないタイプです。",
+    [
+      "条件も悪くないし会っても悪くないのに、気持ちが育つ前に判断されると疲れる",
+      "実際に話したときの自然さを、少しずつ確認したい",
+      "一対一で落ち着いて会う時間があると相手を見やすい",
+    ],
+    "あなたは、対面で相手の空気を知りながら、ゆっくり条件や生活観を確認すると進みやすいタイプです。初回で結論を出さない設計が合います。",
+    ["紹介", "相談所", "何度か会えるデート", "趣味イベント", "条件と対面の相性を両方見られる出会い"],
+    ["即判断のアプリ", "ノリだけの飲み会", "一度きりの婚活パーティー", "早すぎる告白や結論を求める場"],
+    "条件も悪くないし会っても悪くないのに、気持ちが育つ前に判断を迫られることに疲れやすいです。",
+    ["初回で結論を出さず、2回目に会いたいかを見る", "生活観や会話の自然さを少しずつ確認する", "「すぐ好きになれない」を弱点扱いしない"]
+  ),
+  "F-C-S-N": result(
+    "F-C-S-N",
+    "生活観じわじわ確認タイプ",
+    "人柄も条件も大事。何度か顔を合わせる中で、生活観や人との関わり方を見たいタイプです。",
+    [
+      "条件と初回印象だけで判断すると、自分の感覚が追いつきにくい",
+      "相手の生活観や人柄が見えると、少しずつ安心できる",
+      "知人経由や趣味の延長のような、何度か会える場が合う",
+    ],
+    "あなたは、人柄と条件を時間の中で確認できると恋愛が進みやすいタイプです。場の信用や生活の延長にある出会いを使うと、自分らしく相手を見られます。",
+    ["友人紹介", "趣味コミュニティ", "社会人サークル", "知人経由", "何度か会える少人数の場"],
+    ["短期判断の婚活イベント", "条件だけで選ぶ相談所", "即アポ前提のアプリ", "その場限りの飲み会"],
+    "相手の生活観や人柄が見える前に、条件と初回印象だけで判断することに疲れやすいです。",
+    ["友人や知人に、紹介してほしい相手像を具体的に伝える", "趣味や生活の延長にある場へ行く", "何度か会える関係の中で相手を見る"]
+  ),
+  "F-V-Q-D": result(
+    "F-V-Q-D",
+    "直感対面タイプ",
+    "会った瞬間の空気感や会話のテンポで判断するタイプです。",
+    [
+      "会う前に情報や条件を詰めすぎると、会う前から気持ちが重くなる",
+      "対面のテンポが合うと、早めに進めたくなる",
+      "直感は大事だけど、最低限の結婚観は後から確認したい",
+    ],
+    "あなたは、対面の空気感と会話のテンポで恋愛が動きやすいタイプです。会う前に詰めすぎず、会ってから必要な確認をする流れが合います。",
+    ["Tinder", "飲み会", "紹介", "街コン", "カジュアルなデート", "軽めのマチアプ"],
+    ["条件入力が多い相談所", "長文プロフィール前提の婚活", "何週間もメッセージする出会い", "重い事前確認が多い場"],
+    "会う前に情報や条件を詰めすぎて、会う前から気持ちが重くなることに疲れやすいです。",
+    ["メッセージを長引かせすぎず、軽く会う", "会ったときの空気感を信じる", "ただし、直感だけで進めず最低限の結婚観や生活観は確認する"]
+  ),
+  "F-V-Q-N": result(
+    "F-V-Q-N",
+    "外飲み即展開タイプ",
+    "場のノリ、偶然、紹介の連鎖で恋愛が動きやすいタイプです。",
+    [
+      "条件や肩書きだけを見ながら会い続けると、出会いが作業に感じやすい",
+      "場のノリや偶然の会話から、恋愛が動きやすい",
+      "大げさな恋愛目的より、軽いつながりから進むほうが自然",
+    ],
+    "あなたは、場の空気や人の連鎖から恋愛が始まりやすいタイプです。外飲みや行きつけの店のように、偶然と信用が混ざる場所が合います。",
+    ["外飲み", "カラオケバー", "立ち飲み", "友達の友達", "イベント", "行きつけの店"],
+    ["条件検索メインのアプリ", "堅いお見合い", "長文プロフィール前提の婚活", "静かすぎる一対一の場"],
+    "恋愛対象を探すためだけの場で、条件や肩書きだけを見ながら会い続けることに疲れやすいです。",
+    ["1人で行けそうな店を1つ探す", "初回は異性と出会おうとせず、店員さんと自然に話す", "気が合った人とはLINEよりインスタ交換くらいの軽さでつながる"]
+  ),
+  "F-V-S-D": result(
+    "F-V-S-D",
+    "一対一で空気を育てるタイプ",
+    "条件より空気感重視。ただし大人数より、一対一でゆっくり相手を見るほうが合うタイプです。",
+    [
+      "大人数の場で相手を見ようとすると疲れやすい",
+      "初回で恋愛対象として判断されるより、2〜3回会って感覚を見たい",
+      "少人数や自然なご飯で、落ち着いて話せると良さが出やすい",
+    ],
+    "あなたは、条件より空気感を大事にしつつ、相手とは一対一でゆっくり向き合うと進みやすいタイプです。会った後に自分が軽いかどうかが大事なサインです。",
+    ["紹介", "趣味デート", "何度か会える相手", "自然なご飯", "少人数の出会い"],
+    ["初回で結論を迫る婚活", "賑やかすぎる外飲み", "大人数の婚活パーティー", "条件検索だけの相談所"],
+    "大人数の場で相手を見ようとして疲れたり、初回で恋愛対象として判断されることに疲れやすいです。",
+    ["友人紹介や趣味の場から、一対一で話せる時間を作る", "初回ではなく、2〜3回会ったときの自分の感覚を見る", "会った後に軽いか疲れるかを記録する"]
+  ),
+  "F-V-S-N": result(
+    "F-V-S-N",
+    "生活圏でじわじわ好きになるタイプ",
+    "出会いに行くより、生活圏に混ざるほうが恋愛が生まれやすいタイプです。",
+    [
+      "初回デートでいきなり恋愛対象として向き合うと疲れる",
+      "何度か自然に会う中で気持ちが動きやすい",
+      "友達の友達や行きつけの店のように、場の信用がある出会いのほうが安心する",
+    ],
+    "あなたは、最初から恋愛対象として向き合うより、人として自然に話せる時間が積み重なったときに気持ちが動きやすいタイプです。相手の周りへの態度や何度か会ったときの安心感が大事になります。",
+    ["外飲み", "行きつけ", "趣味コミュニティ", "友達の友達", "SNSとオフラインの接続", "何度か自然に顔を合わせる場所"],
+    ["短期決戦のアプリ", "初回で恋愛対象として審査する場", "条件検索だけの相談所", "1回のデートで結論を出す婚活"],
+    "自分の気持ちが育つ前に、恋愛対象として判断しなければいけない場所に行き続けることに疲れやすいです。",
+    ["今週、1人で行けそうな店やイベントを1つ探す", "初回から異性と出会おうとせず、店や場に馴染むことを目標にする", "SNSに好きな店、休日の過ごし方、考えていることを1つ投稿する"]
+  ),
 };
 
-export function runDeaiFitDiagnosis(answers: DeaiFitType[]) {
-  const scores = DEAI_FIT_TYPE_ORDER.reduce<Record<DeaiFitType, number>>((accumulator, type) => {
-    accumulator[type] = 0;
-    return accumulator;
-  }, {} as Record<DeaiFitType, number>);
+function addScore(scores: DeaiFitScores, letter: DeaiFitLetter, points: number) {
+  scores[letter] += points;
+}
 
-  answers.forEach((answer) => {
-    scores[answer] += 1;
+function scoreAnswer(scores: DeaiFitScores, question: DeaiFitQuestion, answer: DeaiFitAnswerValue) {
+  if (answer === "very") {
+    addScore(scores, question.agree, 3);
+    return;
+  }
+
+  if (answer === "somewhat") {
+    addScore(scores, question.agree, 2);
+    return;
+  }
+
+  if (answer === "notMuch") {
+    addScore(scores, question.disagree, 1);
+    return;
+  }
+
+  if (answer === "none") {
+    addScore(scores, question.disagree, 2);
+  }
+}
+
+function pickAxis(scores: DeaiFitScores, left: DeaiFitLetter, right: DeaiFitLetter) {
+  if (scores[left] > scores[right]) {
+    return left;
+  }
+
+  return right;
+}
+
+export function runDeaiFitDiagnosis(answers: DeaiFitAnswerValue[]) {
+  const scores: DeaiFitScores = {
+    O: 0,
+    F: 0,
+    C: 0,
+    V: 0,
+    Q: 0,
+    S: 0,
+    D: 0,
+    N: 0,
+  };
+
+  answers.forEach((answer, index) => {
+    const question = DEAI_FIT_QUESTIONS[index];
+    if (!question) {
+      return;
+    }
+
+    scoreAnswer(scores, question, answer);
   });
 
-  const maxScore = Math.max(...DEAI_FIT_TYPE_ORDER.map((type) => scores[type]));
-  const winners = DEAI_FIT_TYPE_ORDER.filter((type) => scores[type] === maxScore);
-  const resultType = winners.length > 1 ? "hybrid" : winners[0];
+  const type = [
+    pickAxis(scores, "O", "F"),
+    pickAxis(scores, "C", "V"),
+    pickAxis(scores, "Q", "S"),
+    pickAxis(scores, "D", "N"),
+  ].join("-") as DeaiFitType;
 
   return {
-    result: DEAI_FIT_RESULTS[resultType],
+    result: DEAI_FIT_RESULTS[type],
     scores,
   };
 }

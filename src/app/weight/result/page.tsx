@@ -56,7 +56,7 @@ export async function generateMetadata({ searchParams }: WeightResultPageProps):
       }),
     },
     openGraph: {
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description,
       type: "article",
       url: getWeightResultPath({
@@ -83,7 +83,7 @@ export async function generateMetadata({ searchParams }: WeightResultPageProps):
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description,
       images: [ogImageUrl],
     },

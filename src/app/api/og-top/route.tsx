@@ -80,7 +80,7 @@ export async function GET() {
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", fontSize: 14, fontWeight: 700, letterSpacing: "0.16em", color: ogPalette.accent }}>
-                  婚活診断LAB
+                  婚活診断LAB by やうゆ
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -146,7 +146,7 @@ export async function GET() {
             gap: 18,
           }}
         >
-          <div style={pillStyle()}>{`婚活診断LAB by アイカタ`}</div>
+          <div style={pillStyle()}>{`婚活診断LAB by やうゆ`}</div>
           <div style={{ display: "flex", flexDirection: "column", fontSize: 58, fontWeight: 700, lineHeight: 1.18 }}>
             <div style={{ display: "flex" }}>診断で、</div>
             <div style={{ display: "flex", color: ogPalette.accent }}>恋愛や婚活の癖を知る。</div>

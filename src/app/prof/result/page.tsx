@@ -50,7 +50,7 @@ export async function generateMetadata({ searchParams }: ProfResultPageProps): P
       canonical: `/prof/result?${query}`,
     },
     openGraph: {
-      title: `${pageTitle} | 婚活診断LAB by アイカタ`,
+      title: `${pageTitle} | 婚活診断LAB by やうゆ`,
       description: result.description,
       type: "article",
       url: `/prof/result?${query}`,
@@ -65,7 +65,7 @@ export async function generateMetadata({ searchParams }: ProfResultPageProps): P
     },
     twitter: {
       card: "summary_large_image",
-      title: `${pageTitle} | 婚活診断LAB by アイカタ`,
+      title: `${pageTitle} | 婚活診断LAB by やうゆ`,
       description: result.description,
       images: [ogImageUrl],
     },

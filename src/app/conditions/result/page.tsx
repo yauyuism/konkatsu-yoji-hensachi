@@ -42,7 +42,7 @@ export async function generateMetadata({ searchParams }: ConditionsResultPagePro
       canonical,
     },
     openGraph: {
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: `条件を入れると、未婚者全体の何%かと人数をリアルタイムで推計します。今回は ${summary.percentage.toFixed(2)}%（約 ${summary.count.toLocaleString()} 人）。`,
       type: "article",
       url: canonicalUrl,
@@ -61,7 +61,7 @@ export async function generateMetadata({ searchParams }: ConditionsResultPagePro
       card: "summary_large_image",
       site: X_ACCOUNT,
       creator: X_ACCOUNT,
-      title: `${title} | 婚活診断LAB by アイカタ`,
+      title: `${title} | 婚活診断LAB by やうゆ`,
       description: `未婚者全体の ${summary.percentage.toFixed(2)}%（約 ${summary.count.toLocaleString()} 人）。`,
       images: [
         {

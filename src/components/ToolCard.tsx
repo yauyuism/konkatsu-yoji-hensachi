@@ -13,6 +13,7 @@ type ToolCardProps = {
   cta?: string;
   ctaLabel?: string;
   className?: string;
+  onClick?: () => void;
 };
 
 export function ToolCard({
@@ -28,13 +29,14 @@ export function ToolCard({
   cta,
   ctaLabel = "診断を開く →",
   className = "",
+  onClick,
 }: ToolCardProps) {
   const resolvedTitle = name ?? title;
   const resolvedCatch = catchText ?? label;
   const resolvedCta = cta ?? ctaLabel;
 
   return (
-    <Link href={href} className={`card card-interactive group relative flex h-full flex-col p-6 sm:p-7 ${className}`.trim()}>
+    <Link href={href} onClick={onClick} className={`card card-interactive group relative flex h-full flex-col p-6 sm:p-7 ${className}`.trim()}>
       {isNew || highlightBadge ? (
         <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
           {highlightBadge ? (
