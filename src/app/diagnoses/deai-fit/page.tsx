@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { DeaiFitApp } from "@/components/deai-fit/DeaiFitApp";
 import { isDeaiFitType } from "@/lib/deai-fit";
 import { DEAI_FIT_DISPLAY_META } from "@/lib/deai-fit-display";
+import { getDeaiFitResultSlug } from "@/lib/deai-fit-share";
 import { buildShareMetadata } from "@/lib/metadata";
 
 type DeaiFitPageProps = {
@@ -38,17 +39,18 @@ export async function generateMetadata({ searchParams }: DeaiFitPageProps): Prom
   }
 
   const meta = DEAI_FIT_DISPLAY_META[resultParam];
+  const resultSlug = getDeaiFitResultSlug(resultParam);
 
   return buildShareMetadata({
     title: `${meta.resultLabel} | ${title}`,
     description: meta.shareCopy,
-    path: `/diagnoses/deai-fit?result=${encodeURIComponent(resultParam)}`,
-    imagePath: `/api/og-deai-fit?result=${encodeURIComponent(resultParam)}`,
+    path: `/diagnoses/deai-fit/result/${resultSlug}`,
+    imagePath: `/og/deai-fit/${resultSlug}.png`,
     imageAlt: `${title} ${meta.resultLabel}の診断カード`,
     absoluteTitle: true,
-    ogTitle: `出会い方診断の結果は「${meta.resultLabel}」`,
+    ogTitle: `${title}｜${meta.resultLabel}`,
     ogDescription: meta.shareCopy,
-    twitterTitle: `出会い方診断の結果は「${meta.resultLabel}」`,
+    twitterTitle: `${title}｜${meta.resultLabel}`,
     twitterDescription: meta.shareCopy,
     siteName: "診断ラボ",
   });

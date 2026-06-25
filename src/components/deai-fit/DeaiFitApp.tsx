@@ -197,15 +197,11 @@ function DeaiFitResultHeader({
   resultLabel,
   shortCopy,
   suitedItems,
-  xShareUrl,
-  onShareClick,
 }: {
   resultCode: DeaiFitType;
   resultLabel: string;
   shortCopy: string;
   suitedItems: string[];
-  xShareUrl: string;
-  onShareClick: () => void;
 }) {
   return (
     <article
@@ -227,17 +223,112 @@ function DeaiFitResultHeader({
         <p className="mt-2 text-base font-bold leading-8 text-[var(--text-main)] sm:text-lg">{shortCopy}</p>
       </div>
       <ResultTagList title="合いやすい出会い方" items={suitedItems} />
-      <a
-        data-testid="deai-fit-share-x-top"
-        href={xShareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onShareClick}
-        className="btn-primary mt-6 inline-flex rounded-full px-6 py-3.5 text-sm font-black"
-      >
-        Xでシェアする
-      </a>
     </article>
+  );
+}
+
+function DeaiFitShareActions({
+  xShareUrl,
+  resultCode,
+  resultLabel,
+  resultUrl,
+  isShareResultPage,
+}: {
+  xShareUrl: string;
+  resultCode: DeaiFitType;
+  resultLabel: string;
+  resultUrl: string;
+  isShareResultPage: boolean;
+}) {
+  const handleShareClick = () => {
+    trackEvent("deai_fit_result_share_x_click", {
+      result_code: resultCode,
+      result_type: resultLabel,
+      share_url: resultUrl,
+    });
+    trackEvent("share_button_click", {
+      platform: "x",
+      placement: "result_first_view",
+      quiz_name: "deai_fit",
+      result_type: resultCode,
+    });
+  };
+
+  const handleConsultationClick = () => {
+    trackEvent("deai_fit_result_consultation_click", {
+      result_code: resultCode,
+      result_type: resultLabel,
+      placement: "result_first_view",
+    });
+    trackEvent("consultation_cta_click", {
+      placement: "deai_fit_result_first_view",
+      quiz_name: "deai_fit",
+      result_type: resultCode,
+      cta_kind: "deai_fit_consultation",
+    });
+  };
+
+  return (
+    <section
+      data-testid="deai-fit-share-actions"
+      className="soft-panel mt-4 rounded-[1.4rem] border border-[rgba(201,130,120,0.16)] bg-white/82 p-4 sm:p-5"
+    >
+      <p className="text-center text-sm font-bold leading-7 text-[var(--text-sub)]">
+        この結果はXでシェアできます。投稿すると、診断カードがリンク画像として表示されます。
+      </p>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <a
+          data-testid="deai-fit-share-x-top"
+          href={xShareUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleShareClick}
+          className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3.5 text-center text-sm font-black"
+        >
+          診断結果をXにシェア
+        </a>
+        <a
+          data-testid="deai-fit-consultation-top"
+          href={MOSH_SERVICES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleConsultationClick}
+          className="btn-secondary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3.5 text-center text-sm font-black text-[var(--color-main)]"
+        >
+          診断結果をもとに相談する
+        </a>
+        {isShareResultPage ? (
+          <Link
+            data-testid="deai-fit-start-from-share"
+            href="/diagnoses/deai-fit"
+            className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--line)] bg-white px-6 py-3.5 text-center text-sm font-black text-[var(--text-main)] transition hover:border-[rgba(201,130,120,0.34)]"
+          >
+            診断をやってみる
+          </Link>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function TrackableBottomShareLink({
+  xShareUrl,
+  onShareClick,
+}: {
+  xShareUrl: string;
+  onShareClick: () => void;
+}) {
+  return (
+    <a
+      data-testid="deai-fit-share-x-bottom"
+      href={xShareUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onShareClick}
+      className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-black"
+    >
+      診断結果をXにシェア
+    </a>
   );
 }
 
@@ -540,7 +631,13 @@ function DeaiFitConsultationCta({ resultCode, resultLabel }: { resultCode: DeaiF
   );
 }
 
-export function DeaiFitApp({ initialResultType = null }: { initialResultType?: DeaiFitType | null }) {
+export function DeaiFitApp({
+  initialResultType = null,
+  isShareResultPage = false,
+}: {
+  initialResultType?: DeaiFitType | null;
+  isShareResultPage?: boolean;
+}) {
   const [stage, setStage] = useState<DeaiFitStage>(initialResultType ? "result" : "intro");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<DeaiFitAnswerValue[]>([]);
@@ -576,7 +673,14 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
       quiz_name: "deai_fit",
       result_type: diagnosis.result.type,
     });
-  }, [diagnosis.result.name, diagnosis.result.type, stage]);
+    if (isShareResultPage) {
+      const shareResultMeta = DEAI_FIT_DISPLAY_META[diagnosis.result.type];
+      trackEvent("deai_fit_result_share_page_view", {
+        result_code: diagnosis.result.type,
+        result_type: shareResultMeta.resultLabel,
+      });
+    }
+  }, [diagnosis.result.name, diagnosis.result.type, isShareResultPage, stage]);
 
   const handleStart = () => {
     trackEvent("diagnosis_start", {
@@ -793,11 +897,12 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
     },
   ];
 
-  const handleXShareClick = (placement: "result_hero" | "share_card") => {
+  const handleXShareClick = (placement: "share_card") => {
     trackEvent("deai_fit_result_share_x_click", {
       placement,
       result_code: result.type,
       result_type: resultMeta.resultLabel,
+      share_url: resultUrl,
     });
     trackEvent("share_button_click", {
       platform: "x",
@@ -845,8 +950,13 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
           resultLabel={resultMeta.resultLabel}
           shortCopy={resultMeta.shareCopy}
           suitedItems={suitedHero}
+        />
+        <DeaiFitShareActions
           xShareUrl={xShareUrl}
-          onShareClick={() => handleXShareClick("result_hero")}
+          resultCode={result.type}
+          resultLabel={resultMeta.resultLabel}
+          resultUrl={resultUrl}
+          isShareResultPage={isShareResultPage}
         />
 
         <div className="mt-8 grid gap-4">
@@ -915,16 +1025,7 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
               />
             </div>
             <div className="flex flex-wrap justify-center gap-3">
-              <a
-                data-testid="deai-fit-share-x-bottom"
-                href={xShareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => handleXShareClick("share_card")}
-                className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-black"
-              >
-                Xでシェアする
-              </a>
+              <TrackableBottomShareLink xShareUrl={xShareUrl} onShareClick={() => handleXShareClick("share_card")} />
               <button
                 data-testid="deai-fit-save-card"
                 type="button"

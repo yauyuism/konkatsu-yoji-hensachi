@@ -27,12 +27,12 @@ export const DEAI_FIT_DISPLAY_META: Record<DeaiFitType, DeaiFitDisplayMeta> = {
     shareCopy: "文章や投稿の温度感で気になり、会ったら早めに進みたいタイプです。",
   },
   "O-V-Q-N": {
-    resultLabel: "SNS人脈拡張型",
-    shareCopy: "オンラインの空気感から入り、人間関係が広がる中で恋愛に進みやすいタイプです。",
+    resultLabel: "SNS人脈拡張タイプ",
+    shareCopy: "オンライン上の価値観や空気感から入り、人間関係が広がる中で恋愛に進みやすいタイプです。",
   },
   "O-V-S-D": {
     resultLabel: "文章からじわじわ好きになるタイプ",
-    shareCopy: "相手の文章や日常の出し方から、少しずつ好きになりやすいタイプです。",
+    shareCopy: "相手の文章、考え方、日常の出し方から少しずつ気になるタイプです。",
   },
   "O-V-S-N": {
     resultLabel: "オンライン生活圏タイプ",
@@ -43,7 +43,7 @@ export const DEAI_FIT_DISPLAY_META: Record<DeaiFitType, DeaiFitDisplayMeta> = {
     shareCopy: "会わないと分からない。でも会ったら早めに判断したいタイプです。",
   },
   "F-C-Q-N": {
-    resultLabel: "紹介即決型",
+    resultLabel: "紹介即決タイプ",
     shareCopy: "誰かの信用がある状態で会い、合えば早めに進めたいタイプです。",
   },
   "F-C-S-D": {
@@ -55,11 +55,11 @@ export const DEAI_FIT_DISPLAY_META: Record<DeaiFitType, DeaiFitDisplayMeta> = {
     shareCopy: "人柄も条件も大事で、何度か顔を合わせる中で生活観を見たいタイプです。",
   },
   "F-V-Q-D": {
-    resultLabel: "直感対面型",
+    resultLabel: "直感対面タイプ",
     shareCopy: "会った瞬間の空気感や会話のテンポで気持ちが動きやすいタイプです。",
   },
   "F-V-Q-N": {
-    resultLabel: "外飲み発展型",
+    resultLabel: "外飲み即展開タイプ",
     shareCopy: "場のノリ、偶然、紹介の連鎖から恋愛が動きやすいタイプです。",
   },
   "F-V-S-D": {
