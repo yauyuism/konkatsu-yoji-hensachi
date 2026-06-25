@@ -450,7 +450,7 @@ function FatigueReviewAnalysis({ analysis }: { analysis: string[] }) {
   return (
     <section data-testid="fatigue-reason-review-analysis" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
       <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">見直すこと</h2>
-      <div className="mt-4 grid gap-3 text-sm font-bold leading-8 text-[var(--text-sub)] sm:text-base">
+      <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
         {analysis.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
