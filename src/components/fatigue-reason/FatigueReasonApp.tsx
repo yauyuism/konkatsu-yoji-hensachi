@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { FatigueReasonRadarChart } from "@/components/fatigue-reason/FatigueReasonRadarChart";
 import { MoshConsultationCta } from "@/components/MoshConsultationCta";
 import { trackEvent } from "@/lib/analytics";
 import { markToolCompleted } from "@/lib/completed-tools";
@@ -9,16 +11,68 @@ import {
   FATIGUE_ANSWER_OPTIONS,
   FATIGUE_REASON_ACTION_GUIDES,
   FATIGUE_REASON_QUESTIONS,
+  FATIGUE_REASON_TYPE_ORDER,
   runFatigueReasonDiagnosis,
   type FatigueReasonFactor,
   type FatigueReasonType,
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
+import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
 
 type FatigueReasonStage = "intro" | "question" | "result";
 
 const analyzingDelayMs = 180;
-const factorLabels = ["主因", "副因", "補助要因"] as const;
+const factorRankLabels = ["いちばんの詰まり", "疲れを増やす要素", "隠れた負担要因"] as const;
+
+const resultDisplayMeta: Record<
+  FatigueReasonType,
+  {
+    resultLabel: string;
+    shortLabel: string;
+    shareCopy: string;
+  }
+> = {
+  fastJudgment: {
+    resultLabel: "判断先行型",
+    shortLabel: "判断先行",
+    shareCopy: "会えるのに進まない理由は、相手を見る前に疲れる仕組みに入っていることかもしれません。",
+  },
+  wrongPeople: {
+    resultLabel: "入口ズレ型",
+    shortLabel: "入口ズレ",
+    shareCopy: "出会いの量より、入口のズレで消耗している状態かもしれません。",
+  },
+  purposeFirst: {
+    resultLabel: "目的迷子型",
+    shortLabel: "目的迷子",
+    shareCopy: "誰を選ぶかの前に、結婚で何を叶えたいかが置き去りになっているかもしれません。",
+  },
+  profileInvisible: {
+    resultLabel: "条件検索疲れ型",
+    shortLabel: "条件疲れ",
+    shareCopy: "条件で選ばれる場所ほど、あなたの魅力が見えにくくなっているかもしれません。",
+  },
+  placeMismatch: {
+    resultLabel: "出会い方ミスマッチ型",
+    shortLabel: "出会い方ズレ",
+    shareCopy: "あなたの魅力が出にくい場所で頑張っているから、婚活が重くなっているのかもしれません。",
+  },
+  overAdjusting: {
+    resultLabel: "合わせすぎ疲れ型",
+    shortLabel: "合わせ疲れ",
+    shareCopy: "相手に合わせるほど、自分のまた会いたい感覚が見えにくくなっているかもしれません。",
+  },
+  stagedFatigue: {
+    resultLabel: "予定調和疲れ型",
+    shortLabel: "予定調和疲れ",
+    shareCopy: "恋愛の予定を増やすほど、生活が広がらない出会いに飽きているのかもしれません。",
+  },
+  reset: {
+    resultLabel: "立て直し期型",
+    shortLabel: "立て直し",
+    shareCopy: "今はもっと会うより、婚活で削れた自分を整える時期かもしれません。",
+  },
+};
 
 function getFatigueCtaKind(type: FatigueReasonType) {
   if (type === "wrongPeople") {
@@ -48,13 +102,64 @@ function mergeGuideItems(factors: FatigueReasonFactor[], key: "suitedMeetings" |
   return Array.from(new Set(factors.flatMap((factor) => FATIGUE_REASON_ACTION_GUIDES[factor.type][key])));
 }
 
+function getFactorScore(factor: FatigueReasonFactor) {
+  return Math.round(factor.normalizedScore * 100);
+}
+
 function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
+  const meta = resultDisplayMeta[factor.type];
+  const isPrimary = index === 0;
+
   return (
-    <article className="rounded-[1.2rem] border border-[var(--line)] bg-white/86 p-5">
-      <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">{factorLabels[index] ?? "要因"}</p>
-      <h3 className="mt-2 text-lg font-black leading-tight text-[var(--text-main)]">{factor.result.name}</h3>
+    <article
+      className={`rounded-[1.25rem] border p-5 ${
+        isPrimary
+          ? "border-[rgba(201,130,120,0.26)] bg-[linear-gradient(135deg,rgba(255,245,240,0.95),rgba(255,255,255,0.92))] shadow-[0_18px_40px_rgba(120,88,70,0.12)]"
+          : "border-[var(--line)] bg-white/86"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">{factorRankLabels[index] ?? "高く出た傾向"}</p>
+          <h3 className="mt-2 text-xl font-black leading-tight text-[var(--text-main)]">{meta.shortLabel}</h3>
+        </div>
+        <span className="rounded-full bg-white/80 px-3 py-1 font-numeric text-sm font-black text-[var(--accent)]">
+          {getFactorScore(factor)}
+        </span>
+      </div>
       <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">{FATIGUE_REASON_ACTION_GUIDES[factor.type].shortReason}</p>
     </article>
+  );
+}
+
+function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
+  return (
+    <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+      <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">上位3つの強さ</h2>
+      <div className="mt-5 grid gap-4">
+        {factors.map((factor, index) => {
+          const score = getFactorScore(factor);
+          const width = Math.max(score, 6);
+
+          return (
+            <div key={factor.type} className="grid gap-2">
+              <div className="flex items-center justify-between gap-4 text-sm font-black text-[var(--text-main)]">
+                <span>
+                  {index + 1}. {resultDisplayMeta[factor.type].shortLabel}
+                </span>
+                <span className="font-numeric">{score}</span>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
+                <div
+                  className={`h-full rounded-full ${index === 0 ? "bg-[var(--accent)]" : "bg-[rgba(201,130,120,0.42)]"}`}
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -70,6 +175,67 @@ function ResultSection({
       <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">{title}</h2>
       {children}
     </section>
+  );
+}
+
+function ShareResultCard({
+  resultLabel,
+  shortCopy,
+  topFactors,
+  chartData,
+}: {
+  resultLabel: string;
+  shortCopy: string;
+  topFactors: FatigueReasonFactor[];
+  chartData: Array<{ label: string; score: number }>;
+}) {
+  return (
+    <article
+      data-testid="fatigue-reason-share-card"
+      className="card overflow-hidden rounded-[1.5rem] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_52%,#f4fbf6_100%)] p-5 sm:p-7"
+    >
+      <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr] lg:items-center">
+        <div>
+          <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">婚活疲れ・マチアプ疲れ診断</p>
+          <p className="mt-4 text-sm font-bold leading-7 text-[var(--text-sub)]">あなたは</p>
+          <h2 className="mt-1 text-3xl font-black leading-tight text-[var(--text-main)] sm:text-4xl">{resultLabel}</h2>
+          <p className="mt-4 max-w-xl text-base font-bold leading-8 text-[var(--text-main)]">{shortCopy}</p>
+          <div className="mt-5 grid gap-2 text-sm leading-7 text-[var(--text-main)]">
+            {topFactors.map((factor, index) => (
+              <p key={factor.type}>
+                <span className="font-black text-[var(--accent)]">{factorRankLabels[index]}：</span>
+                {resultDisplayMeta[factor.type].shortLabel}
+              </p>
+            ))}
+          </div>
+          <p className="mt-5 text-xs font-black tracking-[0.16em] text-[var(--text-sub)]">婚活診断LAB by やうゆ</p>
+          <p className="mt-1 font-numeric text-xs font-bold text-[var(--text-sub)]">shindanlab.jp/diagnoses/konkatsu-fatigue</p>
+        </div>
+        <div className="rounded-[1.4rem] border border-[rgba(63,52,46,0.08)] bg-white/70 px-2 py-4">
+          <FatigueReasonRadarChart data={chartData} height={250} />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function RelatedDiagnosisCard({
+  href,
+  title,
+  body,
+  onClick,
+}: {
+  href: string;
+  title: string;
+  body: string;
+  onClick: () => void;
+}) {
+  return (
+    <Link href={href} onClick={onClick} className="rounded-[1.2rem] border border-[var(--line)] bg-white/86 p-5 transition hover:-translate-y-0.5 hover:border-[rgba(201,130,120,0.34)]">
+      <h3 className="text-base font-black leading-7 text-[var(--text-main)]">{title}</h3>
+      <p className="mt-2 text-sm leading-7 text-[var(--text-sub)]">{body}</p>
+      <span className="text-link mt-4 inline-flex">やってみる →</span>
+    </Link>
   );
 }
 
@@ -92,7 +258,16 @@ export function FatigueReasonApp() {
     }
 
     markToolCompleted("fatigueReason");
-  }, [stage]);
+    trackEvent("result_view", {
+      quiz_name: "fatigue_reason",
+      result_type: diagnosis.result.type,
+      result_name: diagnosis.result.name,
+    });
+    trackEvent("radar_chart_view", {
+      quiz_name: "fatigue_reason",
+      result_type: diagnosis.result.type,
+    });
+  }, [diagnosis.result.name, diagnosis.result.type, stage]);
 
   const handleStart = () => {
     trackEvent("diagnosis_start", {
@@ -274,23 +449,96 @@ export function FatigueReasonApp() {
   }
 
   const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[primaryFactor.type];
-  const secondaryFactors = topFactors.slice(1);
   const suitedMeetings = mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
   const drainingMeetings = mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
+  const resultMeta = resultDisplayMeta[result.type];
+  const chartData = FATIGUE_REASON_TYPE_ORDER.map((type) => ({
+    label: resultDisplayMeta[type].shortLabel,
+    score: Math.round(normalizedScores[type] * 100),
+  }));
+  const resultUrl = getFatigueReasonResultUrl(result.type);
+  const xShareUrl = getFatigueReasonXShareUrl({
+    resultLabel: resultMeta.resultLabel,
+    shortCopy: resultMeta.shareCopy,
+    resultUrl,
+  });
+  const relatedDiagnoses = [
+    {
+      href: "/diagnoses/deai-fit",
+      title: "あなたに合う出会い方診断",
+      body: "マチアプ、相談所、紹介、SNS、外飲みのどこが合いやすいかを16タイプで見ます。",
+    },
+    {
+      href: "/prof",
+      title: "プロフィール偏差値診断",
+      body: "合わない人が入りやすい人は、プロフィールの届き方を見直すと入口が変わります。",
+    },
+    {
+      href: "/weight",
+      title: "LINEの重さ測定",
+      body: "会う前後のやり取りで疲れやすい人は、メッセージの重さも見ておくと整理しやすいです。",
+    },
+  ];
+
+  const handleXShareClick = (placement: "result_hero" | "share_card") => {
+    trackEvent("share_button_click", {
+      platform: "x",
+      placement,
+      quiz_name: "fatigue_reason",
+      result_type: result.type,
+    });
+    trackEvent("x_share_click", {
+      placement,
+      quiz_name: "fatigue_reason",
+      result_type: result.type,
+    });
+  };
+
+  const handleRelatedDiagnosisClick = (title: string) => {
+    trackEvent("related_diagnosis_click", {
+      placement: "fatigue_reason_result",
+      quiz_name: "fatigue_reason",
+      result_type: result.type,
+      related_title: title,
+    });
+  };
 
   return (
     <section data-testid="fatigue-reason-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <div className="mx-auto max-w-4xl">
-        <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
-          RESULT
-        </p>
-        <h1 className="mt-4 text-center text-3xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
-          あなたが婚活疲れしている一番の理由
-          <span className="block text-[var(--accent)]">{result.name}</span>
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-sm font-bold leading-8 text-[var(--text-main)] sm:text-base">
-          {result.catchCopy}
-        </p>
+        <article
+          data-testid="fatigue-reason-result-hero"
+          className="card overflow-hidden rounded-[1.6rem] bg-[linear-gradient(135deg,#fff8f3_0%,#ffffff_54%,#f2fbf5_100%)] p-5 text-center sm:p-8"
+        >
+          <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
+            RESULT CARD
+          </p>
+          <p className="mt-5 text-sm font-bold leading-7 text-[var(--text-sub)]">あなたの婚活疲れタイプは</p>
+          <h1 className="mt-2 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-6xl">{resultMeta.resultLabel}</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base font-bold leading-8 text-[var(--text-main)] sm:text-lg">
+            {resultMeta.shareCopy}
+          </p>
+          <div data-testid="fatigue-reason-radar" className="mx-auto mt-5 max-w-[360px]">
+            <FatigueReasonRadarChart data={chartData} />
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {topFactors.map((factor, index) => (
+              <span key={factor.type} className="tag">
+                {index + 1}. {resultDisplayMeta[factor.type].shortLabel}
+              </span>
+            ))}
+          </div>
+          <a
+            data-testid="fatigue-reason-share-x-top"
+            href={xShareUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => handleXShareClick("result_hero")}
+            className="btn-primary mt-6 inline-flex rounded-full px-6 py-3.5 text-sm font-black"
+          >
+            Xで結果をシェアする
+          </a>
+        </article>
 
         <div className="mt-8 grid gap-4">
           <section data-testid="fatigue-reason-top-factors" className="grid gap-4 lg:grid-cols-3">
@@ -299,7 +547,9 @@ export function FatigueReasonApp() {
             ))}
           </section>
 
-          <ResultSection title="あなたが疲れている理由">
+          <TopFactorBars factors={topFactors} />
+
+          <ResultSection title="なぜこう出た？">
             <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)]">
               {introParagraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -307,7 +557,7 @@ export function FatigueReasonApp() {
             </div>
           </ResultSection>
 
-          <ResultSection title="主因の詳しい説明">
+          <ResultSection title="詳しいコメント">
             <div className="mt-4 grid gap-6 lg:grid-cols-3">
               <div>
                 <h3 className="text-sm font-black leading-6 text-[var(--text-main)]">なぜ疲れているのか</h3>
@@ -328,16 +578,8 @@ export function FatigueReasonApp() {
             </div>
           </ResultSection>
 
-          <ResultSection title="次に強く出ている理由">
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {secondaryFactors.map((factor, index) => (
-                <FactorCard key={factor.type} factor={factor} index={index + 1} />
-              ))}
-            </div>
-          </ResultSection>
-
           <div className="grid gap-4 lg:grid-cols-2">
-            <ResultSection title="まず見直すこと">
+            <ResultSection title="おすすめの見直し方">
               <ResultList items={primaryGuide.reviewActions} />
             </ResultSection>
 
@@ -359,6 +601,28 @@ export function FatigueReasonApp() {
               <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{result.nextStep}</p>
             </ResultSection>
           </div>
+
+          <section className="grid gap-4">
+            <div>
+              <h2 className="text-center text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">スクショ用カード</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-7 text-[var(--text-sub)]">
+                結果を貼るなら、このカードが一番伝わりやすいです。上位3つだけに絞って、SNSで見ても意味が分かる形にしています。
+              </p>
+            </div>
+            <ShareResultCard resultLabel={resultMeta.resultLabel} shortCopy={resultMeta.shareCopy} topFactors={topFactors} chartData={chartData} />
+            <div className="flex justify-center">
+              <a
+                data-testid="fatigue-reason-share-x-bottom"
+                href={xShareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => handleXShareClick("share_card")}
+                className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-black"
+              >
+                Xで結果をシェアする
+              </a>
+            </div>
+          </section>
 
           <details className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
             <summary className="cursor-pointer text-sm font-black tracking-[0.14em] text-[var(--color-text)]">
@@ -391,6 +655,21 @@ export function FatigueReasonApp() {
             resultType={result.type}
             ctaKind={getFatigueCtaKind(result.type)}
           />
+
+          <section data-testid="fatigue-reason-related" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+            <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">次におすすめの診断</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {relatedDiagnoses.map((diagnosisItem) => (
+                <RelatedDiagnosisCard
+                  key={diagnosisItem.href}
+                  href={diagnosisItem.href}
+                  title={diagnosisItem.title}
+                  body={diagnosisItem.body}
+                  onClick={() => handleRelatedDiagnosisClick(diagnosisItem.title)}
+                />
+              ))}
+            </div>
+          </section>
         </div>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
