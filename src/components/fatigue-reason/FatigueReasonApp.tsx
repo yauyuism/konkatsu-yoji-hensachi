@@ -56,7 +56,11 @@ function buildReviewAnalysis({
   primaryGuide: (typeof FATIGUE_REASON_ACTION_GUIDES)[FatigueReasonType];
 }) {
   if (isLowSignal) {
-    return "今は大きな原因を無理に探すより、会った後の体感を細かく見る段階です。楽しかったかより、帰り道に軽いか、次の予定を考えたときに身体が重くならないかを観察すると、小さなズレを早めに拾えます。疲れが強くなる前に、会う基準と連絡頻度だけ軽く整えるのがおすすめです。";
+    return [
+      "今は大きな原因を無理に探すより、会った後の体感を細かく見る段階です。",
+      "楽しかったかより、帰り道に軽いか、次の予定を考えたときに身体が重くならないかを観察すると、小さなズレを早めに拾えます。",
+      "疲れが強くなる前に、会う基準と連絡頻度だけ軽く整えるのがおすすめです。",
+    ];
   }
 
   const primaryMeta = FATIGUE_REASON_DISPLAY_META[primaryFactor.type];
@@ -65,7 +69,11 @@ function buildReviewAnalysis({
     ? `そこに「${secondaryMeta.shortLabel}」も重なると、相手そのものより、選ぶ前提や進め方で消耗しやすくなります。`
     : "相手を増やすほど情報量が増え、判断の負荷だけが先に大きくなりやすい状態です。";
 
-  return `見直すべきなのは、出会いの数より「${primaryMeta.shortLabel}」が起きる場面です。${primaryGuide.shortReason}${secondarySentence}まずは「${primaryGuide.reviewActions[0]}」を試すと、どこで疲れが発生しているかを切り分けやすくなります。`;
+  return [
+    `見直すべきなのは、出会いの数より「${primaryMeta.shortLabel}」が起きる場面です。${primaryGuide.shortReason}`,
+    secondarySentence,
+    `まずは「${primaryGuide.reviewActions[0]}」を試すと、どこで疲れが発生しているかを切り分けやすくなります。`,
+  ];
 }
 
 function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
@@ -438,11 +446,15 @@ function MeetingFitSection({
   );
 }
 
-function FatigueReviewAnalysis({ analysis }: { analysis: string }) {
+function FatigueReviewAnalysis({ analysis }: { analysis: string[] }) {
   return (
     <section data-testid="fatigue-reason-review-analysis" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
       <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">見直すこと</h2>
-      <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{analysis}</p>
+      <div className="mt-4 grid gap-3 text-sm font-bold leading-8 text-[var(--text-sub)] sm:text-base">
+        {analysis.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </div>
     </section>
   );
 }
