@@ -2,6 +2,12 @@ type ResultImageSaveResult = {
   mode: "download" | "preview" | "native-share";
 };
 
+type ResultImageShareData = {
+  title?: string;
+  text?: string;
+  url?: string;
+};
+
 function isIosSafari() {
   const userAgent = window.navigator.userAgent;
   const isIos = /iP(ad|hone|od)/.test(userAgent) || (userAgent.includes("Macintosh") && navigator.maxTouchPoints > 1);
@@ -54,7 +60,17 @@ async function renderResultImage(element: HTMLElement) {
   }
 }
 
-function canNativeShareImage(fileName: string) {
+function isLikelyMobileDevice() {
+  const userAgent = window.navigator.userAgent;
+
+  return /Android|iP(ad|hone|od)/.test(userAgent) || (userAgent.includes("Macintosh") && navigator.maxTouchPoints > 1);
+}
+
+export function canNativeShareImage(fileName: string) {
+  if (!isLikelyMobileDevice()) {
+    return false;
+  }
+
   if (typeof navigator.share !== "function" || typeof navigator.canShare !== "function") {
     return false;
   }
@@ -132,7 +148,7 @@ function writePreviewImage(previewWindow: Window, dataUrl: string, fileName: str
 export async function shareOrDownloadResultImage(
   element: HTMLElement,
   fileName: string,
-  shareData?: { title?: string; text?: string; url?: string }
+  shareData?: ResultImageShareData
 ): Promise<ResultImageSaveResult> {
   if (!canNativeShareImage(fileName)) {
     return downloadResultImage(element, fileName);
@@ -140,6 +156,32 @@ export async function shareOrDownloadResultImage(
 
   const { blob } = await renderResultImage(element);
   const file = new File([blob], fileName, { type: "image/png" });
+
+  await navigator.share({
+    files: [file],
+    title: shareData?.title,
+    text: shareData?.text,
+    url: shareData?.url,
+  });
+
+  return { mode: "native-share" };
+}
+
+export async function shareResultImageFile(
+  element: HTMLElement,
+  fileName: string,
+  shareData?: ResultImageShareData
+): Promise<ResultImageSaveResult> {
+  if (!canNativeShareImage(fileName)) {
+    throw new Error("画像ファイル共有に対応していません");
+  }
+
+  const { blob } = await renderResultImage(element);
+  const file = new File([blob], fileName, { type: "image/png" });
+
+  if (!navigator.canShare({ files: [file] })) {
+    throw new Error("生成した画像ファイルを共有できません");
+  }
 
   await navigator.share({
     files: [file],
