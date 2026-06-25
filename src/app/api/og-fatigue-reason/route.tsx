@@ -1,11 +1,12 @@
 import { createOgImage, hexToRgba, ogPalette, pillStyle, renderBackdrop, renderFooter, SoftCard } from "../og-theme";
-import { FATIGUE_REASON_ACTION_GUIDES, isFatigueReasonType, type FatigueReasonType } from "@/lib/fatigue-reason";
+import { FATIGUE_REASON_ACTION_GUIDES, type FatigueReasonType } from "@/lib/fatigue-reason";
 import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
+import { resolveFatigueReasonTypeFromSlug } from "@/lib/fatigue-reason-share";
 
 export const runtime = "edge";
 
 function resolveType(value: string | null): FatigueReasonType {
-  return isFatigueReasonType(value) ? value : "reset";
+  return resolveFatigueReasonTypeFromSlug(value) ?? "reset";
 }
 
 export async function GET(request: Request) {
