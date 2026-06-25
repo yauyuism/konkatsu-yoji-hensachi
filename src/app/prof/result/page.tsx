@@ -5,6 +5,7 @@ import { CreatorFollowPanel } from "@/components/CreatorFollowPanel";
 import { AxisBarChart } from "@/components/prof/AxisBarChart";
 import { HensachiDisplay } from "@/components/prof/HensachiDisplay";
 import { ProfResultPageClient } from "@/components/prof/ProfResultPageClient";
+import { ProfStaticShareActions } from "@/components/prof/ProfStaticShareActions";
 import { getProfTitleMeta, parseProfShareParams } from "@/lib/prof";
 import { getProfLineShareUrl, getProfOgImageUrl, getProfResultUrl, getProfXShareUrl } from "@/lib/prof-share";
 import { getSiteUrl } from "@/lib/site-url";
@@ -128,24 +129,11 @@ export default async function ProfResultPage({ searchParams }: ProfResultPagePro
                 <div className="mt-4 rounded-[1.6rem] border border-[rgba(26,26,26,0.08)] bg-white/86 p-4">
                   <AxisBarChart scores={scores} comments={axisComments} />
                 </div>
-                <div className="mt-5 grid gap-3">
-                  <a
-                    href={getProfXShareUrl(shareResult, resultUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cta-button inline-flex items-center justify-center rounded-[1.2rem] px-5 py-4 text-sm font-bold text-white"
-                  >
-                    Xでシェア
-                  </a>
-                  <a
-                    href={getProfLineShareUrl(shareResult, resultUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="secondary-button inline-flex items-center justify-center rounded-[1.2rem] px-5 py-4 text-sm font-bold text-[var(--text-main)]"
-                  >
-                    LINEで送る
-                  </a>
-                </div>
+                <ProfStaticShareActions
+                  xShareUrl={getProfXShareUrl(shareResult, resultUrl)}
+                  lineShareUrl={getProfLineShareUrl(shareResult, resultUrl)}
+                  total={scores.total}
+                />
               </div>
             </div>
 
