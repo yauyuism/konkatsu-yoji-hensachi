@@ -124,6 +124,18 @@ test("あなたに合う出会い方診断を最後まで進められる", async
   );
 });
 
+test("result付きURLでは出会い方診断の個別結果カードを直接表示する", async ({ page }) => {
+  await page.goto("/diagnoses/deai-fit?result=F-V-S-N");
+
+  await expect(page.getByTestId("deai-fit-intro")).toHaveCount(0);
+  await expect(page.getByTestId("deai-fit-result")).toBeVisible();
+  await expect(page.getByTestId("deai-fit-result-hero").locator("h1", { hasText: "生活圏拡張型" })).toBeVisible();
+  await expect(page.getByTestId("deai-fit-share-card")).toContainText("生活圏拡張型");
+  await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", /result%3DF-V-S-N/);
+  await expect(page.locator("meta[property='og:image']")).toHaveAttribute("content", /\/api\/og-deai-fit\?result=F-V-S-N/);
+  await expect(page.locator("meta[property='og:title']")).toHaveAttribute("content", /生活圏拡張型/);
+});
+
 test("通常タイプでは出会い方相談CTAを表示する", async ({ page }) => {
   await page.goto("/diagnoses/deai-fit");
 

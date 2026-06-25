@@ -12,11 +12,13 @@ import {
   FATIGUE_REASON_ACTION_GUIDES,
   FATIGUE_REASON_QUESTIONS,
   FATIGUE_REASON_TYPE_ORDER,
+  buildFatigueReasonDiagnosisFromResultType,
   runFatigueReasonDiagnosis,
   type FatigueReasonFactor,
   type FatigueReasonType,
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
+import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
 import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
 import { downloadResultImage } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
@@ -25,56 +27,6 @@ type FatigueReasonStage = "intro" | "question" | "result";
 
 const analyzingDelayMs = 180;
 const factorRankLabels = ["いちばんの詰まり", "疲れを増やす要素", "隠れた負担要因"] as const;
-
-const resultDisplayMeta: Record<
-  FatigueReasonType,
-  {
-    resultLabel: string;
-    shortLabel: string;
-    shareCopy: string;
-  }
-> = {
-  fastJudgment: {
-    resultLabel: "判断先行型",
-    shortLabel: "判断先行",
-    shareCopy: "会えるのに進まない理由は、相手を見る前に疲れる仕組みに入っていることかもしれません。",
-  },
-  wrongPeople: {
-    resultLabel: "入口ズレ型",
-    shortLabel: "入口ズレ",
-    shareCopy: "出会いの量より、入口のズレで消耗している状態かもしれません。",
-  },
-  purposeFirst: {
-    resultLabel: "目的迷子型",
-    shortLabel: "目的迷子",
-    shareCopy: "誰を選ぶかの前に、結婚で何を叶えたいかが置き去りになっているかもしれません。",
-  },
-  profileInvisible: {
-    resultLabel: "条件検索疲れ型",
-    shortLabel: "条件疲れ",
-    shareCopy: "条件で選ばれる場所ほど、あなたの魅力が見えにくくなっているかもしれません。",
-  },
-  placeMismatch: {
-    resultLabel: "出会い方ミスマッチ型",
-    shortLabel: "出会い方ズレ",
-    shareCopy: "あなたの魅力が出にくい場所で頑張っているから、婚活が重くなっているのかもしれません。",
-  },
-  overAdjusting: {
-    resultLabel: "合わせすぎ疲れ型",
-    shortLabel: "合わせ疲れ",
-    shareCopy: "相手に合わせるほど、自分のまた会いたい感覚が見えにくくなっているかもしれません。",
-  },
-  stagedFatigue: {
-    resultLabel: "予定調和疲れ型",
-    shortLabel: "予定調和疲れ",
-    shareCopy: "恋愛の予定を増やすほど、生活が広がらない出会いに飽きているのかもしれません。",
-  },
-  reset: {
-    resultLabel: "立て直し期型",
-    shortLabel: "立て直し",
-    shareCopy: "今はもっと会うより、婚活で削れた自分を整える時期かもしれません。",
-  },
-};
 
 function getFatigueCtaKind(type: FatigueReasonType) {
   if (type === "wrongPeople") {
@@ -109,7 +61,7 @@ function getFactorScore(factor: FatigueReasonFactor) {
 }
 
 function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
-  const meta = resultDisplayMeta[factor.type];
+  const meta = FATIGUE_REASON_DISPLAY_META[factor.type];
   const isPrimary = index === 0;
 
   return (
@@ -134,10 +86,10 @@ function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: num
   );
 }
 
-function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
+function TopFactorBars({ factors, title = "上位3つの強さ" }: { factors: FatigueReasonFactor[]; title?: string }) {
   return (
     <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">上位3つの強さ</h2>
+      <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">{title}</h2>
       <div className="mt-5 grid gap-4">
         {factors.map((factor, index) => {
           const score = getFactorScore(factor);
@@ -147,7 +99,7 @@ function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
             <div key={factor.type} className="grid gap-2">
               <div className="flex items-center justify-between gap-4 text-sm font-black text-[var(--text-main)]">
                 <span>
-                  {index + 1}. {resultDisplayMeta[factor.type].shortLabel}
+                  {index + 1}. {FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
                 </span>
                 <span className="font-numeric">{score}</span>
               </div>
@@ -244,7 +196,7 @@ function ShareResultCard({
             {topFactors.map((factor, index) => (
               <p key={factor.type}>
                 <span className="font-black text-[var(--accent)]">{factorRankLabels[index]}：</span>
-                {resultDisplayMeta[factor.type].shortLabel}
+                {FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
               </p>
             ))}
           </div>
@@ -279,15 +231,22 @@ function RelatedDiagnosisCard({
   );
 }
 
-export function FatigueReasonApp() {
-  const [stage, setStage] = useState<FatigueReasonStage>("intro");
+export function FatigueReasonApp({ initialResultType = null }: { initialResultType?: FatigueReasonType | null }) {
+  const [stage, setStage] = useState<FatigueReasonStage>(initialResultType ? "result" : "intro");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<FatigueAnswerValue[]>([]);
   const [selectedValue, setSelectedValue] = useState<FatigueAnswerValue | null>(null);
   const [isSavingShareImage, setIsSavingShareImage] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
 
-  const diagnosis = useMemo(() => runFatigueReasonDiagnosis(answers), [answers]);
+  const isSharedResult = Boolean(initialResultType) && answers.length === 0;
+  const diagnosis = useMemo(() => {
+    if (initialResultType && answers.length === 0) {
+      return buildFatigueReasonDiagnosisFromResultType(initialResultType);
+    }
+
+    return runFatigueReasonDiagnosis(answers);
+  }, [answers, initialResultType]);
   const question = FATIGUE_REASON_QUESTIONS[questionIndex];
 
   useEffect(() => {
@@ -493,9 +452,9 @@ export function FatigueReasonApp() {
   const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[primaryFactor.type];
   const suitedMeetings = mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
   const drainingMeetings = mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
-  const resultMeta = resultDisplayMeta[result.type];
+  const resultMeta = FATIGUE_REASON_DISPLAY_META[result.type];
   const chartData = FATIGUE_REASON_TYPE_ORDER.map((type) => ({
-    label: resultDisplayMeta[type].shortLabel,
+    label: FATIGUE_REASON_DISPLAY_META[type].shortLabel,
     score: Math.round(normalizedScores[type] * 100),
   }));
   const resultUrl = getFatigueReasonResultUrl(result.type);
@@ -586,7 +545,7 @@ export function FatigueReasonApp() {
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {topFactors.map((factor, index) => (
               <span key={factor.type} className="tag">
-                {index + 1}. {resultDisplayMeta[factor.type].shortLabel}
+                {index + 1}. {FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
               </span>
             ))}
           </div>
@@ -609,7 +568,7 @@ export function FatigueReasonApp() {
             ))}
           </section>
 
-          <TopFactorBars factors={topFactors} />
+          <TopFactorBars factors={topFactors} title={isSharedResult ? "この結果タイプの強さ" : "上位3つの強さ"} />
 
           <FatigueLanguageConsultationCta resultType={result.type} />
 
@@ -670,7 +629,9 @@ export function FatigueReasonApp() {
             <div>
               <h2 className="text-center text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">スクショ用カード</h2>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-7 text-[var(--text-sub)]">
-                結果を貼るなら、このカードが一番伝わりやすいです。上位3つだけに絞って、SNSで見ても意味が分かる形にしています。
+                {isSharedResult
+                  ? "結果を貼るなら、このカードが一番伝わりやすいです。結果タイプがひと目で分かる形にしています。"
+                  : "結果を貼るなら、このカードが一番伝わりやすいです。上位3つだけに絞って、SNSで見ても意味が分かる形にしています。"}
               </p>
             </div>
             <div ref={shareCardRef}>

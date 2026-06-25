@@ -662,6 +662,33 @@ function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>
   });
 }
 
+export function isFatigueReasonType(value: string | null | undefined): value is FatigueReasonType {
+  return FATIGUE_REASON_TYPE_ORDER.includes(value as FatigueReasonType);
+}
+
+export function buildFatigueReasonDiagnosisFromResultType(type: FatigueReasonType) {
+  const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
+    accumulator[currentType] = currentType === type ? FATIGUE_REASON_MAX_SCORES[currentType] : 0;
+    return accumulator;
+  }, {} as Record<FatigueReasonType, number>);
+  const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
+    accumulator[currentType] = currentType === type ? 1 : 0;
+    return accumulator;
+  }, {} as Record<FatigueReasonType, number>);
+  const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
+  const primaryFactor = rankedFactors.find((factor) => factor.type === type) ?? rankedFactors[0];
+  const topFactors = primaryFactor ? [primaryFactor] : [];
+
+  return {
+    result: FATIGUE_REASON_RESULTS[type],
+    scores,
+    normalizedScores,
+    rankedFactors,
+    topFactors,
+    introParagraphs: buildFatigueReasonIntro(topFactors),
+  };
+}
+
 export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
   const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, type) => {
     accumulator[type] = 0;

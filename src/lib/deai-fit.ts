@@ -97,6 +97,8 @@ export const DEAI_FIT_AXIS_PAIRS = [
   rightLabel: string;
 }>;
 
+export const DEAI_FIT_LETTERS: DeaiFitLetter[] = ["O", "F", "C", "V", "Q", "S", "D", "N"];
+
 const profileCta: DeaiFitCta = {
   kind: "profile",
   text:
@@ -608,17 +610,34 @@ function pickAxis(scores: DeaiFitScores, left: DeaiFitLetter, right: DeaiFitLett
   return right;
 }
 
-export function runDeaiFitDiagnosis(answers: DeaiFitAnswerValue[]) {
-  const scores: DeaiFitScores = {
-    O: 0,
-    F: 0,
-    C: 0,
-    V: 0,
-    Q: 0,
-    S: 0,
-    D: 0,
-    N: 0,
+function createEmptyDeaiFitScores(): DeaiFitScores {
+  return DEAI_FIT_LETTERS.reduce<DeaiFitScores>((accumulator, letter) => {
+    accumulator[letter] = 0;
+    return accumulator;
+  }, {} as DeaiFitScores);
+}
+
+export function isDeaiFitType(value: string | null | undefined): value is DeaiFitType {
+  return DEAI_FIT_TYPE_ORDER.includes(value as DeaiFitType);
+}
+
+export function buildDeaiFitDiagnosisFromResultType(type: DeaiFitType) {
+  const scores = createEmptyDeaiFitScores();
+
+  type.split("-").forEach((letter) => {
+    if (DEAI_FIT_LETTERS.includes(letter as DeaiFitLetter)) {
+      scores[letter as DeaiFitLetter] = 15;
+    }
+  });
+
+  return {
+    result: DEAI_FIT_RESULTS[type],
+    scores,
   };
+}
+
+export function runDeaiFitDiagnosis(answers: DeaiFitAnswerValue[]) {
+  const scores = createEmptyDeaiFitScores();
 
   answers.forEach((answer, index) => {
     const question = DEAI_FIT_QUESTIONS[index];

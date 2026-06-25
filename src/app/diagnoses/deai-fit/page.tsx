@@ -1,20 +1,63 @@
+import type { Metadata } from "next";
+
 import { DeaiFitApp } from "@/components/deai-fit/DeaiFitApp";
+import { isDeaiFitType } from "@/lib/deai-fit";
+import { DEAI_FIT_DISPLAY_META } from "@/lib/deai-fit-display";
 import { buildShareMetadata } from "@/lib/metadata";
 
-export const metadata = buildShareMetadata({
+type DeaiFitPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getSingleParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+const title = "あなたに合う出会い方診断";
+const description =
+  "マチアプ、相談所、紹介、SNS、外飲み。オンライン・オフライン、条件・空気感、スピード感、人間関係の4軸から、あなたの恋愛が進みやすい出会い方を16タイプで診断します。";
+
+const defaultMetadata = buildShareMetadata({
   title: "あなたに合う出会い方診断",
-  description:
-    "マチアプ、相談所、紹介、SNS、外飲み。オンライン・オフライン、条件・空気感、スピード感、人間関係の4軸から、あなたの恋愛が進みやすい出会い方を16タイプで診断します。",
+  description,
   path: "/diagnoses/deai-fit",
   imagePath: "/api/og-top",
   imageAlt: "あなたに合う出会い方診断のOGP画像",
   absoluteTitle: true,
-  ogTitle: "あなたに合う出会い方診断",
-  ogDescription:
-    "マチアプ、相談所、紹介、SNS、外飲み。オンライン・オフライン、条件・空気感、スピード感、人間関係の4軸から、あなたの恋愛が進みやすい出会い方を16タイプで診断します。",
+  ogTitle: title,
+  ogDescription: description,
   siteName: "診断ラボ",
 });
 
-export default function DeaiFitPage() {
-  return <DeaiFitApp />;
+export async function generateMetadata({ searchParams }: DeaiFitPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const resultParam = getSingleParam(resolvedSearchParams.result);
+
+  if (!isDeaiFitType(resultParam)) {
+    return defaultMetadata;
+  }
+
+  const meta = DEAI_FIT_DISPLAY_META[resultParam];
+
+  return buildShareMetadata({
+    title: `${meta.resultLabel} | ${title}`,
+    description: meta.shareCopy,
+    path: `/diagnoses/deai-fit?result=${encodeURIComponent(resultParam)}`,
+    imagePath: `/api/og-deai-fit?result=${encodeURIComponent(resultParam)}`,
+    imageAlt: `${title} ${meta.resultLabel}の診断カード`,
+    absoluteTitle: true,
+    ogTitle: `出会い方診断の結果は「${meta.resultLabel}」`,
+    ogDescription: meta.shareCopy,
+    twitterTitle: `出会い方診断の結果は「${meta.resultLabel}」`,
+    twitterDescription: meta.shareCopy,
+    siteName: "診断ラボ",
+  });
+}
+
+export default async function DeaiFitPage({ searchParams }: DeaiFitPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const resultParam = getSingleParam(resolvedSearchParams.result);
+  const initialResultType = isDeaiFitType(resultParam) ? resultParam : null;
+
+  return <DeaiFitApp initialResultType={initialResultType} />;
 }
