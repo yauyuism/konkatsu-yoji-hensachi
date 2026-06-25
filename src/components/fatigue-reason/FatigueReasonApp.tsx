@@ -354,15 +354,9 @@ function FatigueShareActions({
     <section data-testid="fatigue-reason-share-actions" className="mx-auto w-full max-w-[520px] rounded-[1.6rem] border border-[rgba(120,88,70,0.1)] bg-white/86 p-5 sm:p-6">
       <div>
         <h2 className="text-xl font-black leading-tight text-[var(--text-main)]">この結果カードを画像でシェアできます</h2>
-        <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
-          対応しているスマホでは、画像つきで共有できる画面が開きます。未対応の環境ではカード画像を保存するので、XやInstagramの投稿に添付してください。
-        </p>
-        <p className="mt-2 text-xs font-bold leading-6 text-[var(--text-sub)] opacity-75">
-          診断カード画像をそのまま投稿に載せるための導線です。
-        </p>
       </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-4 grid gap-3">
         <button
           data-testid="fatigue-reason-save-card"
           type="button"
@@ -370,8 +364,7 @@ function FatigueShareActions({
           disabled={isSavingShareImage}
           className="btn-primary inline-flex min-h-14 w-full justify-center gap-2 rounded-full px-6 py-4 text-base font-black disabled:cursor-wait disabled:opacity-70"
         >
-          <span aria-hidden="true" className="text-lg leading-none">↓</span>
-          {isSavingShareImage ? "画像を作成しています..." : "画像を保存してシェア"}
+          {isSavingShareImage ? "X共有用の画像を作成しています..." : "診断結果をXにシェア"}
         </button>
         {shareImageMessage ? (
           <p data-testid="fatigue-reason-save-card-success" className="rounded-[1rem] bg-[rgba(143,183,161,0.12)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
@@ -780,15 +773,16 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
         {
           title: `婚活疲れ診断_${resultMeta.resultLabel}`,
           text: `婚活疲れ・マチアプ疲れ診断をやってみたら「${resultMeta.resultLabel}」でした。`,
+          url: `https://www.shindanlab.jp/diagnoses/konkatsu-fatigue?result=${result.type}`,
         }
       );
 
       setShareImageMessage(
         saveResult.mode === "native-share"
-          ? "共有画面を開きました。SNSで画像を添付して投稿できます。"
+          ? "共有画面を開きました。Xを選ぶと診断カード画像を投稿できます。"
           : saveResult.mode === "preview"
-            ? "結果カード画像を開きました。長押しで保存してSNSに添付できます。"
-            : "結果カードを保存しました。SNS投稿に画像を添付できます。"
+            ? "結果カード画像を開きました。長押しで保存してXに添付できます。"
+            : "結果カードを保存しました。X投稿に画像を添付できます。"
       );
       trackEvent("fatigue_result_save_image_success", {
         placement: "result_first_view",
