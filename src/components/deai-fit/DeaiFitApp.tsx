@@ -23,10 +23,76 @@ import { downloadResultImage } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type DeaiFitStage = "intro" | "question" | "result";
+type AxisBarItem = {
+  axis: string;
+  leftCode: DeaiFitLetter;
+  rightCode: DeaiFitLetter;
+  leftTitle: string;
+  rightTitle: string;
+  leftDescription: string;
+  rightDescription: string;
+  activeCode: DeaiFitLetter;
+  activeTitle: string;
+  activeDescription: string;
+  markerPosition: number;
+};
 
 const analyzingDelayMs = 180;
 const DEAI_FIT_LETTER_MAX_SCORE = 15;
 const FATIGUE_DIAGNOSIS_PATH = "/diagnoses/konkatsu-fatigue";
+const nextDiagnostics = [
+  {
+    href: FATIGUE_DIAGNOSIS_PATH,
+    title: "婚活疲れ・マチアプ疲れの理由診断",
+    body: "会えるのに進まない理由、会ったあとに疲れる理由を整理します。",
+  },
+  {
+    href: "/prof",
+    title: "プロフィール偏差値診断",
+    body: "マチアプやSNSで、あなたの魅力がどう届いているかを見直します。",
+  },
+];
+
+const axisDescriptions: Record<
+  DeaiFitLetter,
+  {
+    title: string;
+    description: string;
+  }
+> = {
+  O: {
+    title: "Online",
+    description: "会う前の情報で判断しやすい",
+  },
+  F: {
+    title: "Offline",
+    description: "会ったときの空気感で判断しやすい",
+  },
+  C: {
+    title: "Condition",
+    description: "条件や生活観を先に見たい",
+  },
+  V: {
+    title: "Vibe",
+    description: "空気感や人柄を重視したい",
+  },
+  Q: {
+    title: "Quick",
+    description: "気になる人とは早めに進めたい",
+  },
+  S: {
+    title: "Slow",
+    description: "何度か会ってから気持ちが動きやすい",
+  },
+  D: {
+    title: "Direct",
+    description: "一対一で相手を見たい",
+  },
+  N: {
+    title: "Network",
+    description: "場や人間関係の中で相手を見たい",
+  },
+};
 
 function ResultList({ items }: { items: string[] }) {
   return (
@@ -65,14 +131,50 @@ function buildRadarData(scores: DeaiFitScores) {
 function buildMeetingScores(scores: DeaiFitScores) {
   return [
     { label: "マチアプ", score: averageScore(scores, ["O", "C", "Q", "D"]) },
-    { label: "結婚相談所", score: averageScore(scores, ["C", "S", "D"]) },
-    { label: "友達の紹介", score: averageScore(scores, ["F", "C", "N"]) },
+    { label: "結婚相談所", score: averageScore(scores, ["O", "C", "S", "D"]) },
+    { label: "ヒトオシ", score: averageScore(scores, ["O", "C", "N"]) },
+    { label: "友人紹介", score: averageScore(scores, ["F", "C", "N"]) },
     { label: "外飲み", score: averageScore(scores, ["F", "V", "Q", "N"]) },
+    { label: "行きつけ", score: averageScore(scores, ["F", "V", "S", "N"]) },
     { label: "SNS", score: averageScore(scores, ["O", "V", "S", "N"]) },
     { label: "趣味コミュニティ", score: averageScore(scores, ["F", "V", "S", "N"]) },
-    { label: "職場・生活圏", score: averageScore(scores, ["F", "V", "S", "N"]) },
-    { label: "イベント", score: averageScore(scores, ["F", "V", "Q", "N"]) },
+    { label: "社会人サークル", score: averageScore(scores, ["F", "C", "S", "N"]) },
+    { label: "婚活パーティー", score: averageScore(scores, ["F", "C", "Q", "D"]) },
+    { label: "街コン", score: averageScore(scores, ["F", "V", "Q", "N"]) },
+    { label: "note / Threads / X", score: averageScore(scores, ["O", "V", "S", "N"]) },
   ].sort((a, b) => b.score - a.score);
+}
+
+function getResultLetters(type: DeaiFitType) {
+  return type.split("-") as DeaiFitLetter[];
+}
+
+function getAxisBarItems(scores: DeaiFitScores, type: DeaiFitType): AxisBarItem[] {
+  const resultLetters = getResultLetters(type);
+
+  return DEAI_FIT_AXIS_PAIRS.map((pair, index) => {
+    const leftScore = scores[pair.left];
+    const rightScore = scores[pair.right];
+    const total = Math.max(leftScore + rightScore, 1);
+    const activeCode = resultLetters[index] === pair.left ? pair.left : pair.right;
+    const rawPosition = Math.round((rightScore / total) * 100);
+    const markerPosition = Math.max(6, Math.min(94, rawPosition));
+    const activeMeta = axisDescriptions[activeCode];
+
+    return {
+      axis: pair.axis,
+      leftCode: pair.left,
+      rightCode: pair.right,
+      leftTitle: axisDescriptions[pair.left].title,
+      rightTitle: axisDescriptions[pair.right].title,
+      leftDescription: axisDescriptions[pair.left].description,
+      rightDescription: axisDescriptions[pair.right].description,
+      activeCode,
+      activeTitle: activeMeta.title,
+      activeDescription: activeMeta.description,
+      markerPosition,
+    };
+  });
 }
 
 function ResultTagList({ title, items }: { title: string; items: string[] }) {
@@ -90,6 +192,55 @@ function ResultTagList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+function DeaiFitResultHeader({
+  resultCode,
+  resultLabel,
+  shortCopy,
+  suitedItems,
+  xShareUrl,
+  onShareClick,
+}: {
+  resultCode: DeaiFitType;
+  resultLabel: string;
+  shortCopy: string;
+  suitedItems: string[];
+  xShareUrl: string;
+  onShareClick: () => void;
+}) {
+  return (
+    <article
+      data-testid="deai-fit-result-hero"
+      className="card overflow-hidden rounded-[1.6rem] bg-[linear-gradient(135deg,#fff8f3_0%,#ffffff_54%,#f2fbf5_100%)] p-5 text-center sm:p-8"
+    >
+      <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
+        RESULT CARD
+      </p>
+      <h1 className="mt-5 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-4xl">あなたに合う出会い方は？</h1>
+      <p className="mt-4 inline-flex rounded-full border border-[rgba(201,130,120,0.2)] bg-white/86 px-4 py-2 font-numeric text-sm font-black text-[var(--accent)]">
+        {resultCode}
+      </p>
+      <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
+        {resultLabel}
+      </h2>
+      <div className="mx-auto mt-5 max-w-2xl rounded-[1.2rem] bg-white/76 px-4 py-4">
+        <p className="text-xs font-black tracking-[0.16em] text-[var(--accent)]">ひとことで言うと</p>
+        <p className="mt-2 text-base font-bold leading-8 text-[var(--text-main)] sm:text-lg">{shortCopy}</p>
+      </div>
+      <ResultTagList title="合いやすい出会い方" items={suitedItems} />
+      <a
+        data-testid="deai-fit-share-x-top"
+        href={xShareUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onShareClick}
+        className="btn-primary mt-6 inline-flex rounded-full px-6 py-3.5 text-sm font-black"
+      >
+        Xでシェアする
+      </a>
+    </article>
+  );
+}
+
 function ResultSection({
   title,
   children,
@@ -101,6 +252,55 @@ function ResultSection({
     <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
       <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">{title}</h2>
       {children}
+    </section>
+  );
+}
+
+function DeaiFitAxisBars({ items }: { items: AxisBarItem[] }) {
+  return (
+    <section data-testid="deai-fit-axis-bars" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">4 AXES</p>
+          <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">4軸で見る出会い方のクセ</h2>
+        </div>
+        <p className="text-sm leading-7 text-[var(--text-sub)] sm:max-w-sm">
+          点数よりも、どちら側に寄っているかを見るための地図です。
+        </p>
+      </div>
+      <div className="mt-6 grid gap-4">
+        {items.map((item) => (
+          <article key={item.axis} className="rounded-[1.15rem] border border-[var(--line)] bg-white/82 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-numeric text-xs font-black tracking-[0.16em] text-[var(--accent)]">
+                  {item.leftCode} / {item.rightCode}
+                </p>
+                <p className="mt-1 text-sm font-black leading-6 text-[var(--text-main)]">{item.activeDescription}</p>
+              </div>
+              <span className="shrink-0 rounded-full bg-[rgba(201,130,120,0.1)] px-3 py-1 font-numeric text-xs font-black text-[var(--accent)]">
+                {item.activeCode}
+              </span>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between gap-3 text-xs font-black text-[var(--text-main)] sm:text-sm">
+                <span>{item.leftTitle}</span>
+                <span>{item.rightTitle}</span>
+              </div>
+              <div className="relative mt-3 h-3 rounded-full bg-[linear-gradient(90deg,rgba(201,130,120,0.22),rgba(143,183,161,0.25))]">
+                <span
+                  className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-[var(--accent)] shadow-[0_8px_20px_rgba(120,88,70,0.18)]"
+                  style={{ left: `${item.markerPosition}%` }}
+                />
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-[0.72rem] font-bold leading-5 text-[var(--text-sub)] sm:text-xs">
+                <p>{item.leftDescription}</p>
+                <p className="text-right">{item.rightDescription}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -133,9 +333,9 @@ function FitRouteCard({
 
 function MeetingFitBars({ items }: { items: Array<{ label: string; score: number }> }) {
   return (
-    <section data-testid="deai-fit-meeting-bars" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">出会い方の相性</h2>
-      <div className="mt-5 grid gap-4">
+    <div data-testid="deai-fit-meeting-bars" className="rounded-[1.2rem] border border-[var(--line)] bg-white/78 p-4 sm:p-5">
+      <h3 className="text-xs font-black tracking-[0.14em] text-[var(--color-text)]">相性が高く出た入口</h3>
+      <div className="mt-4 grid gap-3">
         {items.map((item, index) => {
           const width = Math.max(item.score, 6);
 
@@ -155,82 +355,160 @@ function MeetingFitBars({ items }: { items: Array<{ label: string; score: number
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function DeaiFitMethodMap({
+  suitedItems,
+  notFitItems,
+  meetingScores,
+}: {
+  suitedItems: string[];
+  notFitItems: string[];
+  meetingScores: Array<{ label: string; score: number }>;
+}) {
+  return (
+    <section data-testid="deai-fit-method-map" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">METHOD MAP</p>
+          <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">あなたの出会い方マップ</h2>
+        </div>
+        <p className="text-sm leading-7 text-[var(--text-sub)] sm:max-w-sm">
+          ひとつに決めるより、合いやすい入口を組み合わせるためのマップです。
+        </p>
+      </div>
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="grid gap-4">
+          <article className="rounded-[1.2rem] border border-[rgba(143,183,161,0.2)] bg-[rgba(244,251,246,0.72)] p-4 sm:p-5">
+            <h3 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">合いやすい出会い方</h3>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {suitedItems.map((item) => (
+                <span key={item} className="tag bg-white/88">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </article>
+          <article className="rounded-[1.2rem] border border-[rgba(201,130,120,0.16)] bg-[rgba(255,248,243,0.72)] p-4 sm:p-5">
+            <h3 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">
+              主戦場にしすぎると疲れやすい出会い方
+            </h3>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {notFitItems.map((item) => (
+                <span key={item} className="tag bg-white/88">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </article>
+        </div>
+        <MeetingFitBars items={meetingScores.slice(0, 6)} />
+      </div>
     </section>
   );
 }
 
 function ShareResultCard({
+  resultCode,
   resultLabel,
   shortCopy,
+  axisItems,
   suitedItems,
-  notFitItem,
 }: {
+  resultCode: DeaiFitType;
   resultLabel: string;
   shortCopy: string;
+  axisItems: AxisBarItem[];
   suitedItems: string[];
-  notFitItem: string;
 }) {
   return (
     <article
       data-testid="deai-fit-share-card"
       className="card overflow-hidden rounded-[1.5rem] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_52%,#f4fbf6_100%)] p-5 sm:p-7"
     >
-      <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">あなたに合う出会い方診断</p>
-      <p className="mt-4 text-sm font-bold leading-7 text-[var(--text-sub)]">私は</p>
-      <h2 className="mt-1 text-3xl font-black leading-tight text-[var(--text-main)] sm:text-4xl">{resultLabel}</h2>
-      <p className="mt-4 text-base font-bold leading-8 text-[var(--text-main)]">{shortCopy}</p>
-      <div className="mt-5 grid gap-2 text-sm leading-7 text-[var(--text-main)]">
-        <p className="font-black text-[var(--accent)]">向いている出会い方</p>
-        {suitedItems.map((item, index) => (
-          <p key={item}>
-            {index + 1}. {item}
-          </p>
-        ))}
-        <p className="pt-2">
-          <span className="font-black text-[var(--accent)]">疲れやすい出会い方：</span>
-          {notFitItem}
-        </p>
+      <p className="text-center text-xs font-black tracking-[0.18em] text-[var(--accent)]">あなたの出会い方診断結果</p>
+      <p className="mt-4 text-center font-numeric text-sm font-black tracking-[0.16em] text-[var(--text-sub)]">{resultCode}</p>
+      <h2 className="mt-2 text-center text-3xl font-black leading-tight text-[var(--text-main)] sm:text-4xl">{resultLabel}</h2>
+      <div className="mt-5 rounded-[1.2rem] bg-white/80 px-4 py-4">
+        <p className="text-xs font-black tracking-[0.14em] text-[var(--accent)]">ひとことで言うと</p>
+        <p className="mt-2 text-sm font-bold leading-7 text-[var(--text-main)] sm:text-base">{shortCopy}</p>
       </div>
-      <p className="mt-5 font-numeric text-xs font-bold text-[var(--text-sub)]">shindanlab.jp</p>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        {axisItems.map((item) => (
+          <div key={item.axis} className="rounded-[0.9rem] border border-[rgba(63,52,46,0.08)] bg-white/74 px-3 py-2">
+            <p className="font-numeric text-xs font-black text-[var(--accent)]">
+              {item.leftCode}/{item.rightCode} → {item.activeCode}
+            </p>
+            <p className="mt-1 text-[0.72rem] font-bold leading-5 text-[var(--text-main)]">{item.activeTitle}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5">
+        <p className="text-xs font-black tracking-[0.14em] text-[var(--accent)]">合いやすい出会い方</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {suitedItems.slice(0, 5).map((item) => (
+            <span key={item} className="rounded-full bg-white/86 px-3 py-1.5 text-xs font-black text-[var(--text-main)]">
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-between gap-3 font-numeric text-xs font-bold text-[var(--text-sub)]">
+        <span>shindanlab.jp</span>
+        <span>やうゆ式</span>
+      </div>
     </article>
   );
 }
 
-function RelatedFatigueCta() {
-  const handleClick = () => {
-    trackEvent("related_diagnosis_click", {
-      placement: "deai_fit_result",
-      quiz_name: "deai_fit",
-      related_title: "婚活疲れ・マチアプ疲れ診断",
-    });
-  };
-
+function DeaiFitNextDiagnostics({ resultCode, resultLabel }: { resultCode: DeaiFitType; resultLabel: string }) {
   return (
-    <section data-testid="deai-fit-fatigue-cta" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">
-        婚活で疲れている理由も知りたい人へ
-      </h2>
-      <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
-        自分に合う出会い方が分かっても、今までの婚活で何に疲れていたのかが分からないと、同じ疲れ方を繰り返すことがあります。
-        会えるのに進まない理由、会ったあとに疲れる理由を知りたい人は、婚活疲れ・マチアプ疲れ診断も試してみてください。
-      </p>
-      <Link
-        href={FATIGUE_DIAGNOSIS_PATH}
-        onClick={handleClick}
-        className="btn-secondary mt-5 inline-flex rounded-full px-6 py-3.5 text-sm font-black text-[var(--color-main)]"
-      >
-        婚活疲れ・マチアプ疲れ診断をやってみる
-      </Link>
+    <section data-testid="deai-fit-next-diagnostics" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+      <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">次におすすめの診断</h2>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {nextDiagnostics.map((diagnosis) => (
+          <Link
+            key={diagnosis.href}
+            href={diagnosis.href}
+            onClick={() => {
+              trackEvent("deai_fit_next_diagnosis_click", {
+                placement: "deai_fit_result",
+                result_code: resultCode,
+                result_type: resultLabel,
+                next_diagnosis: diagnosis.title,
+              });
+              trackEvent("related_diagnosis_click", {
+                placement: "deai_fit_result",
+                quiz_name: "deai_fit",
+                result_type: resultCode,
+                related_title: diagnosis.title,
+              });
+            }}
+            className="rounded-[1.2rem] border border-[var(--line)] bg-white/86 p-5 transition hover:-translate-y-0.5 hover:border-[rgba(201,130,120,0.34)]"
+          >
+            <h3 className="text-base font-black leading-7 text-[var(--text-main)]">{diagnosis.title}</h3>
+            <p className="mt-2 text-sm leading-7 text-[var(--text-sub)]">{diagnosis.body}</p>
+            <span className="text-link mt-4 inline-flex">やってみる →</span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
 
-function DeaiFitConsultationCta({ resultType }: { resultType: DeaiFitType }) {
+function DeaiFitConsultationCta({ resultCode, resultLabel }: { resultCode: DeaiFitType; resultLabel: string }) {
   const handleClick = () => {
+    trackEvent("deai_fit_result_consultation_click", {
+      placement: "deai_fit_result",
+      result_code: resultCode,
+      result_type: resultLabel,
+    });
     trackEvent("consultation_cta_click", {
       placement: "deai_fit_result_bottom",
       quiz_name: "deai_fit",
-      result_type: resultType,
+      result_type: resultCode,
       cta_kind: "fatigue_language_consultation",
     });
   };
@@ -239,14 +517,14 @@ function DeaiFitConsultationCta({ resultType }: { resultType: DeaiFitType }) {
     <section data-testid="deai-fit-mosh-cta" className="soft-panel rounded-[1.4rem] border border-[rgba(63,52,46,0.08)] bg-white/72 p-5 sm:p-6">
       <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">SECOND OPINION</p>
       <h2 className="mt-3 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">
-        自分の場合を見てほしい人へ
+        自分に合う出会い方を、個別に整理したい人へ。
       </h2>
       <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
         <p>
-          診断結果は入口です。プロフィールの見せ方、今までの出会い方、会ってきた相手、LINE、会ったあとの感情まで見ると、どの出会い方が本当に合っているのかはもっと具体的に見えてきます。
+          診断では大まかな傾向が分かります。ただ、実際にはプロフィール、使っているアプリ、過去の恋愛、相談所に入るかどうか、外飲みや紹介への向き不向きまで見ると、出会い方はもっと具体的に整理できます。
         </p>
         <p>
-          婚活をもっと頑張らせるための相談ではありません。合っていない頑張り方をやめるための、婚活のセカンドオピニオンです。
+          マチアプ、相談所、紹介、SNS、外飲みまで含めて、無理しない進め方を一緒に考えたい人は、やうゆ式の婚活の見直し相談で話せます。
         </p>
       </div>
       <a
@@ -256,7 +534,7 @@ function DeaiFitConsultationCta({ resultType }: { resultType: DeaiFitType }) {
         onClick={handleClick}
         className="btn-primary mt-5 inline-flex min-h-12 rounded-full px-6 py-3.5 text-sm font-black"
       >
-        婚活疲れの言語化相談を見てみる
+        自分に合う出会い方を相談する
       </a>
     </section>
   );
@@ -311,6 +589,15 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
   };
 
   const handleRestart = () => {
+    if (stage === "result") {
+      const restartResultMeta = DEAI_FIT_DISPLAY_META[diagnosis.result.type];
+      trackEvent("deai_fit_result_retry_click", {
+        placement: "deai_fit_result",
+        result_code: diagnosis.result.type,
+        result_type: restartResultMeta.resultLabel,
+      });
+    }
+
     setAnswers([]);
     setQuestionIndex(0);
     setSelectedValue(null);
@@ -476,12 +763,16 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
   const resultMeta = DEAI_FIT_DISPLAY_META[result.type];
   const radarData = buildRadarData(scores);
   const meetingScores = buildMeetingScores(scores);
-  const suitedTop = result.suited.slice(0, 3);
-  const notFitTop = result.notFit.slice(0, 2);
+  const axisItems = getAxisBarItems(scores, result.type);
+  const suitedTop = result.suited.slice(0, 5);
+  const suitedHero = result.suited.slice(0, 3);
+  const notFitTop = result.notFit.slice(0, 4);
   const resultUrl = getDeaiFitResultUrl(result.type);
   const xShareUrl = getDeaiFitXShareUrl({
+    resultCode: result.type,
     resultLabel: resultMeta.resultLabel,
     shortCopy: resultMeta.shareCopy,
+    suitedItems: suitedHero,
     resultUrl,
   });
   const routeCards = [
@@ -497,12 +788,17 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
     },
     {
       title: "疲れやすい出会い方",
-      heading: notFitTop.join("・"),
+      heading: notFitTop.slice(0, 2).join("・"),
       body: result.drainPattern,
     },
   ];
 
   const handleXShareClick = (placement: "result_hero" | "share_card") => {
+    trackEvent("deai_fit_result_share_x_click", {
+      placement,
+      result_code: result.type,
+      result_type: resultMeta.resultLabel,
+    });
     trackEvent("share_button_click", {
       platform: "x",
       placement,
@@ -524,6 +820,11 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
     setIsSavingShareImage(true);
 
     try {
+      trackEvent("deai_fit_result_save_image_click", {
+        placement: "share_card",
+        result_code: result.type,
+        result_type: resultMeta.resultLabel,
+      });
       trackEvent("save_image_click", {
         placement: "share_card",
         quiz_name: "deai_fit",
@@ -539,36 +840,18 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
   return (
     <section data-testid="deai-fit-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <div className="mx-auto max-w-4xl">
-        <article
-          data-testid="deai-fit-result-hero"
-          className="card overflow-hidden rounded-[1.6rem] bg-[linear-gradient(135deg,#fff8f3_0%,#ffffff_54%,#f2fbf5_100%)] p-5 text-center sm:p-8"
-        >
-          <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
-            RESULT CARD
-          </p>
-          <p className="mt-5 text-xs font-black tracking-[0.18em] text-[var(--accent)]">あなたに合う出会い方診断</p>
-          <p className="mt-5 text-sm font-bold leading-7 text-[var(--text-sub)]">あなたは</p>
-          <h1 className="mt-2 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-6xl">{resultMeta.resultLabel}</h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base font-bold leading-8 text-[var(--text-main)] sm:text-lg">
-            {resultMeta.shareCopy}
-          </p>
-          <div data-testid="deai-fit-radar" className="mx-auto mt-5 max-w-[360px]">
-            <DeaiFitRadarChart data={radarData} />
-          </div>
-          <ResultTagList title="向いている出会い方" items={suitedTop} />
-          <a
-            data-testid="deai-fit-share-x-top"
-            href={xShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => handleXShareClick("result_hero")}
-            className="btn-primary mt-6 inline-flex rounded-full px-6 py-3.5 text-sm font-black"
-          >
-            Xで結果をシェアする
-          </a>
-        </article>
+        <DeaiFitResultHeader
+          resultCode={result.type}
+          resultLabel={resultMeta.resultLabel}
+          shortCopy={resultMeta.shareCopy}
+          suitedItems={suitedHero}
+          xShareUrl={xShareUrl}
+          onShareClick={() => handleXShareClick("result_hero")}
+        />
 
         <div className="mt-8 grid gap-4">
+          <DeaiFitAxisBars items={axisItems} />
+
           <section data-testid="deai-fit-route-cards" className="grid gap-4 lg:grid-cols-3">
             {routeCards.map((card, index) => (
               <FitRouteCard
@@ -581,7 +864,13 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
             ))}
           </section>
 
-          <MeetingFitBars items={meetingScores} />
+          <DeaiFitMethodMap suitedItems={suitedTop} notFitItems={notFitTop} meetingScores={meetingScores} />
+
+          <ResultSection title="8項目チャート">
+            <div data-testid="deai-fit-radar" className="mx-auto mt-5 max-w-[360px]">
+              <DeaiFitRadarChart data={radarData} />
+            </div>
+          </ResultSection>
 
           <ResultSection title="あなたに起きやすいこと">
             <ResultList items={result.likely} />
@@ -613,15 +902,16 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
             <div>
               <h2 className="text-center text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">スクショ用カード</h2>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-7 text-[var(--text-sub)]">
-                結果を貼るなら、このカードが一番伝わりやすいです。向いている出会い方と疲れやすい出会い方だけに絞っています。
+                スクショしてシェアしやすい結果カードです。タイプコード、4軸、合いやすい出会い方だけに絞っています。
               </p>
             </div>
             <div ref={shareCardRef}>
               <ShareResultCard
+                resultCode={result.type}
                 resultLabel={resultMeta.resultLabel}
                 shortCopy={resultMeta.shareCopy}
+                axisItems={axisItems}
                 suitedItems={suitedTop}
-                notFitItem={result.notFit[0] ?? "短期判断の婚活"}
               />
             </div>
             <div className="flex flex-wrap justify-center gap-3">
@@ -633,7 +923,7 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
                 onClick={() => handleXShareClick("share_card")}
                 className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-black"
               >
-                Xで結果をシェアする
+                Xでシェアする
               </a>
               <button
                 data-testid="deai-fit-save-card"
@@ -642,47 +932,14 @@ export function DeaiFitApp({ initialResultType = null }: { initialResultType?: D
                 disabled={isSavingShareImage}
                 className="btn-secondary inline-flex rounded-full px-6 py-3.5 text-sm font-black text-[var(--color-main)] disabled:cursor-wait disabled:opacity-70"
               >
-                {isSavingShareImage ? "画像を保存しています..." : "画像を保存する"}
+                {isSavingShareImage ? "画像を保存しています..." : "結果を画像で保存"}
               </button>
             </div>
           </section>
 
-          <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-            <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">出会い方の4軸メモ</h2>
-            <div className="mt-4 grid gap-3">
-              {DEAI_FIT_AXIS_PAIRS.map((pair) => {
-                const leftScore = scores[pair.left];
-                const rightScore = scores[pair.right];
-                const total = Math.max(leftScore + rightScore, 1);
-                const leftPercent = Math.round((leftScore / total) * 100);
+          <DeaiFitNextDiagnostics resultCode={result.type} resultLabel={resultMeta.resultLabel} />
 
-                return (
-                  <div key={pair.axis} className="grid gap-2 rounded-[1rem] bg-white/78 px-4 py-3">
-                    <div className="flex items-center justify-between gap-3 text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">
-                      <span>
-                        {pair.left}: {pair.leftLabel}
-                      </span>
-                      <span>
-                        {pair.right}: {pair.rightLabel}
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-[rgba(143,183,161,0.24)]">
-                      <span className="block h-full rounded-full bg-[var(--color-main)]" style={{ width: `${leftPercent}%` }} />
-                    </div>
-                    <p className="text-right font-numeric text-xs font-black text-[var(--text-main)]">
-                      {pair.left}
-                      {leftScore} / {pair.right}
-                      {rightScore}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <RelatedFatigueCta />
-
-          <DeaiFitConsultationCta resultType={result.type} />
+          <DeaiFitConsultationCta resultCode={result.type} resultLabel={resultMeta.resultLabel} />
         </div>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
