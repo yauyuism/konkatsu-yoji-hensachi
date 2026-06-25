@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 
 import { FatigueReasonRadarChart } from "@/components/fatigue-reason/FatigueReasonRadarChart";
 import { trackEvent } from "@/lib/analytics";
@@ -18,8 +18,7 @@ import {
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
 import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
-import { getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
-import { downloadResultImage } from "@/lib/result-image";
+import { shareOrDownloadResultImage } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type FatigueReasonStage = "intro" | "question" | "result";
@@ -28,18 +27,6 @@ const analyzingDelayMs = 180;
 const factorRankLabels = ["一番の原因", "二番目のストレス", "見落としがちな癖"] as const;
 const compactFactorRankLabels = ["一番の原因", "二番目のストレス", "疲れグセ"] as const;
 const conditionThreshold = 70;
-
-function ResultList({ items }: { items: string[] }) {
-  return (
-    <ul className="mt-4 grid gap-3">
-      {items.map((item) => (
-        <li key={item} className="rounded-[1rem] bg-white/84 px-4 py-3 text-sm leading-7 text-[var(--color-text)]">
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 function mergeGuideItems(factors: FatigueReasonFactor[], key: "suitedMeetings" | "drainingMeetings") {
   return Array.from(new Set(factors.flatMap((factor) => FATIGUE_REASON_ACTION_GUIDES[factor.type][key])));
@@ -55,6 +42,30 @@ function getFactorScoreText(factor: FatigueReasonFactor) {
 
 function sanitizeFileNamePart(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_").slice(0, 40) || "result";
+}
+
+function buildReviewAnalysis({
+  isLowSignal,
+  primaryFactor,
+  secondaryFactor,
+  primaryGuide,
+}: {
+  isLowSignal: boolean;
+  primaryFactor: FatigueReasonFactor;
+  secondaryFactor?: FatigueReasonFactor;
+  primaryGuide: (typeof FATIGUE_REASON_ACTION_GUIDES)[FatigueReasonType];
+}) {
+  if (isLowSignal) {
+    return "今は大きな原因を無理に探すより、会った後の体感を細かく見る段階です。楽しかったかより、帰り道に軽いか、次の予定を考えたときに身体が重くならないかを観察すると、小さなズレを早めに拾えます。疲れが強くなる前に、会う基準と連絡頻度だけ軽く整えるのがおすすめです。";
+  }
+
+  const primaryMeta = FATIGUE_REASON_DISPLAY_META[primaryFactor.type];
+  const secondaryMeta = secondaryFactor ? FATIGUE_REASON_DISPLAY_META[secondaryFactor.type] : null;
+  const secondarySentence = secondaryMeta
+    ? `そこに「${secondaryMeta.shortLabel}」も重なると、相手そのものより、選ぶ前提や進め方で消耗しやすくなります。`
+    : "相手を増やすほど情報量が増え、判断の負荷だけが先に大きくなりやすい状態です。";
+
+  return `見直すべきなのは、出会いの数より「${primaryMeta.shortLabel}」が起きる場面です。${primaryGuide.shortReason}${secondarySentence}まずは「${primaryGuide.reviewActions[0]}」を試すと、どこで疲れが発生しているかを切り分けやすくなります。`;
 }
 
 function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
@@ -118,7 +129,7 @@ function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
 function FatigueConsultationCta({
   onClick,
 }: {
-  onClick: (placement: string) => void;
+  onClick: () => void;
 }) {
   return (
     <section
@@ -130,11 +141,14 @@ function FatigueConsultationCta({
       <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
         診断では大まかな傾向が分かります。ただ、実際にはプロフィール、使っているアプリ、会ってきた相手、LINE、相談所に入るかどうかまで見ると、婚活でどこに疲れているかはもっと具体的に整理できます。
       </p>
+      <p className="mt-3 rounded-[1rem] bg-white/78 px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
+        婚活をもっと頑張らせる相談ではなく、合っていない頑張り方をやめるための相談です。
+      </p>
       <a
         href={MOSH_SERVICES_URL}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => onClick("fatigue_reason_main_consultation")}
+        onClick={onClick}
         className="btn-primary mt-5 inline-flex min-h-12 rounded-full px-6 py-3.5 text-sm font-black"
       >
         婚活の見直し相談を見る
@@ -154,25 +168,6 @@ function ResultSection({
     <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
       <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">{title}</h2>
       {children}
-    </section>
-  );
-}
-
-function FatigueMapSection({ chartData }: { chartData: Array<{ label: string; score: number }> }) {
-  return (
-    <section data-testid="fatigue-reason-map" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">FATIGUE MAP</p>
-          <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">詳しい婚活疲れマップ</h2>
-        </div>
-        <p className="text-sm leading-7 text-[var(--text-sub)] sm:max-w-sm">
-          しんどさがどこに出ているかを見るための地図です。点数より、形と偏りを見てください。
-        </p>
-      </div>
-      <div data-testid="fatigue-reason-radar" className="mx-auto mt-5 max-w-[330px]">
-        <FatigueReasonRadarChart data={chartData} height={260} />
-      </div>
     </section>
   );
 }
@@ -272,39 +267,62 @@ function DetailedExplanationSection({
 }
 
 function FatigueSimpleResultCard({
+  cardRef,
   resultLabel,
   supportLabel,
-  shortCopy,
   tags,
+  chartData,
 }: {
+  cardRef: RefObject<HTMLElement>;
   resultLabel: string;
   supportLabel: string;
-  shortCopy: string;
   tags: Array<{ label: string; value: string }>;
+  chartData: Array<{ label: string; score: number }>;
 }) {
   return (
     <article
+      ref={cardRef}
       data-testid="fatigue-reason-share-card"
-      className="card overflow-hidden rounded-[1.5rem] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_56%,#f4fbf6_100%)] p-5 sm:p-8"
+      className="relative mx-auto flex min-h-[680px] w-full max-w-[440px] overflow-hidden rounded-[2rem] border border-[rgba(120,88,70,0.12)] bg-[linear-gradient(145deg,#fffdf9_0%,#fff8f2_46%,#f3fbf5_100%)] p-5 shadow-[0_24px_70px_rgba(90,64,48,0.18)] sm:min-h-[720px] sm:p-7"
     >
-      <div>
-        <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">婚活疲れ・マチアプ疲れ診断</p>
-        <p className="mt-5 text-sm font-bold leading-7 text-[var(--text-sub)]">あなたは</p>
-        <h1 className="mt-1 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-6xl">{resultLabel}</h1>
-        <p className="mt-3 text-sm font-black leading-7 text-[var(--text-main)] sm:text-base">{supportLabel}</p>
-        <p className="mt-5 text-xs font-black tracking-[0.16em] text-[var(--accent)]">一言診断</p>
-        <p className="mt-3 max-w-2xl text-base font-bold leading-8 text-[var(--text-main)] sm:text-lg">{shortCopy}</p>
-        <div className="mt-6 grid gap-2">
-          {tags.map((tag) => (
-            <p key={`${tag.label}-${tag.value}`} className="rounded-[1rem] bg-white/78 px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
-              <span className="text-[var(--accent)]">{tag.label}：</span>
-              {tag.value}
-            </p>
-          ))}
+      <div className="pointer-events-none absolute right-5 top-5 rounded-full border border-[rgba(201,130,120,0.2)] bg-white/76 px-3 py-1 text-[0.65rem] font-black tracking-[0.18em] text-[var(--accent)]">
+        SHARE IMAGE
+      </div>
+      <div className="flex min-h-full w-full flex-col">
+        <div>
+          <p className="text-[0.72rem] font-black tracking-[0.18em] text-[var(--accent)]">婚活疲れ・マチアプ疲れ診断</p>
+          <p className="mt-1 text-[0.68rem] font-black tracking-[0.18em] text-[var(--text-sub)]">RESULT CARD</p>
         </div>
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-black tracking-[0.14em] text-[var(--text-sub)]">
-          <span>shindanlab.jp</span>
-          <span>やうゆ式</span>
+
+        <div data-testid="fatigue-reason-card-map" className="mt-7 rounded-[1.35rem] border border-[rgba(201,130,120,0.14)] bg-white/70 px-3 py-4">
+          <p className="text-center text-xs font-black tracking-[0.16em] text-[var(--accent)]">詳しい婚活疲れマップ</p>
+          <div className="mx-auto mt-2 max-w-[290px]">
+            <FatigueReasonRadarChart data={chartData} height={205} />
+          </div>
+        </div>
+
+        <div className="py-6">
+          <p className="text-sm font-bold leading-7 text-[var(--text-sub)]">あなたは</p>
+          <h1 className="mt-2 text-[2.7rem] font-black leading-[1.05] text-[var(--text-main)] sm:text-6xl">{resultLabel}</h1>
+          <p className="mt-4 text-[0.95rem] font-black leading-7 text-[var(--text-main)] sm:text-base">{supportLabel}</p>
+        </div>
+
+        <div className="mt-auto">
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <p
+                key={`${tag.label}-${tag.value}`}
+                className="rounded-full border border-[rgba(201,130,120,0.12)] bg-white/78 px-3 py-2 text-[0.78rem] font-black leading-6 text-[var(--text-main)]"
+              >
+                <span className="text-[var(--accent)]">{tag.label}：</span>
+                {tag.value}
+              </p>
+            ))}
+          </div>
+          <div className="mt-6 flex items-center justify-between gap-4 text-xs font-black tracking-[0.14em] text-[var(--text-sub)]">
+            <span>shindanlab.jp</span>
+            <span>やうゆ式</span>
+          </div>
         </div>
       </div>
     </article>
@@ -312,56 +330,60 @@ function FatigueSimpleResultCard({
 }
 
 function FatigueShareActions({
-  xShareUrl,
   isSavingShareImage,
+  shareImageMessage,
   shareImageError,
   onSaveImage,
-  onXShareClick,
   onConsultationClick,
 }: {
-  xShareUrl: string;
   isSavingShareImage: boolean;
+  shareImageMessage: string | null;
   shareImageError: string | null;
   onSaveImage: () => void;
-  onXShareClick: () => void;
   onConsultationClick: () => void;
 }) {
   return (
-    <section data-testid="fatigue-reason-share-actions" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+    <section data-testid="fatigue-reason-share-actions" className="mx-auto w-full max-w-[520px] rounded-[1.6rem] border border-[rgba(120,88,70,0.1)] bg-white/86 p-5 sm:p-6">
+      <div>
+        <h2 className="text-xl font-black leading-tight text-[var(--text-main)]">この結果カードを画像でシェアできます</h2>
+        <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
+          対応しているスマホでは、画像つきで共有できる画面が開きます。未対応の環境ではカード画像を保存するので、XやInstagramの投稿に添付してください。
+        </p>
+        <p className="mt-2 text-xs font-bold leading-6 text-[var(--text-sub)] opacity-75">
+          診断カード画像をそのまま投稿に載せるための導線です。
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3">
         <button
           data-testid="fatigue-reason-save-card"
           type="button"
           onClick={onSaveImage}
           disabled={isSavingShareImage}
-          className="btn-primary inline-flex min-h-12 justify-center rounded-full px-6 py-3.5 text-sm font-black disabled:cursor-wait disabled:opacity-70"
+          className="btn-primary inline-flex min-h-14 w-full justify-center gap-2 rounded-full px-6 py-4 text-base font-black disabled:cursor-wait disabled:opacity-70"
         >
-          {isSavingShareImage ? "画像を保存しています..." : "画像を保存してシェア"}
+          <span aria-hidden="true" className="text-lg leading-none">↓</span>
+          {isSavingShareImage ? "画像を作成しています..." : "画像を保存してシェア"}
         </button>
+        {shareImageMessage ? (
+          <p data-testid="fatigue-reason-save-card-success" className="rounded-[1rem] bg-[rgba(143,183,161,0.12)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
+            {shareImageMessage}
+          </p>
+        ) : null}
         <a
           data-testid="fatigue-reason-consultation-quick"
           href={MOSH_SERVICES_URL}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onConsultationClick}
-          className="btn-secondary inline-flex min-h-12 justify-center rounded-full px-6 py-3.5 text-sm font-black text-[var(--color-main)]"
+          className="btn-secondary inline-flex min-h-14 w-full justify-center rounded-full border-[rgba(201,130,120,0.26)] bg-white px-6 py-4 text-base font-black text-[var(--color-main)]"
         >
           個別に相談する
         </a>
       </div>
-      <p className="mt-4 text-sm leading-7 text-[var(--text-sub)]">
-        画像つきでXに載せたい人は、結果カードを保存して投稿に添付してください。
+      <p className="mt-3 rounded-[1rem] bg-[rgba(255,245,240,0.72)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
+        「当たってるかも」と思ったら、プロフィールや会ってきた相手まで含めて見ると、疲れている理由がもっと具体的になります。
       </p>
-      <a
-        data-testid="fatigue-reason-share-x-top"
-        href={xShareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onXShareClick}
-        className="text-link mt-2 inline-flex text-sm font-bold"
-      >
-        Xで文章だけシェア
-      </a>
       {shareImageError ? (
         <p data-testid="fatigue-reason-save-card-error" className="mt-3 text-sm font-bold leading-7 text-[var(--accent)]">
           {shareImageError}
@@ -384,17 +406,43 @@ function FatigueReasonSummary({ paragraphs }: { paragraphs: string[] }) {
   );
 }
 
-function FatigueFirstActions({ actions }: { actions: string[] }) {
+function MeetingFitSection({
+  suitedMeetings,
+  drainingMeetings,
+}: {
+  suitedMeetings: string[];
+  drainingMeetings: string[];
+}) {
   return (
-    <section data-testid="fatigue-reason-first-actions" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-      <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">まず見直すこと</h2>
-      <ul className="mt-4 grid gap-3">
-        {actions.slice(0, 3).map((action) => (
-          <li key={action} className="rounded-[1rem] bg-white/84 px-4 py-3 text-sm font-bold leading-7 text-[var(--color-text)]">
-            {action}
-          </li>
-        ))}
-      </ul>
+    <section data-testid="fatigue-reason-meeting-fit" className="grid gap-4 lg:grid-cols-2">
+      <ResultSection title="自分に合う出会い方">
+        <div className="mt-4 flex flex-wrap gap-2">
+          {suitedMeetings.map((hint) => (
+            <span key={hint} className="tag">
+              {hint}
+            </span>
+          ))}
+        </div>
+      </ResultSection>
+
+      <ResultSection title="疲れやすい出会い方">
+        <div className="mt-4 flex flex-wrap gap-2">
+          {drainingMeetings.map((hint) => (
+            <span key={hint} className="tag">
+              {hint}
+            </span>
+          ))}
+        </div>
+      </ResultSection>
+    </section>
+  );
+}
+
+function FatigueReviewAnalysis({ analysis }: { analysis: string }) {
+  return (
+    <section data-testid="fatigue-reason-review-analysis" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+      <h2 className="text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">見直すこと</h2>
+      <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{analysis}</p>
     </section>
   );
 }
@@ -425,8 +473,9 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
   const [answers, setAnswers] = useState<FatigueAnswerValue[]>([]);
   const [selectedValue, setSelectedValue] = useState<FatigueAnswerValue | null>(null);
   const [isSavingShareImage, setIsSavingShareImage] = useState(false);
+  const [shareImageMessage, setShareImageMessage] = useState<string | null>(null);
   const [shareImageError, setShareImageError] = useState<string | null>(null);
-  const shareCardRef = useRef<HTMLDivElement>(null);
+  const shareCardRef = useRef<HTMLElement>(null);
 
   const diagnosis = useMemo(() => {
     if (initialResultType && answers.length === 0) {
@@ -647,13 +696,6 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
     label: FATIGUE_REASON_DISPLAY_META[type].chartLabel,
     score: Math.round(normalizedScores[type] * 100),
   }));
-  const shareTopLabels = isLowSignal
-    ? ["大きな原因は薄め", "今のペースを守る", "違和感を早めにメモ"]
-    : topFactors.map((factor) => FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel);
-  const xShareUrl = getFatigueReasonXShareUrl({
-    resultLabel: resultMeta.resultLabel,
-    shortCopy: resultMeta.shareCopy,
-  });
   const resultTags = isLowSignal
     ? [
         { label: "状態", value: "大きな原因は薄め" },
@@ -676,12 +718,17 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
           ? `さらに「${FATIGUE_REASON_DISPLAY_META[topFactors[1].type].shortLabel}」も重なると、今の婚活のしんどさが増えやすくなります。`
           : "出会いの数を増やすより、まず今の進め方が自分に合っているかを見るのがよさそうです。",
       ];
-  const firstActions = primaryGuide.reviewActions.slice(0, 3);
+  const reviewAnalysis = buildReviewAnalysis({
+    isLowSignal,
+    primaryFactor,
+    secondaryFactor: topFactors[1],
+    primaryGuide,
+  });
   const relatedDiagnoses = [
     {
       href: "/diagnoses/deai-fit",
       title: "あなたに合う出会い方診断",
-      body: "マチアプ、相談所、紹介、SNS、外飲みのどこが合いやすいかを16タイプで見ます。",
+      body: "マチアプ、相談所、紹介、SNS、外飲みのどこが自分に合うかを16タイプで見ます。",
     },
     {
       href: "/prof",
@@ -695,38 +742,19 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
     },
   ];
 
-  const handleXShareClick = (placement: "result_hero" | "share_card") => {
-    trackEvent("fatigue_result_share_x_click", {
-      placement: "fatigue_result",
-      primary_type: resultMeta.resultLabel,
-      top_labels: shareTopLabels,
-    });
-    trackEvent("share_button_click", {
-      platform: "x",
-      placement,
-      quiz_name: "fatigue_reason",
-      result_type: result.type,
-    });
-    trackEvent("x_share_click", {
-      placement,
-      quiz_name: "fatigue_reason",
-      result_type: result.type,
-    });
-  };
-
   const handleSaveShareImage = async () => {
     if (!shareCardRef.current || isSavingShareImage) {
       return;
     }
 
     setShareImageError(null);
+    setShareImageMessage(null);
     setIsSavingShareImage(true);
 
     try {
       trackEvent("fatigue_result_save_image_click", {
-        placement: "fatigue_result",
-        primary_type: resultMeta.resultLabel,
-        top_labels: shareTopLabels,
+        placement: "result_first_view",
+        result_type: resultMeta.resultLabel,
       });
       trackEvent("save_image_click", {
         placement: "share_card",
@@ -734,14 +762,43 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
         result_type: result.type,
       });
 
-      await downloadResultImage(shareCardRef.current, `婚活疲れ診断_${sanitizeFileNamePart(resultMeta.resultLabel)}.png`);
+      const saveResult = await shareOrDownloadResultImage(
+        shareCardRef.current,
+        `婚活疲れ診断_${sanitizeFileNamePart(resultMeta.resultLabel)}.png`,
+        {
+          title: `婚活疲れ診断_${resultMeta.resultLabel}`,
+          text: `婚活疲れ・マチアプ疲れ診断をやってみたら「${resultMeta.resultLabel}」でした。`,
+        }
+      );
+
+      setShareImageMessage(
+        saveResult.mode === "native-share"
+          ? "共有画面を開きました。SNSで画像を添付して投稿できます。"
+          : saveResult.mode === "preview"
+            ? "結果カード画像を開きました。長押しで保存してSNSに添付できます。"
+            : "結果カードを保存しました。SNS投稿に画像を添付できます。"
+      );
+      trackEvent("fatigue_result_save_image_success", {
+        placement: "result_first_view",
+        result_type: resultMeta.resultLabel,
+        save_mode: saveResult.mode,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "unknown error";
 
-      setShareImageError("保存できなかったため、スクショで保存してください。");
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setShareImageMessage("共有をキャンセルしました。もう一度押すと画像共有をやり直せます。");
+        trackEvent("fatigue_result_save_image_cancel", {
+          placement: "result_first_view",
+          result_type: resultMeta.resultLabel,
+        });
+        return;
+      }
+
+      setShareImageError("画像保存に失敗しました。スクショで保存してください。");
       trackEvent("fatigue_result_save_image_error", {
-        placement: "fatigue_result",
-        primary_type: resultMeta.resultLabel,
+        placement: "result_first_view",
+        result_type: resultMeta.resultLabel,
         error_message: errorMessage,
       });
     } finally {
@@ -750,6 +807,10 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
   };
 
   const handleConsultationClick = (placement: string) => {
+    trackEvent(placement === "consultation_block" ? "fatigue_result_consultation_cta_click" : "fatigue_result_consultation_click", {
+      placement,
+      result_type: resultMeta.resultLabel,
+    });
     trackEvent("consultation_cta_click", {
       placement,
       quiz_name: "fatigue_reason",
@@ -770,38 +831,38 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
   return (
     <section data-testid="fatigue-reason-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <div className="mx-auto max-w-4xl">
-        <div data-testid="fatigue-reason-result-hero" ref={shareCardRef}>
+        <div data-testid="fatigue-reason-result-hero">
           <FatigueSimpleResultCard
+            cardRef={shareCardRef}
             resultLabel={resultMeta.resultLabel}
             supportLabel={resultMeta.supportLabel}
-            shortCopy={resultMeta.shareCopy}
             tags={resultTags}
+            chartData={chartData}
           />
         </div>
 
         <div className="mt-5 grid gap-4">
           <FatigueShareActions
-            xShareUrl={xShareUrl}
             isSavingShareImage={isSavingShareImage}
+            shareImageMessage={shareImageMessage}
             shareImageError={shareImageError}
             onSaveImage={handleSaveShareImage}
-            onXShareClick={() => handleXShareClick("result_hero")}
-            onConsultationClick={() => handleConsultationClick("fatigue_reason_quick_action")}
+            onConsultationClick={() => handleConsultationClick("result_first_view")}
           />
 
           <FatigueReasonSummary paragraphs={reasonSummaryParagraphs} />
 
-          <FatigueFirstActions actions={firstActions} />
+          <MeetingFitSection suitedMeetings={suitedMeetings} drainingMeetings={drainingMeetings} />
 
-          <FatigueConsultationCta onClick={handleConsultationClick} />
+          <FatigueReviewAnalysis analysis={reviewAnalysis} />
+
+          <FatigueConsultationCta onClick={() => handleConsultationClick("consultation_block")} />
 
           <details data-testid="fatigue-reason-detailed-result" className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
             <summary className="cursor-pointer text-base font-black leading-7 text-[var(--color-text)]">
               詳しい診断結果を見る
             </summary>
             <div className="mt-5 grid gap-4">
-              <FatigueMapSection chartData={chartData} />
-
               {isLowSignal ? (
                 <LowSignalSection />
               ) : (
@@ -820,21 +881,7 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
                 </>
               )}
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <ResultSection title="合いやすい出会い方">
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {suitedMeetings.map((hint) => (
-                      <span key={hint} className="tag">
-                        {hint}
-                      </span>
-                    ))}
-                  </div>
-                </ResultSection>
-
-                <ResultSection title="主戦場にしすぎると疲れやすい出会い方">
-                  <ResultList items={drainingMeetings} />
-                </ResultSection>
-
+              <div className="grid gap-4">
                 <ResultSection title="おすすめの次の一歩">
                   <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{result.nextStep}</p>
                 </ResultSection>
