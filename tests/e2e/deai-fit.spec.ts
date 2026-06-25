@@ -3,7 +3,6 @@ import { expect, type Page, test } from "@playwright/test";
 const moshServicesUrl = "https://mosh.jp/yauyuism/services";
 
 const ocqdAnswers = [
-  "very",
   "none",
   "very",
   "none",
@@ -15,6 +14,7 @@ const ocqdAnswers = [
   "none",
   "very",
   "none",
+  "very",
   "very",
   "none",
   "very",
@@ -30,18 +30,18 @@ const ocqdAnswers = [
 ];
 
 const fcqnAnswers = [
-  "none",
-  "very",
-  "none",
-  "very",
-  "none",
-  "very",
   "very",
   "none",
   "very",
   "none",
   "very",
   "none",
+  "none",
+  "very",
+  "none",
+  "very",
+  "none",
+  "very",
   "very",
   "none",
   "very",
@@ -57,7 +57,6 @@ const fcqnAnswers = [
 ];
 
 const fvsnAnswers = [
-  "none",
   "very",
   "none",
   "very",
@@ -69,6 +68,7 @@ const fvsnAnswers = [
   "very",
   "none",
   "very",
+  "none",
   "none",
   "very",
   "none",
