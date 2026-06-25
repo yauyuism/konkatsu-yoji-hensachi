@@ -14,18 +14,31 @@ export async function downloadResultImage(element: HTMLElement, fileName: string
   clone.style.zIndex = "-1";
   document.body.appendChild(clone);
 
-  await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
+  try {
+    await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
 
-  const canvas = await html2canvas(clone, {
-    backgroundColor: "#ffffff",
-    scale: 2,
-    useCORS: true,
-    logging: false,
-  });
-  clone.remove();
+    const canvas = await html2canvas(clone, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    const dataUrl = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
 
-  const link = document.createElement("a");
-  link.download = fileName;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+    if (typeof link.download === "string") {
+      link.download = fileName;
+      link.href = dataUrl;
+      link.click();
+      return;
+    }
+
+    const imageWindow = window.open(dataUrl, "_blank", "noopener,noreferrer");
+
+    if (!imageWindow) {
+      throw new Error("画像を新規タブで開けませんでした");
+    }
+  } finally {
+    clone.remove();
+  }
 }

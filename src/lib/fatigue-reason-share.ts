@@ -1,7 +1,7 @@
 import type { FatigueReasonType } from "@/lib/fatigue-reason";
 import { getSiteUrl } from "@/lib/site-url";
 
-const X_HASHTAGS = "婚活疲れ,マチアプ疲れ,婚活診断";
+const X_HASHTAGS = "婚活疲れ,マチアプ疲れ";
 const X_VIA = "yauyuism";
 
 function resolveOrigin() {
@@ -23,13 +23,16 @@ export function getFatigueReasonResultUrl(type: FatigueReasonType) {
 export function getFatigueReasonXShareUrl({
   resultLabel,
   shortCopy,
+  topLabels,
   resultUrl,
 }: {
   resultLabel: string;
   shortCopy: string;
+  topLabels: string[];
   resultUrl: string;
 }) {
-  const text = `婚活疲れ・マチアプ疲れ診断をやってみたら、私の結果は「${resultLabel}」でした。\n\n${shortCopy}\n\nあなたは？→`;
+  const topText = topLabels.slice(0, 3).map((label, index) => `${index + 1}. ${label}`).join("\n");
+  const text = `婚活疲れ・マチアプ疲れの理由診断をやってみたら、\n「${resultLabel}」でした。\n${shortCopy}\n\n今のしんどさ：\n${topText}\n\n診断はこちら`;
 
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     text

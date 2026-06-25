@@ -78,8 +78,9 @@ export const FATIGUE_REASON_TYPE_ORDER: FatigueReasonType[] = [
   "reset",
 ];
 
+export const FATIGUE_REASON_CAUSE_TYPE_ORDER: FatigueReasonType[] = FATIGUE_REASON_TYPE_ORDER.filter((type) => type !== "reset");
+
 const TIE_BREAK_PRIORITY: FatigueReasonType[] = [
-  "reset",
   "fastJudgment",
   "wrongPeople",
   "purposeFirst",
@@ -87,6 +88,7 @@ const TIE_BREAK_PRIORITY: FatigueReasonType[] = [
   "placeMismatch",
   "profileInvisible",
   "stagedFatigue",
+  "reset",
 ];
 
 const consultationCta: FatigueReasonCta = {
@@ -643,6 +645,14 @@ export function buildFatigueReasonIntro(topFactors: FatigueReasonFactor[]) {
   ].filter(Boolean);
 }
 
+function getTopCauseFactors(rankedFactors: FatigueReasonFactor[]) {
+  return rankedFactors.filter((factor) => factor.type !== "reset").slice(0, 3);
+}
+
+function getConditionFactor(rankedFactors: FatigueReasonFactor[]) {
+  return rankedFactors.find((factor) => factor.type === "reset") ?? null;
+}
+
 function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>, normalizedScores: Record<FatigueReasonType, number>) {
   return FATIGUE_REASON_TYPE_ORDER.map<FatigueReasonFactor>((type) => ({
     type,
@@ -667,24 +677,26 @@ export function isFatigueReasonType(value: string | null | undefined): value is 
 }
 
 export function buildFatigueReasonDiagnosisFromResultType(type: FatigueReasonType) {
+  const resultType = type === "reset" ? "fastJudgment" : type;
   const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
-    accumulator[currentType] = currentType === type ? FATIGUE_REASON_MAX_SCORES[currentType] : 0;
+    accumulator[currentType] = currentType === resultType || currentType === type ? FATIGUE_REASON_MAX_SCORES[currentType] : 0;
     return accumulator;
   }, {} as Record<FatigueReasonType, number>);
   const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
-    accumulator[currentType] = currentType === type ? 1 : 0;
+    accumulator[currentType] = currentType === resultType || currentType === type ? 1 : 0;
     return accumulator;
   }, {} as Record<FatigueReasonType, number>);
   const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
-  const primaryFactor = rankedFactors.find((factor) => factor.type === type) ?? rankedFactors[0];
-  const topFactors = primaryFactor ? [primaryFactor] : [];
+  const topFactors = getTopCauseFactors(rankedFactors);
+  const conditionFactor = getConditionFactor(rankedFactors);
 
   return {
-    result: FATIGUE_REASON_RESULTS[type],
+    result: FATIGUE_REASON_RESULTS[resultType],
     scores,
     normalizedScores,
     rankedFactors,
     topFactors,
+    conditionFactor,
     introParagraphs: buildFatigueReasonIntro(topFactors),
   };
 }
@@ -713,8 +725,9 @@ export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
     return accumulator;
   }, {} as Record<FatigueReasonType, number>);
   const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
-  const topFactors = rankedFactors.slice(0, 3);
-  const resultType = topFactors[0]?.type ?? "reset";
+  const topFactors = getTopCauseFactors(rankedFactors);
+  const conditionFactor = getConditionFactor(rankedFactors);
+  const resultType = topFactors[0]?.type ?? "fastJudgment";
 
   return {
     result: FATIGUE_REASON_RESULTS[resultType],
@@ -722,6 +735,7 @@ export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
     normalizedScores,
     rankedFactors,
     topFactors,
+    conditionFactor,
     introParagraphs: buildFatigueReasonIntro(topFactors),
   };
 }
