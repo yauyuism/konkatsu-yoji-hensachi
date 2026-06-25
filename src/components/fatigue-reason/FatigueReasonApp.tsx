@@ -62,22 +62,8 @@ function getFactorScore(factor: FatigueReasonFactor) {
   return Math.round(factor.normalizedScore * 100);
 }
 
-function getFactorStrengthLabel(factor: FatigueReasonFactor) {
-  const score = getFactorScore(factor);
-
-  if (score >= 90) {
-    return "かなり強く出ています";
-  }
-
-  if (score >= 70) {
-    return "強く出ています";
-  }
-
-  if (score >= 50) {
-    return "やや出ています";
-  }
-
-  return "少し出ています";
+function getFactorScoreText(factor: FatigueReasonFactor) {
+  return String(getFactorScore(factor));
 }
 
 function sanitizeFileNamePart(value: string) {
@@ -102,8 +88,8 @@ function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: num
           <h3 className="mt-2 text-xl font-black leading-tight text-[var(--text-main)]">{meta.shortLabel}</h3>
           <p className="mt-1 text-sm font-bold leading-6 text-[var(--text-main)]">{meta.supportLabel}</p>
         </div>
-        <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-black text-[var(--accent)]">
-          {getFactorStrengthLabel(factor)}
+        <span className="rounded-full bg-white/80 px-3 py-1 font-numeric text-sm font-black text-[var(--accent)]">
+          {getFactorScoreText(factor)}
         </span>
       </div>
       <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">{meta.formalDescription}</p>
@@ -126,7 +112,7 @@ function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
                 <span>
                   {factorRankLabels[index] ?? "高く出た傾向"}：{FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
                 </span>
-                <span className="shrink-0 text-xs text-[var(--accent)]">{getFactorStrengthLabel(factor)}</span>
+                <span className="font-numeric shrink-0 text-sm text-[var(--accent)]">{getFactorScoreText(factor)}</span>
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
                 <div
@@ -823,7 +809,7 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
                       style={{ width: `${Math.round(normalizedScores[factor.type] * 100)}%` }}
                     />
                   </span>
-                  <span className="text-right text-xs font-black text-[var(--text-main)]">{getFactorStrengthLabel(factor)}</span>
+                  <span className="font-numeric text-right text-xs font-black text-[var(--text-main)]">{getFactorScoreText(factor)}</span>
                 </div>
               ))}
             </div>

@@ -41,7 +41,7 @@ export async function generateMetadata({ searchParams }: KonkatsuFatiguePageProp
     title: `${meta.resultLabel} | ${title}`,
     description: meta.shareCopy,
     path: `/diagnoses/konkatsu-fatigue?result=${resultParam}`,
-    imagePath: `/api/og-fatigue-reason?result=${resultParam}`,
+    imagePath: `/og/fatigue-reason/${resultParam}.png`,
     imageAlt: `${title} ${meta.resultLabel}の診断カード`,
     absoluteTitle: true,
     ogTitle: `婚活疲れ診断の結果は「${meta.resultLabel}」`,
