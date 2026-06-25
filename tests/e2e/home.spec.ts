@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 const moshServicesUrl = "https://mosh.jp/yauyuism/services";
+const xUrl = "https://x.com/yauyuism";
+const noteUrl = "https://note.com/yauyuism";
 
 test("トップページの主要導線を表示できる", async ({ page }) => {
   await page.goto("/");
@@ -19,7 +21,15 @@ test("トップページの主要導線を表示できる", async ({ page }) => 
   await expect(page.locator("#tool-list").getByRole("link", { name: /あなたに合う出会い方診断/ })).toBeVisible();
   await expect(page.locator("#tool-list").getByRole("link", { name: /My 9 Specs/ })).toBeVisible();
   await expect(page.getByTestId("home-guides")).toBeVisible();
-  await expect(page.getByTestId("home-consultation").getByTestId("mosh-consultation-cta").getByRole("link")).toHaveAttribute("href", moshServicesUrl);
+  await expect(page.getByTestId("home-creator")).toContainText("この診断を作っている人");
+  await expect(page.getByTestId("home-creator")).toContainText("やうゆ｜婚活の違和感を言語化する人");
+  await expect(page.getByRole("img", { name: "やうゆのアイコン" })).toBeVisible();
+  await expect(page.getByTestId("home-creator").getByRole("link", { name: "診断結果をもとに相談する" })).toHaveAttribute(
+    "href",
+    moshServicesUrl
+  );
+  await expect(page.getByTestId("home-creator").getByRole("link", { name: "Xを見る" })).toHaveAttribute("href", xUrl);
+  await expect(page.getByTestId("home-creator").getByRole("link", { name: "noteを見る" })).toHaveAttribute("href", noteUrl);
 });
 
 test("完了済みユーザーには『まずはこれ』を表示しない", async ({ page, context, baseURL }) => {

@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
-import { MoshConsultationCta } from "@/components/MoshConsultationCta";
 import { ToolCard } from "@/components/ToolCard";
 import {
   CATEGORIES,
@@ -18,6 +18,7 @@ import {
   type Tool,
 } from "@/data/tools";
 import { trackEvent } from "@/lib/analytics";
+import { getCreatorLinks } from "@/lib/creator-links";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 function SectionHeading({
@@ -110,6 +111,7 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
   const deaiFitTool = getToolById("deaiFit");
   const mainDiagnosisTools = [fatigueTool, deaiFitTool].filter((tool): tool is Tool => Boolean(tool));
   const heroHref = fatigueTool?.path ?? "/diagnoses/konkatsu-fatigue";
+  const { noteUrl, xUrl } = getCreatorLinks();
   const handleHeroStartClick = () => {
     trackEvent("top_hero_start_diagnosis_click", {
       placement: "home_hero",
@@ -132,6 +134,18 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
     trackEvent("course_cta_click", {
       placement: "home_course",
       course_name: courseName,
+    });
+  };
+  const handleCreatorConsultationClick = () => {
+    trackEvent("creator_section_consultation_click", {
+      placement: "creator_section",
+      link_url: MOSH_SERVICES_URL,
+    });
+  };
+  const handleCreatorSocialClick = (platform: "x" | "note", linkUrl: string) => {
+    trackEvent(platform === "x" ? "creator_section_x_click" : "creator_section_note_click", {
+      placement: "creator_section",
+      link_url: linkUrl,
     });
   };
 
@@ -310,21 +324,86 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
         </section>
       ) : null}
 
-      <section data-testid="home-consultation" className="mt-12 border-t border-[color:var(--line)] pt-10">
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
-          <div>
-            <SectionHeading
-              title="診断で分かった違和感を、個別に整理したい人へ。"
-              description="診断だけでは分かりきらないこともあります。今の出会い方を続けるべきか。プロフィールを変えるべきか。相談所に入る前に整理したほうがいいのか。個別に見たい人は、やうゆ式の婚活の見直し相談で一緒に話せます。"
-            />
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="tag">あなたと合う人に届くプロフィール添削</span>
-              <span className="tag">やうゆ式 婚活の見直し相談 60分</span>
-              <span className="tag">やうゆ式 婚活の見直し相談 2回セット</span>
+      <section data-testid="home-creator" className="mt-12 border-t border-[color:var(--line)] pt-10">
+        <article className="card p-6 sm:p-7 lg:p-8">
+          <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
+            <div className="flex items-center gap-4 md:block">
+              <Image
+                src="/images/yauyu-icon.jpg"
+                alt="やうゆのアイコン"
+                width={96}
+                height={96}
+                sizes="(max-width: 640px) 64px, 96px"
+                className="h-16 w-16 shrink-0 rounded-full border border-[color:var(--line)] bg-[var(--bg-soft)] object-cover shadow-[0_12px_28px_rgba(120,88,70,0.14)] sm:h-24 sm:w-24"
+                priority={false}
+              />
+              <div className="md:mt-4">
+                <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">CREATOR</p>
+                <h2 className="mt-1 text-xl font-black leading-tight text-[var(--color-text)] sm:text-2xl">
+                  この診断を作っている人
+                </h2>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-lg font-black leading-tight text-[var(--color-text)] sm:text-xl">
+                やうゆ｜婚活の違和感を言語化する人
+              </p>
+              <div className="mt-4 grid gap-3 text-sm leading-7 text-[var(--color-text-sub)] sm:text-base sm:leading-8">
+                <p>恋愛・婚活・外飲み・人間関係について発信しています。</p>
+                <p>
+                  マッチングアプリ、結婚相談所、紹介、SNS、外飲み、趣味の場。出会い方には、それぞれ向き不向きがあります。
+                </p>
+                <p>
+                  婚活がしんどいのは、あなたが恋愛に向いていないからではなく、自分に合わない頑張り方を続けているからかもしれません。
+                </p>
+                <p>
+                  診断ラボでは、恋愛や婚活の違和感を少しでも言語化できるように、出会い方・プロフィール・LINE・条件・婚活疲れを無料診断にしています。
+                </p>
+                <p>
+                  診断だけでは分かりきらない部分を個別に整理したい人は、やうゆ式の婚活の見直し相談で一緒に話せます。
+                </p>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="tag">マッチングアプリ</span>
+                <span className="tag">結婚相談所</span>
+                <span className="tag">紹介</span>
+                <span className="tag">SNS</span>
+                <span className="tag">外飲み</span>
+                <span className="tag">趣味の場</span>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a
+                  href={MOSH_SERVICES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleCreatorConsultationClick}
+                  className="btn-primary inline-flex rounded-full px-6 py-3.5 text-sm font-bold sm:text-[15px]"
+                >
+                  診断結果をもとに相談する
+                </a>
+                <a
+                  href={xUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleCreatorSocialClick("x", xUrl)}
+                  className="btn-secondary inline-flex rounded-full px-5 py-3 text-sm font-bold text-[var(--color-main)]"
+                >
+                  Xを見る
+                </a>
+                <a
+                  href={noteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleCreatorSocialClick("note", noteUrl)}
+                  className="btn-secondary inline-flex rounded-full px-5 py-3 text-sm font-bold text-[var(--color-main)]"
+                >
+                  noteを見る
+                </a>
+              </div>
             </div>
           </div>
-          <MoshConsultationCta placement="home_bottom" ctaKind="consultation" variant="compact" />
-        </div>
+        </article>
       </section>
     </section>
   );

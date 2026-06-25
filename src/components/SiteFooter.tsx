@@ -48,13 +48,13 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">個別に整理したい方へ</p>
+          <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">やうゆ監修</p>
           <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
-            マチアプ、相談所、紹介、SNS、外飲みまで含めて、婚活の進め方を見直す相談です。
+            恋愛・婚活の違和感を言語化する無料診断メディア。個別相談では、マチアプ、相談所、紹介、SNS、外飲みまで含めて婚活の進め方を見直します。
           </p>
           <div className="mt-3 grid gap-1">
             <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
-              やうゆ式 婚活の見直し相談
+              60分婚活相談
             </a>
             <a href={xUrl} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
               X: @yauyuism
