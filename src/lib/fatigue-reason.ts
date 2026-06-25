@@ -660,12 +660,12 @@ function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>
     normalizedScore: normalizedScores[type],
     result: FATIGUE_REASON_RESULTS[type],
   })).sort((a, b) => {
-    if (b.score !== a.score) {
-      return b.score - a.score;
-    }
-
     if (b.normalizedScore !== a.normalizedScore) {
       return b.normalizedScore - a.normalizedScore;
+    }
+
+    if (b.score !== a.score) {
+      return b.score - a.score;
     }
 
     return TIE_BREAK_PRIORITY.indexOf(a.type) - TIE_BREAK_PRIORITY.indexOf(b.type);

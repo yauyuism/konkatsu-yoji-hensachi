@@ -99,6 +99,25 @@ test("結果カードをPNG画像として保存できる", async ({ page }) => 
   expect(download.suggestedFilename()).toBe("婚活疲れ診断_判断先行型.png");
 });
 
+test("しんどさの内訳は画面に出る点数の高い順に並ぶ", async ({ page }) => {
+  await page.goto("/diagnoses/konkatsu-fatigue");
+
+  const answers = Array.from({ length: 20 }, () => "none");
+  answers[0] = "very";
+  answers[1] = "very";
+  answers[2] = "somewhat";
+  answers[16] = "very";
+  answers[17] = "very";
+
+  await answerDiagnosis(page, answers);
+
+  await expect(page.getByTestId("fatigue-reason-result-hero").locator("h1", { hasText: "予定調和疲れ型" })).toBeVisible();
+  await expect(page.getByTestId("fatigue-reason-breakdown")).toContainText("いちばんの詰まり：予定調和");
+  await expect(page.getByTestId("fatigue-reason-breakdown")).toContainText("100");
+  await expect(page.getByTestId("fatigue-reason-breakdown")).toContainText("しんどさの増幅ポイント：判断先行");
+  await expect(page.getByTestId("fatigue-reason-breakdown")).toContainText("67");
+});
+
 test("合わない人が入りすぎている結果ではプロフィール添削CTAを表示する", async ({ page }) => {
   await page.goto("/diagnoses/konkatsu-fatigue");
 
