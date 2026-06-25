@@ -132,7 +132,7 @@ function writePreviewImage(previewWindow: Window, dataUrl: string, fileName: str
 export async function shareOrDownloadResultImage(
   element: HTMLElement,
   fileName: string,
-  shareData?: { title?: string; text?: string }
+  shareData?: { title?: string; text?: string; url?: string }
 ): Promise<ResultImageSaveResult> {
   if (!canNativeShareImage(fileName)) {
     return downloadResultImage(element, fileName);
@@ -145,6 +145,7 @@ export async function shareOrDownloadResultImage(
     files: [file],
     title: shareData?.title,
     text: shareData?.text,
+    url: shareData?.url,
   });
 
   return { mode: "native-share" };
