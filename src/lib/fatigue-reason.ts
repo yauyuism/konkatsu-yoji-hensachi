@@ -1,4 +1,4 @@
-export type FatigueReasonType =
+export type FatigueReasonScoreType =
   | "reset"
   | "fastJudgment"
   | "wrongPeople"
@@ -8,6 +8,8 @@ export type FatigueReasonType =
   | "profileInvisible"
   | "stagedFatigue";
 
+export type FatigueReasonType = FatigueReasonScoreType | "lowSignal";
+
 export type FatigueAnswerValue = "very" | "somewhat" | "neutral" | "notMuch" | "none";
 
 export type FatigueAnswerOption = {
@@ -16,7 +18,7 @@ export type FatigueAnswerOption = {
 };
 
 type ScoreItem = {
-  type: FatigueReasonType;
+  type: FatigueReasonScoreType;
   points: number;
 };
 
@@ -46,7 +48,7 @@ export type FatigueReasonResult = {
 };
 
 export type FatigueReasonFactor = {
-  type: FatigueReasonType;
+  type: FatigueReasonScoreType;
   score: number;
   normalizedScore: number;
   result: FatigueReasonResult;
@@ -67,7 +69,7 @@ export const FATIGUE_ANSWER_OPTIONS: FatigueAnswerOption[] = [
   { value: "none", label: "ほとんど当てはまらない" },
 ];
 
-export const FATIGUE_REASON_TYPE_ORDER: FatigueReasonType[] = [
+export const FATIGUE_REASON_TYPE_ORDER: FatigueReasonScoreType[] = [
   "fastJudgment",
   "wrongPeople",
   "purposeFirst",
@@ -78,9 +80,9 @@ export const FATIGUE_REASON_TYPE_ORDER: FatigueReasonType[] = [
   "reset",
 ];
 
-export const FATIGUE_REASON_CAUSE_TYPE_ORDER: FatigueReasonType[] = FATIGUE_REASON_TYPE_ORDER.filter((type) => type !== "reset");
+export const FATIGUE_REASON_CAUSE_TYPE_ORDER: FatigueReasonScoreType[] = FATIGUE_REASON_TYPE_ORDER.filter((type) => type !== "reset");
 
-const TIE_BREAK_PRIORITY: FatigueReasonType[] = [
+const TIE_BREAK_PRIORITY: FatigueReasonScoreType[] = [
   "fastJudgment",
   "wrongPeople",
   "purposeFirst",
@@ -90,6 +92,8 @@ const TIE_BREAK_PRIORITY: FatigueReasonType[] = [
   "stagedFatigue",
   "reset",
 ];
+
+const LOW_SIGNAL_THRESHOLD = 0.4;
 
 const consultationCta: FatigueReasonCta = {
   title: "婚活のしんどさを、個別に整理したい人へ",
@@ -297,19 +301,47 @@ export const FATIGUE_REASON_QUESTIONS: FatigueReasonQuestion[] = [
   },
 ];
 
-function getTypeScore(items: ScoreItem[] | undefined, type: FatigueReasonType) {
+function getTypeScore(items: ScoreItem[] | undefined, type: FatigueReasonScoreType) {
   return items?.filter((item) => item.type === type).reduce((sum, item) => sum + item.points, 0) ?? 0;
 }
 
-export const FATIGUE_REASON_MAX_SCORES = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, type) => {
+export const FATIGUE_REASON_MAX_SCORES = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonScoreType, number>>((accumulator, type) => {
   accumulator[type] = FATIGUE_REASON_QUESTIONS.reduce((sum, question) => {
     const maxQuestionScore = Math.max(0, ...Object.values(question.scores).map((items) => getTypeScore(items, type)));
     return sum + maxQuestionScore;
   }, 0);
   return accumulator;
-}, {} as Record<FatigueReasonType, number>);
+}, {} as Record<FatigueReasonScoreType, number>);
 
 export const FATIGUE_REASON_RESULTS: Record<FatigueReasonType, FatigueReasonResult> = {
+  lowSignal: {
+    type: "lowSignal",
+    name: "大きな婚活疲れサインはまだ薄めのタイプ",
+    catchCopy: "今は、特定の原因が強く出ている状態ではなさそうです。",
+    reason: [
+      "今回の回答では、婚活疲れの原因がどこか一箇所に強く偏っている状態ではありませんでした。",
+      "ただし、疲れていないというより、まだ言語化できるほど強いサインになっていないだけの可能性もあります。小さな違和感を早めに拾っておくと、あとから大きく消耗しにくくなります。",
+    ],
+    commonStates: [
+      "婚活に強いしんどさはない",
+      "何となく気になることはあるが、まだ大きな問題にはなっていない",
+      "今の出会い方をすぐ変えるほどではない",
+      "ただ、少し疲れる日もある",
+    ],
+    stopTrying: [
+      "無理に大きな原因を探すこと",
+      "問題がないのに婚活を増やしすぎること",
+      "小さな違和感を全部なかったことにすること",
+    ],
+    reviewPoints: [
+      "最近少し引っかかった場面だけメモする",
+      "会った後に軽いか疲れるかを見る",
+      "疲れが強くなる前に、出会い方や会う基準を軽く整える",
+    ],
+    meetingHints: ["今のペースを守る", "負荷の低い出会い方を残す", "違和感が強くなったら再診断する"],
+    nextStep: "今週は婚活を増やすより、会った後に軽いか疲れるかだけメモしてみてください。",
+    cta: consultationCta,
+  },
   fastJudgment: {
     type: "fastJudgment",
     name: "速すぎる判断に疲れているタイプ",
@@ -552,6 +584,16 @@ export const FATIGUE_REASON_RESULTS: Record<FatigueReasonType, FatigueReasonResu
 };
 
 export const FATIGUE_REASON_ACTION_GUIDES: Record<FatigueReasonType, FatigueReasonActionGuide> = {
+  lowSignal: {
+    shortReason: "今回の回答では、大きな婚活疲れサインはまだ強く出ていません。",
+    reviewActions: [
+      "最近少し引っかかった場面だけメモする",
+      "会った後に軽いか疲れるかを見る",
+      "疲れが強くなる前に、出会い方や会う基準を軽く整える",
+    ],
+    suitedMeetings: ["今のペースを守る", "負荷の低い紹介", "自然に会える場", "違和感が強くなったら再診断"],
+    drainingMeetings: ["予定を急に増やす", "疲れていないのに原因探しをしすぎる", "小さな違和感を全部無視する"],
+  },
   fastJudgment: {
     shortReason: "短い時間で恋愛対象として判断される婚活に疲れやすい傾向があります。",
     reviewActions: [
@@ -653,7 +695,11 @@ function getConditionFactor(rankedFactors: FatigueReasonFactor[]) {
   return rankedFactors.find((factor) => factor.type === "reset") ?? null;
 }
 
-function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>, normalizedScores: Record<FatigueReasonType, number>) {
+function shouldUseLowSignal(topFactors: FatigueReasonFactor[]) {
+  return (topFactors[0]?.normalizedScore ?? 0) < LOW_SIGNAL_THRESHOLD;
+}
+
+function getFatigueReasonRankedFactors(scores: Record<FatigueReasonScoreType, number>, normalizedScores: Record<FatigueReasonScoreType, number>) {
   return FATIGUE_REASON_TYPE_ORDER.map<FatigueReasonFactor>((type) => ({
     type,
     score: scores[type],
@@ -673,19 +719,19 @@ function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>
 }
 
 export function isFatigueReasonType(value: string | null | undefined): value is FatigueReasonType {
-  return FATIGUE_REASON_TYPE_ORDER.includes(value as FatigueReasonType);
+  return value === "lowSignal" || FATIGUE_REASON_TYPE_ORDER.includes(value as FatigueReasonScoreType);
 }
 
 export function buildFatigueReasonDiagnosisFromResultType(type: FatigueReasonType) {
-  const resultType = type === "reset" ? "fastJudgment" : type;
-  const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
+  const resultType: FatigueReasonType = type === "reset" ? "fastJudgment" : type;
+  const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonScoreType, number>>((accumulator, currentType) => {
     accumulator[currentType] = currentType === resultType || currentType === type ? FATIGUE_REASON_MAX_SCORES[currentType] : 0;
     return accumulator;
-  }, {} as Record<FatigueReasonType, number>);
-  const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, currentType) => {
+  }, {} as Record<FatigueReasonScoreType, number>);
+  const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonScoreType, number>>((accumulator, currentType) => {
     accumulator[currentType] = currentType === resultType || currentType === type ? 1 : 0;
     return accumulator;
-  }, {} as Record<FatigueReasonType, number>);
+  }, {} as Record<FatigueReasonScoreType, number>);
   const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
   const topFactors = getTopCauseFactors(rankedFactors);
   const conditionFactor = getConditionFactor(rankedFactors);
@@ -702,10 +748,10 @@ export function buildFatigueReasonDiagnosisFromResultType(type: FatigueReasonTyp
 }
 
 export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
-  const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, type) => {
+  const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonScoreType, number>>((accumulator, type) => {
     accumulator[type] = 0;
     return accumulator;
-  }, {} as Record<FatigueReasonType, number>);
+  }, {} as Record<FatigueReasonScoreType, number>);
 
   answers.forEach((answer, index) => {
     const question = FATIGUE_REASON_QUESTIONS[index];
@@ -719,15 +765,15 @@ export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
   });
 
   // Compare ratios so types with fewer dedicated questions are not penalized.
-  const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, type) => {
+  const normalizedScores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonScoreType, number>>((accumulator, type) => {
     const maxScore = FATIGUE_REASON_MAX_SCORES[type];
     accumulator[type] = maxScore > 0 ? scores[type] / maxScore : 0;
     return accumulator;
-  }, {} as Record<FatigueReasonType, number>);
+  }, {} as Record<FatigueReasonScoreType, number>);
   const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
   const topFactors = getTopCauseFactors(rankedFactors);
   const conditionFactor = getConditionFactor(rankedFactors);
-  const resultType = topFactors[0]?.type ?? "fastJudgment";
+  const resultType: FatigueReasonType = shouldUseLowSignal(topFactors) ? "lowSignal" : topFactors[0]?.type ?? "lowSignal";
 
   return {
     result: FATIGUE_REASON_RESULTS[resultType],

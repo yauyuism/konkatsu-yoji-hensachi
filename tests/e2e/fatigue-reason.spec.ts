@@ -99,6 +99,21 @@ test("結果カードをPNG画像として保存できる", async ({ page }) => 
   expect(download.suggestedFilename()).toBe("婚活疲れ診断_判断先行型.png");
 });
 
+test("大きな疲れサインが薄い回答では低サイン結果を表示する", async ({ page }) => {
+  await page.goto("/diagnoses/konkatsu-fatigue");
+
+  await answerDiagnosis(page, Array.from({ length: 20 }, () => "none"));
+
+  await expect(page.getByTestId("fatigue-reason-result-hero").locator("h1", { hasText: "疲れサイン薄め型" })).toBeVisible();
+  await expect(page.getByTestId("fatigue-reason-low-signal")).toContainText("大きく出た原因はありません");
+  await expect(page.getByTestId("fatigue-reason-low-signal")).toContainText("大きな原因は薄め");
+  await expect(page.getByTestId("fatigue-reason-breakdown")).toHaveCount(0);
+  await expect(page.getByTestId("fatigue-reason-top-factors")).toHaveCount(0);
+  await expect(page.getByText("参考メモを見る")).toHaveCount(0);
+  await expect(page.getByTestId("fatigue-reason-share-card")).toContainText("大きな原因は薄め");
+  await expect(page.getByTestId("fatigue-reason-share-x-top")).toHaveAttribute("href", /result%3DlowSignal/);
+});
+
 test("しんどさの内訳は画面に出る点数の高い順に並ぶ", async ({ page }) => {
   await page.goto("/diagnoses/konkatsu-fatigue");
 

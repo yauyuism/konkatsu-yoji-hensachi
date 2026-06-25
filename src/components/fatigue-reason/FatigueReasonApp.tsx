@@ -222,6 +222,24 @@ function ConditionCard({ factor }: { factor: FatigueReasonFactor }) {
   );
 }
 
+function LowSignalSection() {
+  return (
+    <section data-testid="fatigue-reason-low-signal" className="soft-panel rounded-[1.4rem] border border-[rgba(143,183,161,0.2)] bg-[rgba(244,251,246,0.72)] p-5 sm:p-6">
+      <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">LOW SIGNAL</p>
+      <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">大きく出た原因はありません</h2>
+      <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
+        今回の回答では、特定の婚活疲れ原因が強く出ている状態ではありませんでした。
+        無理に原因を探すより、会った後に軽いか疲れるか、小さな違和感だけメモしておくのがおすすめです。
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="tag">大きな原因は薄め</span>
+        <span className="tag">今のペースを守る</span>
+        <span className="tag">違和感を早めにメモ</span>
+      </div>
+    </section>
+  );
+}
+
 function DetailedFactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
   const meta = FATIGUE_REASON_DISPLAY_META[factor.type];
   const guide = FATIGUE_REASON_ACTION_GUIDES[factor.type];
@@ -304,12 +322,25 @@ function ShareResultCard({
           <p className="mt-2 text-sm font-bold leading-7 text-[var(--text-main)]">{supportLabel}</p>
           <p className="mt-4 max-w-xl text-base font-bold leading-8 text-[var(--text-main)]">{shortCopy}</p>
           <div className="mt-5 grid gap-2 text-sm leading-7 text-[var(--text-main)]">
-            {topFactors.map((factor, index) => (
-              <p key={factor.type}>
-                <span className="font-black text-[var(--accent)]">{compactFactorRankLabels[index] ?? factorRankLabels[index]}：</span>
-                {FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
-              </p>
-            ))}
+            {topFactors.length > 0 ? (
+              topFactors.map((factor, index) => (
+                <p key={factor.type}>
+                  <span className="font-black text-[var(--accent)]">{compactFactorRankLabels[index] ?? factorRankLabels[index]}：</span>
+                  {FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
+                </p>
+              ))
+            ) : (
+              <>
+                <p>
+                  <span className="font-black text-[var(--accent)]">状態：</span>
+                  大きな原因は薄め
+                </p>
+                <p>
+                  <span className="font-black text-[var(--accent)]">次の見方：</span>
+                  小さな違和感をメモ
+                </p>
+              </>
+            )}
             {conditionFactor ? (
               <p className="pt-1">
                 <span className="font-black text-[var(--accent)]">コンディション：</span>
@@ -560,22 +591,25 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
   }
 
   const { result, normalizedScores, rankedFactors, topFactors, conditionFactor } = diagnosis;
+  const isLowSignal = result.type === "lowSignal";
   const primaryFactor = topFactors[0];
 
   if (!primaryFactor) {
     return null;
   }
 
-  const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[primaryFactor.type];
-  const suitedMeetings = mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
-  const drainingMeetings = mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
+  const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[result.type];
+  const suitedMeetings = isLowSignal ? primaryGuide.suitedMeetings : mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
+  const drainingMeetings = isLowSignal ? primaryGuide.drainingMeetings : mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
   const resultMeta = FATIGUE_REASON_DISPLAY_META[result.type];
-  const showCondition = conditionFactor ? getFactorScore(conditionFactor) >= conditionThreshold : false;
+  const showCondition = !isLowSignal && conditionFactor ? getFactorScore(conditionFactor) >= conditionThreshold : false;
   const chartData = FATIGUE_REASON_TYPE_ORDER.map((type) => ({
     label: FATIGUE_REASON_DISPLAY_META[type].chartLabel,
     score: Math.round(normalizedScores[type] * 100),
   }));
-  const shareTopLabels = topFactors.map((factor) => FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel);
+  const shareTopLabels = isLowSignal
+    ? ["大きな原因は薄め", "今のペースを守る", "違和感を早めにメモ"]
+    : topFactors.map((factor) => FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel);
   const resultUrl = getFatigueReasonResultUrl(result.type);
   const xShareUrl = getFatigueReasonXShareUrl({
     resultLabel: resultMeta.resultLabel,
@@ -687,11 +721,17 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
             <FatigueReasonRadarChart data={chartData} height={260} />
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {topFactors.map((factor, index) => (
-              <span key={factor.type} className="tag">
-                {index + 1}. {compactFactorRankLabels[index] ?? factorRankLabels[index]}：{FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
-              </span>
-            ))}
+            {isLowSignal
+              ? shareTopLabels.map((label) => (
+                  <span key={label} className="tag">
+                    {label}
+                  </span>
+                ))
+              : topFactors.map((factor, index) => (
+                  <span key={factor.type} className="tag">
+                    {index + 1}. {compactFactorRankLabels[index] ?? factorRankLabels[index]}：{FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}
+                  </span>
+                ))}
             {showCondition ? <span className="tag">コンディション：立て直しサインあり</span> : null}
           </div>
           <a
@@ -709,17 +749,23 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
         <div className="mt-8 grid gap-4">
           <FatigueMapSection chartData={chartData} />
 
-          <TopFactorBars factors={topFactors} />
+          {isLowSignal ? (
+            <LowSignalSection />
+          ) : (
+            <>
+              <TopFactorBars factors={topFactors} />
 
-          <section data-testid="fatigue-reason-top-factors" className="grid gap-4 lg:grid-cols-3">
-            {topFactors.map((factor, index) => (
-              <FactorCard key={factor.type} factor={factor} index={index} />
-            ))}
-          </section>
+              <section data-testid="fatigue-reason-top-factors" className="grid gap-4 lg:grid-cols-3">
+                {topFactors.map((factor, index) => (
+                  <FactorCard key={factor.type} factor={factor} index={index} />
+                ))}
+              </section>
 
-          {showCondition && conditionFactor ? <ConditionCard factor={conditionFactor} /> : null}
+              {showCondition && conditionFactor ? <ConditionCard factor={conditionFactor} /> : null}
 
-          <DetailedExplanationSection factors={topFactors} showCondition={showCondition} />
+              <DetailedExplanationSection factors={topFactors} showCondition={showCondition} />
+            </>
+          )}
 
           <FatigueLanguageConsultationCta resultType={result.type} />
 
@@ -759,7 +805,7 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
                 resultLabel={resultMeta.resultLabel}
                 supportLabel={resultMeta.supportLabel}
                 shortCopy={resultMeta.shareCopy}
-                topFactors={topFactors}
+                topFactors={isLowSignal ? [] : topFactors}
                 conditionFactor={showCondition ? conditionFactor : null}
                 chartData={chartData}
               />
@@ -792,28 +838,30 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
             ) : null}
           </section>
 
-          <details className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-            <summary className="cursor-pointer text-sm font-black tracking-[0.14em] text-[var(--color-text)]">
-              参考メモを見る
-            </summary>
-            <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
-              結果本文では、点数ではなく上位の原因と今のコンディションから見立てています。
-            </p>
-            <div className="mt-4 grid gap-3">
-              {rankedFactors.map((factor) => (
-                <div key={factor.type} className="grid grid-cols-[minmax(5.5rem,8rem)_1fr_minmax(5.5rem,8rem)] items-center gap-3 text-sm">
-                  <span className="text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">{FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}</span>
-                  <span className="h-2 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
-                    <span
-                      className="block h-full rounded-full bg-[var(--color-main)]"
-                      style={{ width: `${Math.round(normalizedScores[factor.type] * 100)}%` }}
-                    />
-                  </span>
-                  <span className="font-numeric text-right text-xs font-black text-[var(--text-main)]">{getFactorScoreText(factor)}</span>
-                </div>
-              ))}
-            </div>
-          </details>
+          {!isLowSignal ? (
+            <details className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+              <summary className="cursor-pointer text-sm font-black tracking-[0.14em] text-[var(--color-text)]">
+                参考メモを見る
+              </summary>
+              <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
+                結果本文では、点数ではなく上位の原因と今のコンディションから見立てています。
+              </p>
+              <div className="mt-4 grid gap-3">
+                {rankedFactors.map((factor) => (
+                  <div key={factor.type} className="grid grid-cols-[minmax(5.5rem,8rem)_1fr_minmax(5.5rem,8rem)] items-center gap-3 text-sm">
+                    <span className="text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">{FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel}</span>
+                    <span className="h-2 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
+                      <span
+                        className="block h-full rounded-full bg-[var(--color-main)]"
+                        style={{ width: `${Math.round(normalizedScores[factor.type] * 100)}%` }}
+                      />
+                    </span>
+                    <span className="font-numeric text-right text-xs font-black text-[var(--text-main)]">{getFactorScoreText(factor)}</span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ) : null}
 
           <MoshConsultationCta
             placement="fatigue_reason_result"

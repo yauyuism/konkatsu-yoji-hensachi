@@ -10,6 +10,14 @@ export type FatigueReasonDisplayMeta = {
 };
 
 export const FATIGUE_REASON_DISPLAY_META: Record<FatigueReasonType, FatigueReasonDisplayMeta> = {
+  lowSignal: {
+    resultLabel: "疲れサイン薄め型",
+    shortLabel: "疲れサイン薄め",
+    chartLabel: "薄め",
+    supportLabel: "大きな婚活疲れはまだ強く出ていないタイプ",
+    formalDescription: "今回の回答では、特定の原因が強く出ている状態ではありません。",
+    shareCopy: "今は大きな婚活疲れサインより、軽い違和感を早めに整えるタイミングかもしれません。",
+  },
   fastJudgment: {
     resultLabel: "判断先行型",
     shortLabel: "判断先行",
