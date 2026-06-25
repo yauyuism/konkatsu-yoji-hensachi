@@ -18,6 +18,7 @@ import {
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
 import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
+import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type FatigueReasonStage = "intro" | "question" | "result";
 
@@ -159,6 +160,44 @@ function TopFactorBars({ factors }: { factors: FatigueReasonFactor[] }) {
           );
         })}
       </div>
+    </section>
+  );
+}
+
+function FatigueLanguageConsultationCta({ resultType }: { resultType: FatigueReasonType }) {
+  const handleClick = () => {
+    trackEvent("consultation_cta_click", {
+      placement: "fatigue_reason_after_top_factors",
+      quiz_name: "fatigue_reason",
+      result_type: resultType,
+      cta_kind: "fatigue_language_consultation",
+    });
+  };
+
+  return (
+    <section
+      data-testid="fatigue-reason-language-consultation-cta"
+      className="soft-panel rounded-[1.4rem] border border-[rgba(63,52,46,0.08)] bg-white/72 p-5 sm:p-6"
+    >
+      <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">SECOND OPINION</p>
+      <h2 className="mt-3 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">
+        診断だけでは分からない人へ
+      </h2>
+      <p className="mt-4 text-sm leading-8 text-[var(--text-sub)] sm:text-base">
+        診断結果は入口です。プロフィールの見せ方、今までの出会い方、会ってきた相手、LINE、会ったあとの感情まで見ると、婚活でどこに消耗しているのかはもっと具体的に見えてきます。
+      </p>
+      <p className="mt-3 rounded-[1rem] bg-white/80 px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
+        婚活をもっと頑張らせるための相談ではありません。合っていない頑張り方をやめるための、婚活のセカンドオピニオンです。
+      </p>
+      <a
+        href={MOSH_SERVICES_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={handleClick}
+        className="btn-primary mt-5 inline-flex min-h-12 rounded-full px-6 py-3.5 text-sm font-black"
+      >
+        婚活疲れの言語化相談を見てみる
+      </a>
     </section>
   );
 }
@@ -548,6 +587,8 @@ export function FatigueReasonApp() {
           </section>
 
           <TopFactorBars factors={topFactors} />
+
+          <FatigueLanguageConsultationCta resultType={result.type} />
 
           <ResultSection title="なぜこう出た？">
             <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)]">
