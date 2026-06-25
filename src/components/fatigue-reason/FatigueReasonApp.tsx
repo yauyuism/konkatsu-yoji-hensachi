@@ -26,8 +26,8 @@ import { MOSH_SERVICES_URL } from "@/lib/service-links";
 type FatigueReasonStage = "intro" | "question" | "result";
 
 const analyzingDelayMs = 180;
-const factorRankLabels = ["いちばんの詰まり", "しんどさの増幅ポイント", "見落としがちな疲れグセ"] as const;
-const compactFactorRankLabels = ["いちばんの詰まり", "増幅ポイント", "疲れグセ"] as const;
+const factorRankLabels = ["一番の原因", "二番目のストレス", "見落としがちな癖"] as const;
+const compactFactorRankLabels = ["一番の原因", "二番目のストレス", "見落としがちな癖"] as const;
 const conditionThreshold = 70;
 
 function getFatigueCtaKind(type: FatigueReasonType) {
