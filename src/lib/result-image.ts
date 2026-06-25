@@ -1,11 +1,5 @@
 type ResultImageSaveResult = {
-  mode: "download" | "preview" | "native-share";
-};
-
-type ResultImageShareData = {
-  title?: string;
-  text?: string;
-  url?: string;
+  mode: "download" | "preview";
 };
 
 function isIosSafari() {
@@ -57,30 +51,6 @@ async function renderResultImage(element: HTMLElement) {
     return { dataUrl, blob };
   } finally {
     clone.remove();
-  }
-}
-
-function isLikelyMobileDevice() {
-  const userAgent = window.navigator.userAgent;
-
-  return /Android|iP(ad|hone|od)/.test(userAgent) || (userAgent.includes("Macintosh") && navigator.maxTouchPoints > 1);
-}
-
-export function canNativeShareImage(fileName: string) {
-  if (!isLikelyMobileDevice()) {
-    return false;
-  }
-
-  if (typeof navigator.share !== "function" || typeof navigator.canShare !== "function") {
-    return false;
-  }
-
-  try {
-    const testFile = new File([new Blob(["test"], { type: "image/png" })], fileName, { type: "image/png" });
-
-    return navigator.canShare({ files: [testFile] });
-  } catch {
-    return false;
   }
 }
 
@@ -143,54 +113,6 @@ function writePreviewImage(previewWindow: Window, dataUrl: string, fileName: str
     </html>
   `);
   previewWindow.document.close();
-}
-
-export async function shareOrDownloadResultImage(
-  element: HTMLElement,
-  fileName: string,
-  shareData?: ResultImageShareData
-): Promise<ResultImageSaveResult> {
-  if (!canNativeShareImage(fileName)) {
-    return downloadResultImage(element, fileName);
-  }
-
-  const { blob } = await renderResultImage(element);
-  const file = new File([blob], fileName, { type: "image/png" });
-
-  await navigator.share({
-    files: [file],
-    title: shareData?.title,
-    text: shareData?.text,
-    url: shareData?.url,
-  });
-
-  return { mode: "native-share" };
-}
-
-export async function shareResultImageFile(
-  element: HTMLElement,
-  fileName: string,
-  shareData?: ResultImageShareData
-): Promise<ResultImageSaveResult> {
-  if (!canNativeShareImage(fileName)) {
-    throw new Error("画像ファイル共有に対応していません");
-  }
-
-  const { blob } = await renderResultImage(element);
-  const file = new File([blob], fileName, { type: "image/png" });
-
-  if (!navigator.canShare({ files: [file] })) {
-    throw new Error("生成した画像ファイルを共有できません");
-  }
-
-  await navigator.share({
-    files: [file],
-    title: shareData?.title,
-    text: shareData?.text,
-    url: shareData?.url,
-  });
-
-  return { mode: "native-share" };
 }
 
 export async function downloadResultImage(element: HTMLElement, fileName: string): Promise<ResultImageSaveResult> {
