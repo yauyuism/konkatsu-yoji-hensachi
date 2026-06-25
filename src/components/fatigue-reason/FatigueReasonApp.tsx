@@ -7,10 +7,10 @@ import { trackEvent } from "@/lib/analytics";
 import { markToolCompleted } from "@/lib/completed-tools";
 import {
   FATIGUE_ANSWER_OPTIONS,
+  FATIGUE_REASON_ACTION_GUIDES,
   FATIGUE_REASON_QUESTIONS,
-  FATIGUE_REASON_RESULTS,
-  FATIGUE_REASON_TYPE_ORDER,
   runFatigueReasonDiagnosis,
+  type FatigueReasonFactor,
   type FatigueReasonType,
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
@@ -18,6 +18,7 @@ import {
 type FatigueReasonStage = "intro" | "question" | "result";
 
 const analyzingDelayMs = 180;
+const factorLabels = ["主因", "副因", "補助要因"] as const;
 
 function getFatigueCtaKind(type: FatigueReasonType) {
   if (type === "wrongPeople") {
@@ -40,6 +41,20 @@ function ResultList({ items }: { items: string[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function mergeGuideItems(factors: FatigueReasonFactor[], key: "suitedMeetings" | "drainingMeetings") {
+  return Array.from(new Set(factors.flatMap((factor) => FATIGUE_REASON_ACTION_GUIDES[factor.type][key])));
+}
+
+function FactorCard({ factor, index }: { factor: FatigueReasonFactor; index: number }) {
+  return (
+    <article className="rounded-[1.2rem] border border-[var(--line)] bg-white/86 p-5">
+      <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">{factorLabels[index] ?? "要因"}</p>
+      <h3 className="mt-2 text-lg font-black leading-tight text-[var(--text-main)]">{factor.result.name}</h3>
+      <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">{FATIGUE_REASON_ACTION_GUIDES[factor.type].shortReason}</p>
+    </article>
   );
 }
 
@@ -251,7 +266,17 @@ export function FatigueReasonApp() {
     );
   }
 
-  const { result, normalizedScores } = diagnosis;
+  const { result, normalizedScores, rankedFactors, topFactors, introParagraphs } = diagnosis;
+  const primaryFactor = topFactors[0];
+
+  if (!primaryFactor) {
+    return null;
+  }
+
+  const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[primaryFactor.type];
+  const secondaryFactors = topFactors.slice(1);
+  const suitedMeetings = mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
+  const drainingMeetings = mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
 
   return (
     <section data-testid="fatigue-reason-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
@@ -260,7 +285,7 @@ export function FatigueReasonApp() {
           RESULT
         </p>
         <h1 className="mt-4 text-center text-3xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
-          あなたは、
+          あなたが婚活疲れしている一番の理由
           <span className="block text-[var(--accent)]">{result.name}</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm font-bold leading-8 text-[var(--text-main)] sm:text-base">
@@ -268,59 +293,97 @@ export function FatigueReasonApp() {
         </p>
 
         <div className="mt-8 grid gap-4">
+          <section data-testid="fatigue-reason-top-factors" className="grid gap-4 lg:grid-cols-3">
+            {topFactors.map((factor, index) => (
+              <FactorCard key={factor.type} factor={factor} index={index} />
+            ))}
+          </section>
+
           <ResultSection title="あなたが疲れている理由">
             <div className="mt-4 grid gap-3 text-sm leading-8 text-[var(--text-sub)]">
-              {result.reason.map((paragraph) => (
+              {introParagraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
           </ResultSection>
 
+          <ResultSection title="主因の詳しい説明">
+            <div className="mt-4 grid gap-6 lg:grid-cols-3">
+              <div>
+                <h3 className="text-sm font-black leading-6 text-[var(--text-main)]">なぜ疲れているのか</h3>
+                <div className="mt-3 grid gap-3 text-sm leading-8 text-[var(--text-sub)]">
+                  {result.reason.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-black leading-6 text-[var(--text-main)]">どんな場面で疲れやすいか</h3>
+                <ResultList items={result.commonStates} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black leading-6 text-[var(--text-main)]">無理に頑張らなくていいこと</h3>
+                <ResultList items={result.stopTrying} />
+              </div>
+            </div>
+          </ResultSection>
+
+          <ResultSection title="次に強く出ている理由">
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {secondaryFactors.map((factor, index) => (
+                <FactorCard key={factor.type} factor={factor} index={index + 1} />
+              ))}
+            </div>
+          </ResultSection>
+
           <div className="grid gap-4 lg:grid-cols-2">
-            <ResultSection title="よくある状態">
-              <ResultList items={result.commonStates} />
+            <ResultSection title="まず見直すこと">
+              <ResultList items={primaryGuide.reviewActions} />
             </ResultSection>
 
-            <ResultSection title="無理に頑張らなくていいこと">
-              <ResultList items={result.stopTrying} />
-            </ResultSection>
-
-            <ResultSection title="見直すと楽になりやすいこと">
-              <ResultList items={result.reviewPoints} />
-            </ResultSection>
-
-            <ResultSection title="向いている出会い方のヒント">
+            <ResultSection title="合いやすい出会い方">
               <div className="mt-4 flex flex-wrap gap-2">
-                {result.meetingHints.map((hint) => (
+                {suitedMeetings.map((hint) => (
                   <span key={hint} className="tag">
                     {hint}
                   </span>
                 ))}
               </div>
             </ResultSection>
+
+            <ResultSection title="主戦場にしすぎると疲れやすい出会い方">
+              <ResultList items={drainingMeetings} />
+            </ResultSection>
+
+            <ResultSection title="おすすめの次の一歩">
+              <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{result.nextStep}</p>
+            </ResultSection>
           </div>
 
-          <ResultSection title="おすすめの次の一歩">
-            <p className="mt-4 text-sm font-bold leading-8 text-[var(--color-text)] sm:text-base">{result.nextStep}</p>
-          </ResultSection>
-
-          <section className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
-            <h2 className="text-sm font-black tracking-[0.14em] text-[var(--color-text)]">タイプ一致度</h2>
+          <details className="soft-panel rounded-[1.4rem] p-5 sm:p-6">
+            <summary className="cursor-pointer text-sm font-black tracking-[0.14em] text-[var(--color-text)]">
+              詳しいスコアを見る
+            </summary>
+            <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
+              ここは参考用です。結果本文では、パーセンテージではなく上位の原因から見立てています。
+            </p>
             <div className="mt-4 grid gap-3">
-              {FATIGUE_REASON_TYPE_ORDER.map((type) => (
-                <div key={type} className="grid grid-cols-[minmax(6.5rem,9rem)_1fr_3rem] items-center gap-3 text-sm">
-                  <span className="text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">{FATIGUE_REASON_RESULTS[type].name}</span>
+              {rankedFactors.map((factor) => (
+                <div key={factor.type} className="grid grid-cols-[minmax(6.5rem,9rem)_1fr_3rem] items-center gap-3 text-sm">
+                  <span className="text-xs font-bold leading-5 text-[var(--text-main)] sm:text-sm">{factor.result.name}</span>
                   <span className="h-2 overflow-hidden rounded-full bg-[rgba(63,52,46,0.1)]">
                     <span
                       className="block h-full rounded-full bg-[var(--color-main)]"
-                      style={{ width: `${Math.round(normalizedScores[type] * 100)}%` }}
+                      style={{ width: `${Math.round(normalizedScores[factor.type] * 100)}%` }}
                     />
                   </span>
-                  <span className="font-numeric text-xs font-black text-[var(--text-main)]">{Math.round(normalizedScores[type] * 100)}%</span>
+                  <span className="font-numeric text-xs font-black text-[var(--text-main)]">
+                    {Math.round(normalizedScores[factor.type] * 100)}%
+                  </span>
                 </div>
               ))}
             </div>
-          </section>
+          </details>
 
           <MoshConsultationCta
             placement="fatigue_reason_result"

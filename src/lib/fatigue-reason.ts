@@ -45,6 +45,20 @@ export type FatigueReasonResult = {
   cta: FatigueReasonCta;
 };
 
+export type FatigueReasonFactor = {
+  type: FatigueReasonType;
+  score: number;
+  normalizedScore: number;
+  result: FatigueReasonResult;
+};
+
+export type FatigueReasonActionGuide = {
+  shortReason: string;
+  reviewActions: string[];
+  suitedMeetings: string[];
+  drainingMeetings: string[];
+};
+
 export const FATIGUE_ANSWER_OPTIONS: FatigueAnswerOption[] = [
   { value: "very", label: "とても当てはまる" },
   { value: "somewhat", label: "やや当てはまる" },
@@ -535,6 +549,119 @@ export const FATIGUE_REASON_RESULTS: Record<FatigueReasonType, FatigueReasonResu
   },
 };
 
+export const FATIGUE_REASON_ACTION_GUIDES: Record<FatigueReasonType, FatigueReasonActionGuide> = {
+  fastJudgment: {
+    shortReason: "短い時間で恋愛対象として判断される婚活に疲れやすい傾向があります。",
+    reviewActions: [
+      "初回や2回目で好きになろうとしすぎない",
+      "何度か自然に会える出会い方を増やす",
+      "プロフィールに「少しずつ仲良くなりたい」温度感を入れる",
+    ],
+    suitedMeetings: ["友達の友達", "趣味の場", "SNS", "外飲み", "何度か自然に顔を合わせる場所"],
+    drainingMeetings: ["即アポ前提のマチアプ", "初回で恋愛対象として判断される婚活", "2〜3回で交際判断を求められる出会い"],
+  },
+  wrongPeople: {
+    shortReason: "プロフィールや出会い方が広く刺さりすぎて、温度感の違う相手まで入りやすい傾向があります。",
+    reviewActions: [
+      "万人受けのプロフィールをやめる",
+      "合わない人を減らす言葉を入れる",
+      "結婚観、生活観、距離感をやわらかくプロフィールに出す",
+    ],
+    suitedMeetings: ["プロフィール改善後のマチアプ", "価値観が伝わるSNS", "ヒトオシ", "友人紹介", "社会人サークル"],
+    drainingMeetings: ["無難なプロフィールのまま広く受けるアプリ", "条件だけで大量に会う婚活", "自分の価値観を隠したまま進める出会い"],
+  },
+  purposeFirst: {
+    shortReason: "誰を選ぶかの前に、なぜ結婚したいのかや選ぶ基準がまだ曖昧な傾向があります。",
+    reviewActions: [
+      "どんな人がいいかの前に、なぜ結婚したいかを書く",
+      "結婚後にどんな生活をしたいかを言葉にする",
+      "「楽しい人」と「生活に入れていい人」を分けて考える",
+    ],
+    suitedMeetings: ["婚活の見直し相談", "価値観を言語化したうえでの紹介", "目的を整理したうえでの相談所", "SNSやnoteで価値観を出す出会い"],
+    drainingMeetings: ["目的が曖昧なまま相手を大量に見るアプリ", "何を選べばいいか分からないままの相談所", "決め手探しだけを続ける婚活"],
+  },
+  profileInvisible: {
+    shortReason: "条件やプロフィールだけで見られる場だと、人柄や空気感の魅力が伝わりにくい傾向があります。",
+    reviewActions: [
+      "条件欄だけで勝負しない出会い方を増やす",
+      "人柄や場での振る舞いが見える場所に行く",
+      "SNSや紹介で価値観が伝わる導線を作る",
+    ],
+    suitedMeetings: ["SNS", "友人紹介", "外飲み", "趣味の場", "生活圏での出会い"],
+    drainingMeetings: ["条件検索だけで並ぶ相談所", "プロフィールだけで判断されるアプリ", "初回で人間性が見える前に判断される出会い"],
+  },
+  placeMismatch: {
+    shortReason: "好きになれる場所と、関係を進めやすい場所が分かれていて、気持ちと行動が噛み合いにくい傾向があります。",
+    reviewActions: [
+      "好きになれる場所で、場の外に出す動きを作る",
+      "いきなり口説かず、軽い一対一の時間を作る",
+      "「この前話していた店、行ってみませんか」くらいの誘い方を使う",
+    ],
+    suitedMeetings: ["外飲み", "サークル", "趣味の場", "友達の友達", "SNSからの少人数飲み"],
+    drainingMeetings: ["口説きやすいけど好きになれないアプリ", "好きになれるけど何も進まないコミュニティ", "場の中だけで完結する出会い"],
+  },
+  overAdjusting: {
+    shortReason: "相手がどう思うかを優先して、自分がまた会いたいかを後回しにしやすい傾向があります。",
+    reviewActions: [
+      "相手がどう思ったかより、自分がまた会いたいかを見る",
+      "会った後に軽いのか疲れるのかを記録する",
+      "違和感がある相手には無理に会わない",
+    ],
+    suitedMeetings: ["自分のペースを守れる紹介", "価値観が伝わるプロフィール", "友達の友達", "少人数の場", "安心して断れる出会い方"],
+    drainingMeetings: ["断りづらい紹介", "押しが強い相手が多いアプリ", "相手のペースに巻き込まれやすい出会い"],
+  },
+  stagedFatigue: {
+    shortReason: "恋愛相手を探すためだけの予定が続き、生活や人間関係が広がらないことに飽きやすい傾向があります。",
+    reviewActions: ["恋愛目的だけではない場所に行く", "行きつけや趣味の場を1つ作る", "SNSで生活や価値観がにじむ投稿を増やす"],
+    suitedMeetings: ["外飲み", "行きつけ", "SNS", "趣味の場", "友達の友達", "生活圏が広がる出会い"],
+    drainingMeetings: ["マチアプだけ", "婚活イベントだけ", "毎回同じ自己紹介をする出会い", "恋愛目的だけの場"],
+  },
+  reset: {
+    shortReason: "新しい出会いを増やす前に、一度婚活で削れた自分を立て直したほうがよい状態です。",
+    reviewActions: [
+      "新しい予定を増やす前に、婚活で何がしんどかったかを書く",
+      "アプリを開く頻度を一度減らす",
+      "プロフィール、会う基準、出会い方を整理してから再開する",
+    ],
+    suitedMeetings: ["まずは相談で整理", "負荷の低い紹介", "SNSでゆるくつながる", "趣味や生活の延長の出会い"],
+    drainingMeetings: ["予定を詰め込む婚活", "毎週新しい人と会い続けるアプリ", "断る・断られるを繰り返す短期決戦の出会い"],
+  },
+};
+
+export function buildFatigueReasonIntro(topFactors: FatigueReasonFactor[]) {
+  const [primary, secondary, tertiary] = topFactors;
+  const primaryGuide = FATIGUE_REASON_ACTION_GUIDES[primary.type];
+  const secondaryGuide = secondary ? FATIGUE_REASON_ACTION_GUIDES[secondary.type] : undefined;
+  const tertiaryGuide = tertiary ? FATIGUE_REASON_ACTION_GUIDES[tertiary.type] : undefined;
+
+  return [
+    `あなたが婚活疲れしている一番の理由は、${primaryGuide.shortReason}`,
+    secondaryGuide && tertiaryGuide
+      ? `さらに、${secondaryGuide.shortReason}また、${tertiaryGuide.shortReason}`
+      : "出会いの数が足りないというより、今の進め方があなたの感覚に合っていない可能性があります。",
+    `まずは「${primaryGuide.reviewActions[0]}」ところから見直すと、今の疲れを減らしやすそうです。`,
+  ].filter(Boolean);
+}
+
+function getFatigueReasonRankedFactors(scores: Record<FatigueReasonType, number>, normalizedScores: Record<FatigueReasonType, number>) {
+  return FATIGUE_REASON_TYPE_ORDER.map<FatigueReasonFactor>((type) => ({
+    type,
+    score: scores[type],
+    normalizedScore: normalizedScores[type],
+    result: FATIGUE_REASON_RESULTS[type],
+  })).sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+
+    if (b.normalizedScore !== a.normalizedScore) {
+      return b.normalizedScore - a.normalizedScore;
+    }
+
+    return TIE_BREAK_PRIORITY.indexOf(a.type) - TIE_BREAK_PRIORITY.indexOf(b.type);
+  });
+}
+
 export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
   const scores = FATIGUE_REASON_TYPE_ORDER.reduce<Record<FatigueReasonType, number>>((accumulator, type) => {
     accumulator[type] = 0;
@@ -558,13 +685,16 @@ export function runFatigueReasonDiagnosis(answers: FatigueAnswerValue[]) {
     accumulator[type] = maxScore > 0 ? scores[type] / maxScore : 0;
     return accumulator;
   }, {} as Record<FatigueReasonType, number>);
-  const maxNormalizedScore = Math.max(...FATIGUE_REASON_TYPE_ORDER.map((type) => normalizedScores[type]));
-  const winners = FATIGUE_REASON_TYPE_ORDER.filter((type) => Math.abs(normalizedScores[type] - maxNormalizedScore) < 0.000001);
-  const resultType = TIE_BREAK_PRIORITY.find((type) => winners.includes(type)) ?? "reset";
+  const rankedFactors = getFatigueReasonRankedFactors(scores, normalizedScores);
+  const topFactors = rankedFactors.slice(0, 3);
+  const resultType = topFactors[0]?.type ?? "reset";
 
   return {
     result: FATIGUE_REASON_RESULTS[resultType],
     scores,
     normalizedScores,
+    rankedFactors,
+    topFactors,
+    introParagraphs: buildFatigueReasonIntro(topFactors),
   };
 }
