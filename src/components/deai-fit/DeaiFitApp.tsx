@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { DeaiFitRadarChart } from "@/components/deai-fit/DeaiFitRadarChart";
 import { trackEvent } from "@/lib/analytics";
@@ -17,6 +17,7 @@ import {
   type DeaiFitType,
 } from "@/lib/deai-fit";
 import { getDeaiFitResultUrl, getDeaiFitXShareUrl } from "@/lib/deai-fit-share";
+import { downloadResultImage } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type DeaiFitStage = "intro" | "question" | "result";
@@ -331,6 +332,8 @@ export function DeaiFitApp() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<DeaiFitAnswerValue[]>([]);
   const [selectedValue, setSelectedValue] = useState<DeaiFitAnswerValue | null>(null);
+  const [isSavingShareImage, setIsSavingShareImage] = useState(false);
+  const shareCardRef = useRef<HTMLDivElement>(null);
 
   const diagnosis = useMemo(() => runDeaiFitDiagnosis(answers), [answers]);
   const question = DEAI_FIT_QUESTIONS[questionIndex];
@@ -572,6 +575,26 @@ export function DeaiFitApp() {
     });
   };
 
+  const handleSaveShareImage = async () => {
+    if (!shareCardRef.current || isSavingShareImage) {
+      return;
+    }
+
+    setIsSavingShareImage(true);
+
+    try {
+      trackEvent("save_image_click", {
+        placement: "share_card",
+        quiz_name: "deai_fit",
+        result_type: result.type,
+      });
+
+      await downloadResultImage(shareCardRef.current, `deai-fit-${result.type}.png`);
+    } finally {
+      setIsSavingShareImage(false);
+    }
+  };
+
   return (
     <section data-testid="deai-fit-result" className="screen-shell mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <div className="mx-auto max-w-4xl">
@@ -652,13 +675,15 @@ export function DeaiFitApp() {
                 結果を貼るなら、このカードが一番伝わりやすいです。向いている出会い方と疲れやすい出会い方だけに絞っています。
               </p>
             </div>
-            <ShareResultCard
-              resultLabel={resultMeta.resultLabel}
-              shortCopy={resultMeta.shareCopy}
-              suitedItems={suitedTop}
-              notFitItem={result.notFit[0] ?? "短期判断の婚活"}
-            />
-            <div className="flex justify-center">
+            <div ref={shareCardRef}>
+              <ShareResultCard
+                resultLabel={resultMeta.resultLabel}
+                shortCopy={resultMeta.shareCopy}
+                suitedItems={suitedTop}
+                notFitItem={result.notFit[0] ?? "短期判断の婚活"}
+              />
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
               <a
                 data-testid="deai-fit-share-x-bottom"
                 href={xShareUrl}
@@ -669,6 +694,15 @@ export function DeaiFitApp() {
               >
                 Xで結果をシェアする
               </a>
+              <button
+                data-testid="deai-fit-save-card"
+                type="button"
+                onClick={handleSaveShareImage}
+                disabled={isSavingShareImage}
+                className="btn-secondary inline-flex rounded-full px-6 py-3.5 text-sm font-black text-[var(--color-main)] disabled:cursor-wait disabled:opacity-70"
+              >
+                {isSavingShareImage ? "画像を保存しています..." : "画像を保存する"}
+              </button>
             </div>
           </section>
 

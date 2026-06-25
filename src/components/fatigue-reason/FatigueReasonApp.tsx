@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { FatigueReasonRadarChart } from "@/components/fatigue-reason/FatigueReasonRadarChart";
 import { MoshConsultationCta } from "@/components/MoshConsultationCta";
@@ -18,6 +18,7 @@ import {
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
 import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
+import { downloadResultImage } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type FatigueReasonStage = "intro" | "question" | "result";
@@ -283,6 +284,8 @@ export function FatigueReasonApp() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<FatigueAnswerValue[]>([]);
   const [selectedValue, setSelectedValue] = useState<FatigueAnswerValue | null>(null);
+  const [isSavingShareImage, setIsSavingShareImage] = useState(false);
+  const shareCardRef = useRef<HTMLDivElement>(null);
 
   const diagnosis = useMemo(() => runFatigueReasonDiagnosis(answers), [answers]);
   const question = FATIGUE_REASON_QUESTIONS[questionIndex];
@@ -533,6 +536,26 @@ export function FatigueReasonApp() {
     });
   };
 
+  const handleSaveShareImage = async () => {
+    if (!shareCardRef.current || isSavingShareImage) {
+      return;
+    }
+
+    setIsSavingShareImage(true);
+
+    try {
+      trackEvent("save_image_click", {
+        placement: "share_card",
+        quiz_name: "fatigue_reason",
+        result_type: result.type,
+      });
+
+      await downloadResultImage(shareCardRef.current, `konkatsu-fatigue-${result.type}.png`);
+    } finally {
+      setIsSavingShareImage(false);
+    }
+  };
+
   const handleRelatedDiagnosisClick = (title: string) => {
     trackEvent("related_diagnosis_click", {
       placement: "fatigue_reason_result",
@@ -650,8 +673,10 @@ export function FatigueReasonApp() {
                 結果を貼るなら、このカードが一番伝わりやすいです。上位3つだけに絞って、SNSで見ても意味が分かる形にしています。
               </p>
             </div>
-            <ShareResultCard resultLabel={resultMeta.resultLabel} shortCopy={resultMeta.shareCopy} topFactors={topFactors} chartData={chartData} />
-            <div className="flex justify-center">
+            <div ref={shareCardRef}>
+              <ShareResultCard resultLabel={resultMeta.resultLabel} shortCopy={resultMeta.shareCopy} topFactors={topFactors} chartData={chartData} />
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
               <a
                 data-testid="fatigue-reason-share-x-bottom"
                 href={xShareUrl}
@@ -662,6 +687,15 @@ export function FatigueReasonApp() {
               >
                 Xで結果をシェアする
               </a>
+              <button
+                data-testid="fatigue-reason-save-card"
+                type="button"
+                onClick={handleSaveShareImage}
+                disabled={isSavingShareImage}
+                className="btn-secondary inline-flex rounded-full px-6 py-3.5 text-sm font-black text-[var(--color-main)] disabled:cursor-wait disabled:opacity-70"
+              >
+                {isSavingShareImage ? "画像を保存しています..." : "画像を保存する"}
+              </button>
             </div>
           </section>
 

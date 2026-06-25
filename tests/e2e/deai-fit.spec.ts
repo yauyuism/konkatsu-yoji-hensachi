@@ -113,6 +113,7 @@ test("あなたに合う出会い方診断を最後まで進められる", async
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", /twitter\.com\/intent\/tweet/);
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", /result%3DO-C-Q-D/);
   await expect(page.getByTestId("deai-fit-share-x-bottom")).toHaveAttribute("href", /twitter\.com\/intent\/tweet/);
+  await expect(page.getByTestId("deai-fit-save-card")).toBeVisible();
   await expect(page.getByTestId("deai-fit-fatigue-cta").getByRole("link", { name: "婚活疲れ・マチアプ疲れ診断をやってみる" })).toHaveAttribute(
     "href",
     "/diagnoses/konkatsu-fatigue"
