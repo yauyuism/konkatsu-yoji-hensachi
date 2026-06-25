@@ -18,7 +18,8 @@ import {
   type FatigueAnswerValue,
 } from "@/lib/fatigue-reason";
 import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
-import { shareOrDownloadResultImage } from "@/lib/result-image";
+import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
+import { downloadResultImage, shareResultImageFile } from "@/lib/result-image";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 type FatigueReasonStage = "intro" | "question" | "result";
@@ -338,33 +339,41 @@ function FatigueSimpleResultCard({
 }
 
 function FatigueShareActions({
-  isSavingShareImage,
+  isSharingResult,
+  isSavingImageOnly,
   shareImageMessage,
   shareImageError,
-  onSaveImage,
+  onShareResult,
+  onSaveImageOnly,
   onConsultationClick,
 }: {
-  isSavingShareImage: boolean;
+  isSharingResult: boolean;
+  isSavingImageOnly: boolean;
   shareImageMessage: string | null;
   shareImageError: string | null;
-  onSaveImage: () => void;
+  onShareResult: () => void;
+  onSaveImageOnly: () => void;
   onConsultationClick: () => void;
 }) {
   return (
     <section data-testid="fatigue-reason-share-actions" className="mx-auto w-full max-w-[520px] rounded-[1.6rem] border border-[rgba(120,88,70,0.1)] bg-white/86 p-5 sm:p-6">
       <div>
-        <h2 className="text-xl font-black leading-tight text-[var(--text-main)]">この結果カードを画像でシェアできます</h2>
+        <h2 className="text-xl font-black leading-tight text-[var(--text-main)]">この結果はXでシェアできます</h2>
+        <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
+          対応スマホでは、診断カード画像つきで共有できます。
+          未対応の環境では、診断カードが表示される結果リンクを投稿します。
+        </p>
       </div>
 
       <div className="mt-4 grid gap-3">
         <button
-          data-testid="fatigue-reason-save-card"
+          data-testid="fatigue-reason-share-x"
           type="button"
-          onClick={onSaveImage}
-          disabled={isSavingShareImage}
+          onClick={onShareResult}
+          disabled={isSharingResult}
           className="btn-primary inline-flex min-h-14 w-full justify-center gap-2 rounded-full px-6 py-4 text-base font-black disabled:cursor-wait disabled:opacity-70"
         >
-          {isSavingShareImage ? "X共有用の画像を作成しています..." : "診断結果をXにシェア"}
+          {isSharingResult ? "X共有画面を準備しています..." : "診断結果をXにシェア"}
         </button>
         {shareImageMessage ? (
           <p data-testid="fatigue-reason-save-card-success" className="rounded-[1rem] bg-[rgba(143,183,161,0.12)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
@@ -379,8 +388,17 @@ function FatigueShareActions({
           onClick={onConsultationClick}
           className="btn-secondary inline-flex min-h-14 w-full justify-center rounded-full border-[rgba(201,130,120,0.26)] bg-white px-6 py-4 text-base font-black text-[var(--color-main)]"
         >
-          個別に相談する
+          診断結果をもとに相談する
         </a>
+        <button
+          data-testid="fatigue-reason-save-image-only"
+          type="button"
+          onClick={onSaveImageOnly}
+          disabled={isSavingImageOnly || isSharingResult}
+          className="text-link mx-auto inline-flex w-fit text-sm font-bold disabled:cursor-wait disabled:no-underline disabled:opacity-60"
+        >
+          {isSavingImageOnly ? "画像を作成しています..." : "画像だけ保存する"}
+        </button>
       </div>
       <p className="mt-3 rounded-[1rem] bg-[rgba(255,245,240,0.72)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text-main)]">
         「当たってるかも」と思ったら、プロフィールや会ってきた相手まで含めて見ると、疲れている理由がもっと具体的になります。
@@ -452,6 +470,19 @@ function FatigueReviewAnalysis({ analysis }: { analysis: string[] }) {
   );
 }
 
+function openXShareIntent(xShareUrl: string, mode: "new-tab" | "same-tab" = "new-tab") {
+  if (mode === "same-tab") {
+    window.location.assign(xShareUrl);
+    return;
+  }
+
+  const openedWindow = window.open(xShareUrl, "_blank", "noopener,noreferrer");
+
+  if (!openedWindow) {
+    window.location.assign(xShareUrl);
+  }
+}
+
 function RelatedDiagnosisCard({
   href,
   title,
@@ -472,12 +503,19 @@ function RelatedDiagnosisCard({
   );
 }
 
-export function FatigueReasonApp({ initialResultType = null }: { initialResultType?: FatigueReasonType | null }) {
+export function FatigueReasonApp({
+  initialResultType = null,
+  isShareResultPage = false,
+}: {
+  initialResultType?: FatigueReasonType | null;
+  isShareResultPage?: boolean;
+}) {
   const [stage, setStage] = useState<FatigueReasonStage>(initialResultType ? "result" : "intro");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<FatigueAnswerValue[]>([]);
   const [selectedValue, setSelectedValue] = useState<FatigueAnswerValue | null>(null);
-  const [isSavingShareImage, setIsSavingShareImage] = useState(false);
+  const [isSharingResult, setIsSharingResult] = useState(false);
+  const [isSavingImageOnly, setIsSavingImageOnly] = useState(false);
   const [shareImageMessage, setShareImageMessage] = useState<string | null>(null);
   const [shareImageError, setShareImageError] = useState<string | null>(null);
   const shareCardRef = useRef<HTMLElement>(null);
@@ -510,7 +548,13 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
       quiz_name: "fatigue_reason",
       result_type: diagnosis.result.type,
     });
-  }, [diagnosis.result.name, diagnosis.result.type, stage]);
+
+    if (isShareResultPage) {
+      trackEvent("fatigue_result_share_page_view", {
+        result_type: FATIGUE_REASON_DISPLAY_META[diagnosis.result.type].resultLabel,
+      });
+    }
+  }, [diagnosis.result.name, diagnosis.result.type, isShareResultPage, stage]);
 
   const handleStart = () => {
     trackEvent("diagnosis_start", {
@@ -696,6 +740,12 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
   const suitedMeetings = isLowSignal ? primaryGuide.suitedMeetings : mergeGuideItems(topFactors.slice(0, 2), "suitedMeetings");
   const drainingMeetings = isLowSignal ? primaryGuide.drainingMeetings : mergeGuideItems(topFactors.slice(0, 2), "drainingMeetings");
   const resultMeta = FATIGUE_REASON_DISPLAY_META[result.type];
+  const resultShareUrl = getFatigueReasonResultUrl(result.type);
+  const xShareUrl = getFatigueReasonXShareUrl({
+    resultLabel: resultMeta.resultLabel,
+    shortCopy: resultMeta.shareCopy,
+    resultUrl: resultShareUrl,
+  });
   const showCondition = !isLowSignal && conditionFactor ? getFactorScore(conditionFactor) >= conditionThreshold : false;
   const chartData = FATIGUE_REASON_TYPE_ORDER.map((type) => ({
     label: FATIGUE_REASON_DISPLAY_META[type].chartLabel,
@@ -747,68 +797,99 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
     },
   ];
 
-  const handleSaveShareImage = async () => {
-    if (!shareCardRef.current || isSavingShareImage) {
+  const handleShareResult = async () => {
+    if (!shareCardRef.current || isSharingResult) {
       return;
     }
 
     setShareImageError(null);
     setShareImageMessage(null);
-    setIsSavingShareImage(true);
+    setIsSharingResult(true);
 
-    try {
-      trackEvent("fatigue_result_save_image_click", {
+    trackEvent("fatigue_result_share_click", {
+      result_type: resultMeta.resultLabel,
+      share_url: resultShareUrl,
+    });
+
+    if (!navigator.share || !navigator.canShare) {
+      trackEvent("fatigue_result_x_intent_fallback", {
         placement: "result_first_view",
         result_type: resultMeta.resultLabel,
+        share_url: resultShareUrl,
+        reason: "native_share_unavailable",
       });
-      trackEvent("save_image_click", {
-        placement: "share_card",
-        quiz_name: "fatigue_reason",
-        result_type: result.type,
-      });
+      setIsSharingResult(false);
+      openXShareIntent(xShareUrl);
+      return;
+    }
 
-      const saveResult = await shareOrDownloadResultImage(
+    try {
+      await shareResultImageFile(
         shareCardRef.current,
         `婚活疲れ診断_${sanitizeFileNamePart(resultMeta.resultLabel)}.png`,
         {
           title: `婚活疲れ診断_${resultMeta.resultLabel}`,
           text: `婚活疲れ・マチアプ疲れ診断をやってみたら「${resultMeta.resultLabel}」でした。`,
-          url: `https://www.shindanlab.jp/diagnoses/konkatsu-fatigue?result=${result.type}`,
+          url: resultShareUrl,
         }
       );
 
-      setShareImageMessage(
-        saveResult.mode === "native-share"
-          ? "共有画面を開きました。Xを選ぶと診断カード画像を投稿できます。"
-          : saveResult.mode === "preview"
-            ? "結果カード画像を開きました。長押しで保存してXに添付できます。"
-            : "結果カードを保存しました。X投稿に画像を添付できます。"
-      );
-      trackEvent("fatigue_result_save_image_success", {
+      setShareImageMessage("共有画面を開きました。Xを選ぶと診断カード画像を投稿できます。");
+      trackEvent("fatigue_result_native_share_success", {
         placement: "result_first_view",
         result_type: resultMeta.resultLabel,
-        save_mode: saveResult.mode,
+        share_url: resultShareUrl,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "unknown error";
 
-      if (error instanceof DOMException && error.name === "AbortError") {
-        setShareImageMessage("共有をキャンセルしました。もう一度押すと画像共有をやり直せます。");
-        trackEvent("fatigue_result_save_image_cancel", {
-          placement: "result_first_view",
-          result_type: resultMeta.resultLabel,
-        });
-        return;
-      }
-
-      setShareImageError("画像保存に失敗しました。スクショで保存してください。");
-      trackEvent("fatigue_result_save_image_error", {
+      trackEvent("fatigue_result_native_share_error", {
         placement: "result_first_view",
+        result_type: resultMeta.resultLabel,
+        share_url: resultShareUrl,
+        error_message: errorMessage,
+      });
+      trackEvent("fatigue_result_x_intent_fallback", {
+        placement: "result_first_view",
+        result_type: resultMeta.resultLabel,
+        share_url: resultShareUrl,
+        reason: error instanceof DOMException && error.name === "AbortError" ? "native_share_aborted" : "native_share_error",
+      });
+      setShareImageMessage("画像つき共有は使えませんでした。結果リンクをXでシェアできます。");
+      openXShareIntent(xShareUrl, "same-tab");
+    } finally {
+      setIsSharingResult(false);
+    }
+  };
+
+  const handleSaveImageOnly = async () => {
+    if (!shareCardRef.current || isSavingImageOnly) {
+      return;
+    }
+
+    setShareImageError(null);
+    setShareImageMessage(null);
+    setIsSavingImageOnly(true);
+
+    try {
+      trackEvent("fatigue_result_save_image_click", {
+        placement: "image_only",
+        result_type: resultMeta.resultLabel,
+      });
+
+      await downloadResultImage(shareCardRef.current, `婚活疲れ診断_${sanitizeFileNamePart(resultMeta.resultLabel)}.png`);
+      setShareImageMessage("結果カードを保存しました。");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "unknown error";
+
+      setShareImageError("画像だけ保存できませんでした。結果リンクのXシェアは利用できます。");
+      trackEvent("fatigue_result_save_image_error", {
+        placement: "image_only",
         result_type: resultMeta.resultLabel,
         error_message: errorMessage,
       });
     } finally {
-      setIsSavingShareImage(false);
+      setIsSavingImageOnly(false);
     }
   };
 
@@ -849,10 +930,12 @@ export function FatigueReasonApp({ initialResultType = null }: { initialResultTy
 
         <div className="mt-5 grid gap-4">
           <FatigueShareActions
-            isSavingShareImage={isSavingShareImage}
+            isSharingResult={isSharingResult}
+            isSavingImageOnly={isSavingImageOnly}
             shareImageMessage={shareImageMessage}
             shareImageError={shareImageError}
-            onSaveImage={handleSaveShareImage}
+            onShareResult={handleShareResult}
+            onSaveImageOnly={handleSaveImageOnly}
             onConsultationClick={() => handleConsultationClick("result_first_view")}
           />
 

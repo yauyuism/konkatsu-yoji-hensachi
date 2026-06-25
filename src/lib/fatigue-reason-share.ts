@@ -12,7 +12,7 @@ function resolveOrigin() {
 }
 
 export function getFatigueReasonResultPath(type: FatigueReasonType) {
-  return `/diagnoses/konkatsu-fatigue?result=${type}`;
+  return `/diagnoses/konkatsu-fatigue/result/${type}`;
 }
 
 export function getFatigueReasonResultUrl(type: FatigueReasonType) {
@@ -22,11 +22,12 @@ export function getFatigueReasonResultUrl(type: FatigueReasonType) {
 export function getFatigueReasonXShareUrl({
   resultLabel,
   shortCopy,
+  resultUrl,
 }: {
   resultLabel: string;
   shortCopy: string;
+  resultUrl: string;
 }) {
-  const resultUrl = `${resolveOrigin()}/diagnoses/konkatsu-fatigue`;
   const text = `婚活疲れ・マチアプ疲れの理由診断をやってみたら、\n「${resultLabel}」でした。\n\n${shortCopy}\n\n診断はこちら`;
 
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(
