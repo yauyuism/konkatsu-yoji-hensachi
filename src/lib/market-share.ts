@@ -8,7 +8,7 @@ import {
 } from "@/lib/market";
 import { MARKET_GENDER_LABELS } from "@/data/market";
 
-const X_HASHTAG = "婚活スペック年収換算";
+const X_HASHTAG = "婚活スペック上位チェック";
 const X_VIA = "yauyuism";
 
 function resolveOrigin() {
@@ -36,10 +36,9 @@ export function getMarketOgImageUrl(user: MarketUserSpec) {
 }
 
 export function getMarketXShareUrl(user: MarketUserSpec, analysis: MarketAnalysis) {
-  const text = `婚活スペックを年収換算したら、年収${analysis.incomeEquivalent}万円相当でした。
+  const text = `婚活スペックを見たら、未婚${MARKET_GENDER_LABELS[user.gender]}の上位${formatMarketPercent(analysis.overallPercentile)}%でした。
 
 ${getMarketShareSpecSummary(user)}
-未婚${MARKET_GENDER_LABELS[user.gender]}の上位${formatMarketPercent(analysis.overallPercentile)}%
 
 ちょっと面白かったので置いておく。`;
 
@@ -49,9 +48,11 @@ ${getMarketShareSpecSummary(user)}
 }
 
 export function getMarketLineShareUrl(user: MarketUserSpec, analysis: MarketAnalysis) {
-  const text = `婚活スペック年収換算の結果は、年収${analysis.incomeEquivalent}万円相当。${getMarketShareSpecSummary(
+  const text = `婚活スペック上位チェックの結果は、未婚${MARKET_GENDER_LABELS[user.gender]}の上位${formatMarketPercent(
+    analysis.overallPercentile
+  )}%。${getMarketShareSpecSummary(
     user
-  )} / 未婚${MARKET_GENDER_LABELS[user.gender]}の上位${formatMarketPercent(analysis.overallPercentile)}%。スペックのレア度を年収で例えています。`;
+  )} / スペック条件の希少性を上位割合で見ています。`;
 
   return `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
     getMarketResultUrl(user)

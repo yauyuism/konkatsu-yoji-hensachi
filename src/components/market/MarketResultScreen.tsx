@@ -110,12 +110,10 @@ function getSpecInsight(item: MarketBreakdownItem) {
 function InlineSpecBreakdown({
   items,
   overallPercentile,
-  incomeEquivalent,
   editHref,
 }: {
   items: MarketBreakdownItem[];
   overallPercentile: number;
-  incomeEquivalent: number;
   editHref: string;
 }) {
   const excludedItems = items.filter((item) => !item.included);
@@ -149,7 +147,7 @@ function InlineSpecBreakdown({
                   {item.included ? `上位${formatMarketPercent(item.percentile)}%` : "未入力"}
                 </p>
                 <p className="mt-1 text-sm font-bold text-[var(--text-sub)]">
-                  {item.included ? `年収で例えると ${item.incomeEquivalent.toLocaleString()}万相当` : "この軸は総合に含めていません"}
+                  {item.included ? "この軸を総合計算に含めています" : "この軸は総合に含めていません"}
                 </p>
               </div>
             </div>
@@ -162,9 +160,7 @@ function InlineSpecBreakdown({
             </div>
 
             <p className="mt-3 text-sm font-bold text-[var(--text-main)]">
-              {item.included
-                ? `上位${formatMarketPercent(item.percentile)}% → 年収${item.incomeEquivalent.toLocaleString()}万相当`
-                : "この軸は未入力のため総合計算から除外しています。"}
+              {item.included ? `この軸単体では上位${formatMarketPercent(item.percentile)}%` : "この軸は未入力のため総合計算から除外しています。"}
             </p>
             <p className="mt-2 text-sm leading-7 text-[var(--text-sub)]">{getSpecInsight(item)}</p>
           </div>
@@ -182,8 +178,8 @@ function InlineSpecBreakdown({
       <div className="mt-6 border-t border-[color:var(--line)] pt-5">
         <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">重み付けすると</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
-          <p className="text-lg font-black text-[var(--text-main)]">未婚同性の上位 {formatMarketPercent(overallPercentile)}%</p>
-          <p className="number-display text-3xl font-black text-[var(--color-main)]">{incomeEquivalent.toLocaleString()}万相当</p>
+          <p className="text-lg font-black text-[var(--text-main)]">未婚同性の中で</p>
+          <p className="number-display text-3xl font-black text-[var(--color-main)]">上位 {formatMarketPercent(overallPercentile)}%</p>
         </div>
       </div>
     </section>
@@ -441,7 +437,7 @@ export function MarketResultScreen({
 
     setIsSaving(true);
     try {
-      await downloadResultImage(captureRef.current, `market-value-${analysis.incomeEquivalent}.png`);
+      await downloadResultImage(captureRef.current, `market-rarity-top-${formatMarketPercent(analysis.overallPercentile).replace(".", "_")}.png`);
     } finally {
       setIsSaving(false);
     }
@@ -460,7 +456,6 @@ export function MarketResultScreen({
       <div className="mx-auto max-w-5xl">
         <IncomeEquivalentDisplay
           gender={user.gender}
-          incomeEquivalent={analysis.incomeEquivalent}
           overallPercentile={analysis.overallPercentile}
           note={analysis.note}
         />
@@ -478,7 +473,6 @@ export function MarketResultScreen({
           <InlineSpecBreakdown
             items={analysis.specs}
             overallPercentile={analysis.overallPercentile}
-            incomeEquivalent={analysis.incomeEquivalent}
             editHref={editHref}
           />
           <InlineDemandGapSection

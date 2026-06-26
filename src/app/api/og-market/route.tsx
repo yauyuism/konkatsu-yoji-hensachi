@@ -40,7 +40,6 @@ export async function GET(request: Request) {
           あなたの婚活スペックの希少性は
         </div>
         <div style={{ display: "flex", alignItems: "baseline", marginTop: 10, gap: 10 }}>
-          <div style={{ display: "flex", fontSize: 26, color: ogPalette.textSub }}>年収</div>
           <div
             style={{
               display: "flex",
@@ -52,15 +51,12 @@ export async function GET(request: Request) {
               textShadow: `0 6px 24px ${hexToRgba(ogPalette.accent, 0.18)}`,
             }}
           >
-            {analysis.incomeEquivalent}
+            {formatMarketPercent(analysis.overallPercentile)}
           </div>
-          <div style={{ display: "flex", fontSize: 26, color: ogPalette.textSub }}>万円</div>
+          <div style={{ display: "flex", fontSize: 30, color: ogPalette.textSub }}>%</div>
         </div>
         <div style={{ display: "flex", marginTop: 4, fontSize: 30, fontWeight: 700, color: ogPalette.textMain }}>
-          相当のレア度
-        </div>
-        <div style={{ display: "flex", marginTop: 16, fontSize: 24, color: ogPalette.textSub }}>
-          {`未婚同性の上位 ${formatMarketPercent(analysis.overallPercentile)}%`}
+          未婚同性の上位
         </div>
         <div
           style={{
@@ -98,7 +94,7 @@ export async function GET(request: Request) {
         </div>
       </div>
 
-      {renderFooter("#婚活スペック年収換算")}
+      {renderFooter("#婚活スペック上位チェック")}
     </div>
   );
 }
