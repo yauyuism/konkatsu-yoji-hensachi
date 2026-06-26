@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { DeaiFitApp } from "@/components/deai-fit/DeaiFitApp";
 import { isDeaiFitType } from "@/lib/deai-fit";
 import { DEAI_FIT_DISPLAY_META } from "@/lib/deai-fit-display";
-import { getDeaiFitResultSlug } from "@/lib/deai-fit-share";
+import { DEAI_FIT_SHARE_VERSION, getDeaiFitResultSlug } from "@/lib/deai-fit-share";
 import { buildShareMetadata } from "@/lib/metadata";
 
 type DeaiFitPageProps = {
@@ -52,6 +52,7 @@ export async function generateMetadata({ searchParams }: DeaiFitPageProps): Prom
     ogDescription: meta.shareCopy,
     twitterTitle: `${title}｜${meta.resultLabel}`,
     twitterDescription: meta.shareCopy,
+    imageVersion: DEAI_FIT_SHARE_VERSION,
     siteName: "診断ラボ",
   });
 }

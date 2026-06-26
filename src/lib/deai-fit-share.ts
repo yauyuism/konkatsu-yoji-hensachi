@@ -1,6 +1,8 @@
 import type { DeaiFitType } from "@/lib/deai-fit";
 import { getSiteUrl } from "@/lib/site-url";
 
+export const DEAI_FIT_SHARE_VERSION = "20260627";
+
 export const DEAI_FIT_RESULT_SLUGS: Record<DeaiFitType, string> = {
   "O-C-Q-D": "ocqd",
   "O-C-Q-N": "ocqn",
@@ -42,7 +44,10 @@ export function getDeaiFitResultPath(type: DeaiFitType) {
 }
 
 export function getDeaiFitResultUrl(type: DeaiFitType) {
-  return `${resolveOrigin()}${getDeaiFitResultPath(type)}`;
+  const resultUrl = new URL(getDeaiFitResultPath(type), resolveOrigin());
+  resultUrl.searchParams.set("share", DEAI_FIT_SHARE_VERSION);
+
+  return resultUrl.toString();
 }
 
 export function getDeaiFitResultSlug(type: DeaiFitType) {
