@@ -84,21 +84,30 @@ export async function GET() {
                 boxShadow: "0 24px 60px rgba(26,26,26,0.08)",
               }}
             >
-              <div style={{ display: "flex", fontSize: 20, color: ogPalette.textSub }}>年収換算</div>
+              <div style={{ display: "flex", fontSize: 20, color: ogPalette.textSub }}>未婚同性の中で</div>
               <div
                 style={{
                   display: "flex",
+                  alignItems: "baseline",
+                  gap: 8,
                   marginTop: 8,
-                  fontSize: 88,
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  color: ogPalette.accent,
-                  fontFamily: "Outfit",
                 }}
               >
-                680
+                <div style={{ display: "flex", fontSize: 22, fontWeight: 700, color: ogPalette.textSub }}>上位</div>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 88,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: ogPalette.accent,
+                    fontFamily: "Outfit",
+                  }}
+                >
+                  31.2
+                </div>
+                <div style={{ display: "flex", fontSize: 22, fontWeight: 700, color: ogPalette.textSub }}>%</div>
               </div>
-              <div style={{ display: "flex", marginTop: 6, fontSize: 22, color: ogPalette.textSub }}>万円相当</div>
             </div>
           </div>
         </div>
@@ -114,12 +123,12 @@ export async function GET() {
           }}
         >
           <div style={pillStyle()}>{`MARKET VALUE`}</div>
-          <div style={{ display: "flex", flexDirection: "column", fontSize: 52, fontWeight: 700, lineHeight: 1.18 }}>
+          <div style={{ display: "flex", flexDirection: "column", fontSize: 44, fontWeight: 700, lineHeight: 1.2 }}>
             <div style={{ display: "flex" }}>あなたの婚活スペック、</div>
-            <div style={{ display: "flex", color: ogPalette.accent }}>年収換算でどのくらい？</div>
+            <div style={{ display: "flex", color: ogPalette.accent }}>未婚同性の上位何%？</div>
           </div>
           <div style={{ display: "flex", fontSize: 24, lineHeight: 1.65, color: ogPalette.textSub }}>
-            年齢・年収・身長・学歴・居住地から、婚活スペックの希少性を年収換算で見直します。
+            年齢・年収・身長・学歴・居住地から、婚活スペックの希少性を上位割合で見直します。
           </div>
           <div
             style={{

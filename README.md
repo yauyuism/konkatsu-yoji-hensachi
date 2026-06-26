@@ -8,11 +8,11 @@
 - `/prof/stats`: 匿名化された統計ページ
 - `/conditions`: 条件リアリティチェック
 - `/check`: この人、大丈夫？チェッカー
-- `/market`: 婚活スペック年収換算
+- `/market`: 婚活スペック上位チェック
 - `/`: 婚活・恋愛の癖を知る無料診断メディア
 - `/yoji`: 婚活四字熟語診断
 
-プロフィール偏差値診断は、プロフィール文を Claude で分析して、偏差値、5軸スコア、ハイライト、刺さる相手、改善案まで返します。条件リアリティチェックは、年齢・年収・身長・学歴・エリア条件から、未婚者全体の何%に当たるかと人数を即時計算します。婚活スペック年収換算は、年齢・年収・身長・学歴・居住地の希少性を年収相当に置き換えて見せます。スクショ読み取りを使う場合のみ Claude を使います。
+プロフィール偏差値診断は、プロフィール文を Claude で分析して、偏差値、5軸スコア、ハイライト、刺さる相手、改善案まで返します。条件リアリティチェックは、年齢・年収・身長・学歴・エリア条件から、未婚者全体の何%に当たるかと人数を即時計算します。婚活スペック上位チェックは、年齢・年収・身長・学歴・居住地の希少性を未婚同性内の上位割合で見せます。スクショ読み取りを使う場合のみ Claude を使います。
 
 ## 技術スタック
 
@@ -37,7 +37,7 @@ npm run dev
 - 婚活疲れ・マチアプ疲れの理由診断: [http://localhost:3000/diagnoses/konkatsu-fatigue](http://localhost:3000/diagnoses/konkatsu-fatigue)
 - あなたに合う出会い方診断: [http://localhost:3000/diagnoses/deai-fit](http://localhost:3000/diagnoses/deai-fit)
 - 条件リアリティチェック: [http://localhost:3000/conditions](http://localhost:3000/conditions)
-- 婚活スペック年収換算: [http://localhost:3000/market](http://localhost:3000/market)
+- 婚活スペック上位チェック: [http://localhost:3000/market](http://localhost:3000/market)
 - プロフィール偏差値診断: [http://localhost:3000/prof](http://localhost:3000/prof)
 - 統計: [http://localhost:3000/prof/stats](http://localhost:3000/prof/stats)
 
@@ -87,7 +87,7 @@ npm run dev
   - 条件リアリティチェックの匿名スナップショット保持件数。`0` で無効
 - `MARKET_STATS_RECORD_RETENTION`
   - 任意
-  - 婚活スペック年収換算の匿名スナップショット保持件数。`0` で無効
+  - 婚活スペック上位チェックの匿名スナップショット保持件数。`0` で無効
 - `MY9SPECS_STATS_RECORD_RETENTION`
   - 任意
   - My 9 Specs の匿名スナップショット保持件数。`0` で無効
@@ -155,11 +155,11 @@ MY9SPECS_STATS_RECORD_RETENTION=3000
 - `/api/analyze` は初回分析と詳細分析の2段階
 - `/api/read-filter` は条件スクショの読み取り専用
 - `/api/conditions-stats` は条件リアリティチェックの匿名スナップショット保存
-- `/api/market-stats` は婚活スペック年収換算の匿名スナップショット保存
+- `/api/market-stats` は婚活スペック上位チェックの匿名スナップショット保存
 - `/api/my9specs-stats` は My 9 Specs の匿名スナップショット保存
 - レスポンスには `X-Analyze-Request-Id` と `Server-Timing` を付与
 - Vercel logs には構造化ログを出すので、遅延・失敗率の確認に使える
 - 統計ページは KV 未設定でもゼロ件表示で動く
 - 匿名統計にはプロフィール原文を保存しない
 - 条件リアリティチェックの匿名統計にはスクショ画像そのものを保存しない
-- 婚活スペック年収換算の匿名統計には入力スペックのスナップショットだけを保存し、個人識別情報は保存しない
+- 婚活スペック上位チェックの匿名統計には入力スペックのスナップショットだけを保存し、個人識別情報は保存しない

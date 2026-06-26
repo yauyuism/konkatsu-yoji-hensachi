@@ -98,11 +98,11 @@ export function ConditionsResultCard({
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <ToolCard
             label="MARKET VALUE"
-            title="婚活スペック年収換算"
+            title="婚活スペック上位チェック"
             description="条件だけでなく、自分が探される側でどう見えるかも確認します。"
             tags={["フォーム入力", "約30秒"]}
             href="/market"
-            ctaLabel="年収換算を開く →"
+            ctaLabel="上位チェックを開く →"
           />
           <ToolCard
             label="PROFILE CHECK"

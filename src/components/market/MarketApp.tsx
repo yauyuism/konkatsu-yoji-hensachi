@@ -55,12 +55,12 @@ export function MarketApp({ initialSpec }: MarketAppProps) {
 
           <h1 className="mt-5 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-5xl lg:text-6xl">
             あなたの婚活スペック、
-            <span className="block">年収に例えると</span>
-            <span className="block text-[var(--accent)]">どのくらい？</span>
+            <span className="block">未婚同性の中で</span>
+            <span className="block text-[var(--accent)]">上位何%？</span>
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--text-sub)] sm:text-lg">
-            年齢・年収・身長・学歴・居住地から、スペックのレア度を年収に換算します。
+            年齢・年収・身長・学歴・居住地から、スペック条件の希少性を上位割合で見ます。
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3 text-sm text-[var(--text-sub)]">

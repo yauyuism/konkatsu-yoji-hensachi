@@ -378,7 +378,7 @@ function joinJapaneseList(items: string[]) {
 }
 
 function getComment(
-  analysis: Pick<MarketAnalysis, "incomeEquivalent" | "demandCount" | "overallPercentile" | "specs">,
+  analysis: Pick<MarketAnalysis, "demandCount" | "overallPercentile" | "specs">,
   gender: MarketGender
 ) {
   const standoutSpecs = analysis.specs
@@ -428,7 +428,7 @@ function getComment(
 
   return `今回の診断では、あなたの婚活スペックは未婚${MARKET_GENDER_LABELS[gender]}の上位${formatMarketPercent(
     analysis.overallPercentile
-  )}%、年収${analysis.incomeEquivalent}万円相当の希少性でした。${rarityLead}の水準です。${standoutLine}今の条件だけでも、あなたを条件内に入れやすい相手は約${formatDemandCountForComment(
+  )}%くらいの希少性でした。${rarityLead}の水準です。${standoutLine}今の条件だけでも、あなたを条件内に入れやすい相手は約${formatDemandCountForComment(
     analysis.demandCount
   )}。${credibilityLine}${positionLine}${shareLine}`;
 }
@@ -436,9 +436,9 @@ function getComment(
 function buildMethodologySteps(user: MarketUserSpec, activeCount: number) {
   return [
     `年齢・年収・身長・学歴・居住地のうち、入力された ${activeCount} 軸を使って単独の上位割合を出しています。`,
-    "各軸の上位割合を、国税庁の給与階級別分布から同じ希少度の年収にいったん置き換えています。",
+    "各軸の上位割合を、国税庁の給与階級別分布も参照しながら同じ分位のものさしに揃えています。",
     "総合値は掛け算ではなく、年収35%・年齢25%・学歴15%・居住地15%・身長10%の重み付け平均です。未入力の軸がある場合は、残りの軸に重みを再配分しています。",
-    "最後に、重み付けした年収相当額を同じ給与分布に戻して、未婚同性の上位何%くらいかを表示しています。",
+    "最後に、重み付けした値を未婚同性の上位何%くらいかに戻して表示しています。",
     `あなたを条件内に入れやすい相手人数は、${MARKET_REGION_LABELS[user.region]}にいる未婚異性人口に、年齢・年収・身長・学歴・居住地の許容率を掛けた概算です。`,
   ];
 }
@@ -538,7 +538,7 @@ export function analyzeMarketSpecs(user: MarketUserSpec): MarketAnalysis {
     demandShare: round1(demandShare),
     comment: "",
     methodologySteps: [],
-    note: "これはスペック条件のレア度を年収に例えたもので、人間としての価値を表すものではありません。",
+    note: "これはスペック条件の希少性を上位割合で見たもので、人間としての価値を表すものではありません。",
     whatIfs: [] as MarketWhatIf[],
   };
 
@@ -563,7 +563,6 @@ export function analyzeMarketSpecs(user: MarketUserSpec): MarketAnalysis {
     ...base,
     comment: getComment(
       {
-        incomeEquivalent,
         demandCount,
         overallPercentile,
         specs,
@@ -667,11 +666,11 @@ export function formatMarketPercent(value: number) {
 }
 
 export function getMarketResultTitle(user: MarketUserSpec, analysis: MarketAnalysis) {
-  return `婚活スペック年収換算 ${analysis.incomeEquivalent}万円相当`;
+  return `婚活スペック上位チェック 上位${formatMarketPercent(analysis.overallPercentile)}%`;
 }
 
 export function getMarketResultDescription(user: MarketUserSpec, analysis: MarketAnalysis) {
   return `${getMarketSpecSummary(user)} の希少性は、未婚${MARKET_GENDER_LABELS[user.gender]}の上位${formatMarketPercent(
     analysis.overallPercentile
-  )}%相当です。`;
+  )}%くらいです。`;
 }

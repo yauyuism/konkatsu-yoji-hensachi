@@ -172,11 +172,11 @@ export const TOOLS: Tool[] = [
   {
     id: "market",
     path: "/market",
-    name: "スペック年収換算",
-    catch: "自分のレア度を年収に例えると？",
-    description: "年齢・年収・身長・学歴・エリア・婚姻歴・喫煙の7項目から、婚活市場での通りやすさを年収に換算します。",
-    homeCatch: "あなたのスペック、年収に換算するといくら？",
-    homeDescription: "年齢・年収・身長・学歴・エリア・婚姻歴・喫煙の7項目から、婚活市場での通りやすさを年収に換算します。",
+    name: "スペック上位チェック",
+    catch: "自分のレア度は未婚同性の上位何%？",
+    description: "年齢・年収・身長・学歴・エリアから、婚活市場での通りやすさを上位割合で見ます。",
+    homeCatch: "あなたのスペック、未婚同性の上位何%？",
+    homeDescription: "年齢・年収・身長・学歴・エリアから、婚活市場での通りやすさを上位割合で見ます。",
     tags: ["約30秒"],
     category: "number",
     cta: "やってみる →",
@@ -298,7 +298,7 @@ export const PROBLEMS: ProblemGuide[] = [
     title: "「スペックは悪くないのに進まない」人",
     description: "スペックが問題じゃないなら、プロフか会話に原因がある。",
     steps: [
-      { toolId: "market", label: "スペック年収換算で確認" },
+      { toolId: "market", label: "スペック上位チェックで確認" },
       { toolId: "prof", label: "プロフ偏差値で改善点を見つける" },
       { toolId: "weight", label: "LINEの重さ測定で会話を見直す" },
     ],
@@ -311,7 +311,7 @@ export const PROBLEMS: ProblemGuide[] = [
     steps: [
       { toolId: "my9specs", label: "まず譲れない条件を9つ選ぶ" },
       { toolId: "conditions", label: "理想の高さチェッカーで人数を確認" },
-      { toolId: "market", label: "スペック年収換算で自分側も確認" },
+      { toolId: "market", label: "スペック上位チェックで自分側も確認" },
     ],
   },
   {

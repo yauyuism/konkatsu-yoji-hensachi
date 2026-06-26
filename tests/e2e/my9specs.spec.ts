@@ -31,5 +31,5 @@ test("My 9 Specs の結果に保存導線と次の診断導線を表示できる
   await expect(page.getByRole("button", { name: "画像を保存" })).toBeVisible();
   await expect(page.getByText("条件別のインパクト")).toBeVisible();
   await expect(page.getByRole("heading", { name: "条件チェッカーでもっと詳しく見る" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "自分のスペックも年収換算してみる" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "自分のスペックも上位チェックしてみる" })).toBeVisible();
 });

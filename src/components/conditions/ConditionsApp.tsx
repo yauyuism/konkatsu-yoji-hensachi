@@ -755,7 +755,7 @@ export function ConditionsApp() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   <ToolCard
                     label="MARKET VALUE"
-                    title="婚活スペック年収換算"
+                    title="婚活スペック上位チェック"
                     description="相手への条件だけでなく、自分が市場でどう見えるかも確認します。"
                     tags={["フォーム入力", "約30秒"]}
                     href="/market"

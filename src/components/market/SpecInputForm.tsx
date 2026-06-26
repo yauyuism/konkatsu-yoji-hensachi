@@ -204,7 +204,7 @@ export function SpecInputForm({ value, onChange, onSubmit, isPending = false }: 
           disabled={isPending}
           className="cta-button inline-flex w-full items-center justify-center rounded-[1.2rem] px-6 py-4 text-sm font-black text-white disabled:cursor-wait disabled:opacity-80"
         >
-          {isPending ? "結果へ移動中..." : "年収に換算する"}
+          {isPending ? "結果へ移動中..." : "上位何%か見る"}
         </button>
         <p className="mt-3 text-center text-xs leading-6 text-[var(--text-sub)]">入力内容はサーバーに保存されません。</p>
       </div>

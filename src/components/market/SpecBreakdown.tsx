@@ -8,7 +8,6 @@ import { formatMarketPercent } from "@/lib/market";
 type SpecBreakdownProps = {
   items: MarketBreakdownItem[];
   overallPercentile: number;
-  incomeEquivalent: number;
   editHref: string;
 };
 
@@ -76,7 +75,7 @@ function getInsight(item: MarketBreakdownItem) {
   return `${item.value}は差がつきにくい軸です。ここより他の条件の寄与が大きくなります。`;
 }
 
-export function SpecBreakdown({ items, overallPercentile, incomeEquivalent, editHref }: SpecBreakdownProps) {
+export function SpecBreakdown({ items, overallPercentile, editHref }: SpecBreakdownProps) {
   const excludedItems = items.filter((item) => !item.included);
 
   return (
@@ -108,7 +107,7 @@ export function SpecBreakdown({ items, overallPercentile, incomeEquivalent, edit
                   {item.included ? `上位${formatMarketPercent(item.percentile)}%` : "未入力"}
                 </p>
                 <p className="mt-1 text-sm font-bold text-[var(--text-sub)]">
-                  {item.included ? `年収で例えると ${item.incomeEquivalent.toLocaleString()}万相当` : "この軸は総合に含めていません"}
+                  {item.included ? "この軸を総合計算に含めています" : "この軸は総合に含めていません"}
                 </p>
               </div>
             </div>
@@ -129,9 +128,7 @@ export function SpecBreakdown({ items, overallPercentile, incomeEquivalent, edit
             </div>
 
             <p className="mt-3 text-sm font-bold text-[var(--text-main)]">
-              {item.included
-                ? `上位${formatMarketPercent(item.percentile)}% → 年収${item.incomeEquivalent.toLocaleString()}万相当`
-                : "この軸は未入力のため総合計算から除外しています。"}
+              {item.included ? `この軸単体では上位${formatMarketPercent(item.percentile)}%` : "この軸は未入力のため総合計算から除外しています。"}
             </p>
             <p className="mt-2 text-sm leading-7 text-[var(--text-sub)]">{getInsight(item)}</p>
           </div>
@@ -149,8 +146,8 @@ export function SpecBreakdown({ items, overallPercentile, incomeEquivalent, edit
       <div className="mt-6 border-t border-[color:var(--line)] pt-5">
         <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">重み付けすると</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
-          <p className="text-lg font-black text-[var(--text-main)]">未婚同性の上位 {formatMarketPercent(overallPercentile)}%</p>
-          <p className="number-display text-3xl font-black text-[var(--color-main)]">{incomeEquivalent.toLocaleString()}万相当</p>
+          <p className="text-lg font-black text-[var(--text-main)]">未婚同性の中で</p>
+          <p className="number-display text-3xl font-black text-[var(--color-main)]">上位 {formatMarketPercent(overallPercentile)}%</p>
         </div>
       </div>
     </section>

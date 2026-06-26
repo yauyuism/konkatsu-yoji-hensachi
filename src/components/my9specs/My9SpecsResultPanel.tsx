@@ -199,10 +199,10 @@ export function My9SpecsResultPanel({
         />
         <NextStepCard
           eyebrow="MARKET VALUE"
-          title="自分のスペックも年収換算してみる"
+          title="自分のスペックも上位チェックしてみる"
           description="条件で探すだけでなく、自分が探される側としてどれくらいレアかも確認できます。"
           href="/market"
-          cta="年収換算を開く →"
+          cta="上位チェックを開く →"
         />
       </section>
 
