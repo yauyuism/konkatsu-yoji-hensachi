@@ -7,6 +7,7 @@ import { buildShareMetadata } from "@/lib/metadata";
 
 const title = "婚活疲れ・マチアプ疲れの理由診断";
 const description = "会えるのに進まない理由を、出会い方・選び方・判断のクセから言語化します。";
+const topOgpImageVersion = "20260628";
 
 type KonkatsuFatiguePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -22,6 +23,7 @@ const defaultMetadata = buildShareMetadata({
   path: "/diagnoses/konkatsu-fatigue",
   imagePath: "/og/konkatsu-fatigue-top.png",
   imageAlt: "婚活疲れ・マチアプ疲れの理由診断のOGP画像",
+  imageVersion: topOgpImageVersion,
   absoluteTitle: true,
   ogTitle: title,
   ogDescription: description,

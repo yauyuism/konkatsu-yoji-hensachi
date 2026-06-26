@@ -16,6 +16,7 @@ function getSingleParam(value: string | string[] | undefined) {
 
 const title = "あなたに合う出会い方診断";
 const description = "マチアプ・相談所・紹介・外飲み・SNS。自分に合う出会い方を診断します。";
+const topOgpImageVersion = "20260628";
 
 const defaultMetadata = buildShareMetadata({
   title: "あなたに合う出会い方診断",
@@ -23,6 +24,7 @@ const defaultMetadata = buildShareMetadata({
   path: "/diagnoses/deai-fit",
   imagePath: "/og/deai-fit-top.png",
   imageAlt: "あなたに合う出会い方診断のOGP画像",
+  imageVersion: topOgpImageVersion,
   absoluteTitle: true,
   ogTitle: title,
   ogDescription: description,
