@@ -66,7 +66,7 @@ export function IncomeEquivalentDisplay({
         </div>
 
         <div className="mt-4 rounded-[1.3rem] border border-[rgba(59,130,246,0.14)] bg-[rgba(59,130,246,0.08)] px-4 py-4 text-sm leading-7 text-[var(--text-main)]">
-          スペックは各軸の「上位○%」を掛け合わせた総合順位です。同じ順位にいる年収で例えています。
+          年齢・年収・身長・学歴・居住地をそれぞれ年収分布に置き換え、婚活入口で効きやすい順に重み付けして換算しています。
         </div>
       </div>
 

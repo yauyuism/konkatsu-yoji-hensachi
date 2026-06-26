@@ -180,7 +180,7 @@ function InlineSpecBreakdown({
       ) : null}
 
       <div className="mt-6 border-t border-[color:var(--line)] pt-5">
-        <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">全部掛け合わせると</p>
+        <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">重み付けすると</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
           <p className="text-lg font-black text-[var(--text-main)]">未婚同性の上位 {formatMarketPercent(overallPercentile)}%</p>
           <p className="number-display text-3xl font-black text-[var(--color-main)]">{incomeEquivalent.toLocaleString()}万相当</p>
@@ -519,8 +519,8 @@ export function MarketResultScreen({
         </div>
 
         <p className="mt-6 text-xs leading-6 text-[var(--text-sub)]">
-          ※ 総務省「国勢調査」、厚生労働省「賃金構造基本統計調査」「国民健康・栄養調査」、文部科学省「学校基本調査」、
-          国立社会保障・人口問題研究所「出生動向基本調査」、婚活実態調査をもとにした推計値です。各軸を独立とみなした概算であり、実際の希少性や需要とは異なる場合があります。
+          ※ 総務省「国勢調査」、国税庁「民間給与実態統計調査」、厚生労働省「国民健康・栄養調査」、文部科学省「学校基本調査」、
+          国立社会保障・人口問題研究所「出生動向基本調査」、婚活実態調査をもとにした推計値です。各軸を年収分布に置き換えた概算であり、実際の希少性や需要とは異なる場合があります。
         </p>
       </div>
 

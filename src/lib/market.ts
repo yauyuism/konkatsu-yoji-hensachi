@@ -64,6 +64,14 @@ export type MarketAnalysis = {
   whatIfs: MarketWhatIf[];
 };
 
+const marketSpecWeights: Record<MarketSpecKey, number> = {
+  age: 0.25,
+  income: 0.35,
+  height: 0.1,
+  education: 0.15,
+  region: 0.15,
+};
+
 export const DEFAULT_MARKET_SPEC: MarketUserSpec = {
   gender: "male",
   age: 32,
@@ -79,6 +87,10 @@ function clamp(value: number, min: number, max: number) {
 
 function round1(value: number) {
   return Math.round(value * 10) / 10;
+}
+
+function roundToNearest(value: number, unit: number) {
+  return Math.round(value / unit) * unit;
 }
 
 function toRecordValue(value: string | string[] | undefined) {
@@ -196,14 +208,24 @@ function getTotalUnmarried(gender: MarketGender, region: MarketRegionKey) {
   return Object.values(unmarriedPopulation[gender]).reduce((total, ageGroup) => total + ageGroup[region], 0);
 }
 
-function combinePercentiles(percentiles: number[]) {
-  const safe = percentiles.filter((value) => Number.isFinite(value) && value > 0);
+function combineIncomeEquivalents(gender: MarketGender, specs: MarketBreakdownItem[]) {
+  const included = specs.filter((item) => item.included);
 
-  if (!safe.length) {
-    return 100;
+  if (!included.length) {
+    return percentileToIncome(gender, 100);
   }
 
-  return clamp(safe.reduce((total, value) => total * (value / 100), 1) * 100, 0.02, 100);
+  const totalWeight = included.reduce((total, item) => total + marketSpecWeights[item.key], 0);
+  const weightedIncome = included.reduce(
+    (total, item) => total + item.incomeEquivalent * (marketSpecWeights[item.key] / totalWeight),
+    0
+  );
+
+  return clamp(roundToNearest(weightedIncome, 10), 100, 2500);
+}
+
+function getOverallPercentileFromIncomeEquivalent(gender: MarketGender, incomeEquivalent: number) {
+  return round1(getIncomePercentile(gender, incomeEquivalent));
 }
 
 function buildBreakdown(user: MarketUserSpec) {
@@ -414,8 +436,9 @@ function getComment(
 function buildMethodologySteps(user: MarketUserSpec, activeCount: number) {
   return [
     `年齢・年収・身長・学歴・居住地のうち、入力された ${activeCount} 軸を使って単独の上位割合を出しています。`,
-    "入力された各軸の上位割合を独立と仮定して掛け合わせ、全部を同時に満たすレア度を総合上位割合として扱っています。",
-    "その総合上位割合と同じパーセンタイルの年収を、賃金構造基本統計調査の逆引きテーブルで年収換算しています。",
+    "各軸の上位割合を、国税庁の給与階級別分布から同じ希少度の年収にいったん置き換えています。",
+    "総合値は掛け算ではなく、年収35%・年齢25%・学歴15%・居住地15%・身長10%の重み付け平均です。未入力の軸がある場合は、残りの軸に重みを再配分しています。",
+    "最後に、重み付けした年収相当額を同じ給与分布に戻して、未婚同性の上位何%くらいかを表示しています。",
     `あなたを条件内に入れやすい相手人数は、${MARKET_REGION_LABELS[user.region]}にいる未婚異性人口に、年齢・年収・身長・学歴・居住地の許容率を掛けた概算です。`,
   ];
 }
@@ -495,8 +518,8 @@ function getWhatIfLabel(current: MarketUserSpec, next: MarketUserSpec): Pick<Mar
 export function analyzeMarketSpecs(user: MarketUserSpec): MarketAnalysis {
   const specs = buildBreakdown(user);
   const activePercentiles = specs.filter((item) => item.included).map((item) => item.percentile);
-  const overallPercentile = combinePercentiles(activePercentiles);
-  const incomeEquivalent = percentileToIncome(user.gender, overallPercentile);
+  const incomeEquivalent = combineIncomeEquivalents(user.gender, specs);
+  const overallPercentile = getOverallPercentileFromIncomeEquivalent(user.gender, incomeEquivalent);
   const oppositeGender = getOppositeGender(user.gender);
   const oppositeTotal = getTotalUnmarried(oppositeGender, user.region);
   const ageRate = getAgeDesirabilityRate(user.gender, user.age);
@@ -554,9 +577,8 @@ export function analyzeMarketSpecs(user: MarketUserSpec): MarketAnalysis {
 
 function analyzeMarketSpecsWithoutWhatIf(user: MarketUserSpec) {
   const specs = buildBreakdown(user);
-  const activePercentiles = specs.filter((item) => item.included).map((item) => item.percentile);
-  const overallPercentile = combinePercentiles(activePercentiles);
-  const incomeEquivalent = percentileToIncome(user.gender, overallPercentile);
+  const incomeEquivalent = combineIncomeEquivalents(user.gender, specs);
+  const overallPercentile = getOverallPercentileFromIncomeEquivalent(user.gender, incomeEquivalent);
 
   return {
     overallPercentile,

@@ -147,7 +147,7 @@ export function SpecBreakdown({ items, overallPercentile, incomeEquivalent, edit
       ) : null}
 
       <div className="mt-6 border-t border-[color:var(--line)] pt-5">
-        <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">全部掛け合わせると</p>
+        <p className="text-xs font-bold tracking-[0.16em] text-[var(--accent)]">重み付けすると</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
           <p className="text-lg font-black text-[var(--text-main)]">未婚同性の上位 {formatMarketPercent(overallPercentile)}%</p>
           <p className="number-display text-3xl font-black text-[var(--color-main)]">{incomeEquivalent.toLocaleString()}万相当</p>
