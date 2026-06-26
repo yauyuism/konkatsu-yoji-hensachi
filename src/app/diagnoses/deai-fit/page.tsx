@@ -15,19 +15,17 @@ function getSingleParam(value: string | string[] | undefined) {
 }
 
 const title = "あなたに合う出会い方診断";
-const description =
-  "マチアプ、相談所、紹介、SNS、外飲み。オンライン・オフライン、条件・空気感、スピード感、人間関係の4軸から、あなたの恋愛が進みやすい出会い方を16タイプで診断します。";
+const description = "マチアプ・相談所・紹介・外飲み・SNS。自分に合う出会い方を診断します。";
 
 const defaultMetadata = buildShareMetadata({
   title: "あなたに合う出会い方診断",
   description,
   path: "/diagnoses/deai-fit",
-  imagePath: "/api/og-top",
+  imagePath: "/og/deai-fit-top.png",
   imageAlt: "あなたに合う出会い方診断のOGP画像",
   absoluteTitle: true,
   ogTitle: title,
   ogDescription: description,
-  siteName: "診断ラボ",
 });
 
 export async function generateMetadata({ searchParams }: DeaiFitPageProps): Promise<Metadata> {

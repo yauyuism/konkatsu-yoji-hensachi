@@ -1,7 +1,7 @@
 import type { DeaiFitType } from "@/lib/deai-fit";
 import { getSiteUrl } from "@/lib/site-url";
 
-export const DEAI_FIT_SHARE_VERSION = "20260627";
+export const DEAI_FIT_SHARE_VERSION = "20260628";
 
 export const DEAI_FIT_RESULT_SLUGS: Record<DeaiFitType, string> = {
   "O-C-Q-D": "ocqd",
