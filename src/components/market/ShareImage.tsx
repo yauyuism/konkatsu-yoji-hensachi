@@ -17,7 +17,7 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(function S
       ref={ref}
       className="w-[560px] rounded-[1.8rem] border border-[color:var(--line)] bg-white p-6 shadow-[0_24px_60px_rgba(26,26,26,0.08)]"
     >
-      <p className="text-center text-xs font-bold tracking-[0.22em] text-[var(--accent)]">MARKET VALUE</p>
+      <p className="text-center text-xs font-bold tracking-[0.22em] text-[var(--accent)]">SPEC RANK</p>
 
       <div className="mt-6 rounded-[1.5rem] bg-[linear-gradient(145deg,rgba(232,69,60,0.08),rgba(249,115,22,0.05))] px-5 py-8 text-center">
         <p className="text-lg font-black text-[var(--text-main)]">あなたの婚活スペックの希少性は</p>

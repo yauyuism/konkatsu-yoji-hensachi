@@ -122,7 +122,7 @@ export async function GET() {
             gap: 18,
           }}
         >
-          <div style={pillStyle()}>{`MARKET VALUE`}</div>
+          <div style={pillStyle()}>{`SPEC RANK`}</div>
           <div style={{ display: "flex", flexDirection: "column", fontSize: 44, fontWeight: 700, lineHeight: 1.2 }}>
             <div style={{ display: "flex" }}>あなたの婚活スペック、</div>
             <div style={{ display: "flex", color: ogPalette.accent }}>未婚同性の上位何%？</div>

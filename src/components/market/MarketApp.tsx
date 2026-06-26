@@ -50,7 +50,7 @@ export function MarketApp({ initialSpec }: MarketAppProps) {
       <div className="relative z-10 mx-auto max-w-4xl">
         <div className="paper-card rounded-[2.2rem] border border-[color:var(--line)] bg-[var(--card)] p-6 shadow-[0_28px_70px_rgba(26,26,26,0.08)] sm:p-8">
           <p className="eyebrow inline-flex rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.24em] text-[var(--accent)]">
-            MARKET VALUE
+            SPEC RANK
           </p>
 
           <h1 className="mt-5 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-5xl lg:text-6xl">
