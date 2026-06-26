@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { DeaiFitApp } from "@/components/deai-fit/DeaiFitApp";
 import { DEAI_FIT_TYPE_ORDER } from "@/lib/deai-fit";
 import { DEAI_FIT_DISPLAY_META } from "@/lib/deai-fit-display";
-import { getDeaiFitResultSlug, resolveDeaiFitTypeFromSlug } from "@/lib/deai-fit-share";
+import { DEAI_FIT_SHARE_VERSION, getDeaiFitResultSlug, resolveDeaiFitTypeFromSlug } from "@/lib/deai-fit-share";
 import { buildShareMetadata } from "@/lib/metadata";
 
 const title = "あなたに合う出会い方診断";
@@ -48,6 +48,7 @@ export async function generateMetadata({ params }: DeaiFitResultPageProps): Prom
     ogDescription: meta.shareCopy,
     twitterTitle: `${title}｜${meta.resultLabel}`,
     twitterDescription: meta.shareCopy,
+    imageVersion: DEAI_FIT_SHARE_VERSION,
     siteName: "診断ラボ",
   });
 }

@@ -25,6 +25,7 @@ type ShareMetadataOptions = {
   siteName?: string;
   twitterTitle?: string;
   twitterDescription?: string;
+  imageVersion?: string;
   robots?: Metadata["robots"];
 };
 
@@ -40,12 +41,13 @@ export function buildShareMetadata({
   siteName,
   twitterTitle,
   twitterDescription,
+  imageVersion,
   robots,
 }: ShareMetadataOptions): Metadata {
   const siteUrl = getSiteUrl();
   const absolutePageUrl = new URL(path, siteUrl).toString();
   const absoluteImageUrl = new URL(imagePath, siteUrl);
-  absoluteImageUrl.searchParams.set("v", OGP_CACHE_BUSTER);
+  absoluteImageUrl.searchParams.set("v", imageVersion ?? OGP_CACHE_BUSTER);
 
   const resolvedOgTitle = ogTitle ?? `${title} | ${SITE_NAME}`;
   const resolvedOgDescription = ogDescription ?? description;
