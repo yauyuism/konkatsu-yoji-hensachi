@@ -97,7 +97,7 @@ export function ConditionsResultCard({
         <p className="text-sm font-bold tracking-[0.16em] text-[var(--text-main)]">次にやること</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <ToolCard
-            label="MARKET VALUE"
+            label="SPEC RANK"
             title="婚活スペック上位チェック"
             description="条件だけでなく、自分が探される側でどう見えるかも確認します。"
             tags={["フォーム入力", "約30秒"]}

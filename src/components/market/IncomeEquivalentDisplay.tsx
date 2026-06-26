@@ -20,7 +20,7 @@ export function IncomeEquivalentDisplay({
   return (
     <section className="paper-card rounded-[2rem] border border-[color:var(--line)] bg-[var(--card)] p-5 shadow-[0_28px_70px_rgba(26,26,26,0.08)] sm:p-7">
       <p className="eyebrow mx-auto w-fit rounded-full px-4 py-2 text-[0.72rem] font-bold tracking-[0.22em] text-[var(--accent)]">
-        MARKET VALUE - RESULT
+        SPEC RANK - RESULT
       </p>
 
       <div className="mt-6 text-center">

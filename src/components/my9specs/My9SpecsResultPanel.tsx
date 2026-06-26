@@ -198,7 +198,7 @@ export function My9SpecsResultPanel({
           cta="条件チェッカーを開く →"
         />
         <NextStepCard
-          eyebrow="MARKET VALUE"
+          eyebrow="SPEC RANK"
           title="自分のスペックも上位チェックしてみる"
           description="条件で探すだけでなく、自分が探される側としてどれくらいレアかも確認できます。"
           href="/market"

@@ -35,7 +35,7 @@ export async function GET(request: Request) {
           paddingBottom: 36,
         }}
       >
-        <div style={pillStyle()}>{`MARKET VALUE`}</div>
+        <div style={pillStyle()}>{`SPEC RANK`}</div>
         <div style={{ display: "flex", marginTop: 18, fontSize: 28, color: ogPalette.textSub }}>
           あなたの婚活スペックの希少性は
         </div>
