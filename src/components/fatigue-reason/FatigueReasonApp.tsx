@@ -279,12 +279,14 @@ function FatigueSimpleResultCard({
   cardRef,
   resultLabel,
   supportLabel,
+  oneLineSummary,
   tags,
   chartData,
 }: {
   cardRef: RefObject<HTMLElement>;
   resultLabel: string;
   supportLabel: string;
+  oneLineSummary: string;
   tags: Array<{ label: string; value: string }>;
   chartData: Array<{ label: string; score: number }>;
 }) {
@@ -303,17 +305,15 @@ function FatigueSimpleResultCard({
           <p className="mt-1 text-[0.68rem] font-black tracking-[0.18em] text-[var(--text-sub)]">RESULT CARD</p>
         </div>
 
-        <div data-testid="fatigue-reason-card-map" className="mt-7 rounded-[1.35rem] border border-[rgba(201,130,120,0.14)] bg-white/70 px-3 py-4">
-          <p className="text-center text-xs font-black tracking-[0.16em] text-[var(--accent)]">詳しい婚活疲れマップ</p>
-          <div className="mx-auto mt-2 max-w-[290px]">
-            <FatigueReasonRadarChart data={chartData} height={205} />
-          </div>
+        <div className="py-6 sm:py-8">
+          <p className="text-base font-black leading-7 text-[var(--text-sub)]">あなたは</p>
+          <h1 className="mt-2 text-[3.25rem] font-black leading-[0.98] text-[var(--text-main)] sm:text-[4.2rem]">{resultLabel}</h1>
+          <p className="mt-4 text-base font-black leading-7 text-[var(--text-main)] sm:text-lg">{supportLabel}</p>
         </div>
 
-        <div className="py-6">
-          <p className="text-sm font-bold leading-7 text-[var(--text-sub)]">あなたは</p>
-          <h1 className="mt-2 text-[2.7rem] font-black leading-[1.05] text-[var(--text-main)] sm:text-6xl">{resultLabel}</h1>
-          <p className="mt-4 text-[0.95rem] font-black leading-7 text-[var(--text-main)] sm:text-base">{supportLabel}</p>
+        <div className="rounded-[1.25rem] border border-[rgba(201,130,120,0.12)] bg-white/76 px-4 py-4">
+          <p className="text-[0.72rem] font-black tracking-[0.16em] text-[var(--accent)]">ひとことで言うと</p>
+          <p className="mt-2 text-[0.95rem] font-bold leading-7 text-[var(--text-main)] sm:text-base">{oneLineSummary}</p>
         </div>
 
         <div className="mt-auto">
@@ -328,6 +328,13 @@ function FatigueSimpleResultCard({
               </p>
             ))}
           </div>
+
+          <div data-testid="fatigue-reason-card-map" className="mt-5 rounded-[1.25rem] border border-[rgba(201,130,120,0.1)] bg-white/54 px-3 py-3 opacity-75">
+            <div className="mx-auto max-w-[220px]">
+              <FatigueReasonRadarChart data={chartData} height={140} />
+            </div>
+          </div>
+
           <div className="mt-6 flex items-center justify-between gap-4 text-xs font-black tracking-[0.14em] text-[var(--text-sub)]">
             <span>shindanlab.jp</span>
             <span>やうゆ式</span>
@@ -388,7 +395,7 @@ function FatigueShareActions({
           onClick={onConsultationClick}
           className="btn-secondary inline-flex min-h-14 w-full justify-center rounded-full border-[rgba(201,130,120,0.26)] bg-white px-6 py-4 text-base font-black text-[var(--color-main)]"
         >
-          診断結果をもとに相談する
+          自分の場合を相談する
         </a>
         <button
           data-testid="fatigue-reason-save-image-only"
@@ -748,15 +755,11 @@ export function FatigueReasonApp({
         value: FATIGUE_REASON_DISPLAY_META[factor.type].shortLabel,
       }));
   const reasonSummaryParagraphs = isLowSignal
-    ? [
-        "今回の回答では、婚活疲れの原因がどこか一箇所に強く偏っている状態ではありませんでした。",
-        "ただ、疲れていないと決めつけるより、会った後に軽いか疲れるかを見ておくと、小さな違和感を早めに拾いやすくなります。",
-      ]
+    ? resultMeta.reasonParagraphs
     : [
-        FATIGUE_REASON_DISPLAY_META[primaryFactor.type].formalDescription,
-        resultMeta.shareCopy,
+        ...resultMeta.reasonParagraphs,
         topFactors[1]
-          ? `さらに「${FATIGUE_REASON_DISPLAY_META[topFactors[1].type].shortLabel}」も重なると、今の婚活のしんどさが増えやすくなります。`
+          ? `さらに「${FATIGUE_REASON_DISPLAY_META[topFactors[1].type].shortLabel}」も重なると、相手そのものより、選ぶ前提や進め方でしんどさが増えやすくなります。`
           : "出会いの数を増やすより、まず今の進め方が自分に合っているかを見るのがよさそうです。",
       ];
   const reviewAnalysis = buildReviewAnalysis({
@@ -854,6 +857,7 @@ export function FatigueReasonApp({
             cardRef={shareCardRef}
             resultLabel={resultMeta.resultLabel}
             supportLabel={resultMeta.supportLabel}
+            oneLineSummary={resultMeta.shareCopy}
             tags={resultTags}
             chartData={chartData}
           />
