@@ -30,7 +30,7 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(function S
         <p className="mt-3 text-base font-bold text-[var(--text-sub)]">
           未婚{MARKET_GENDER_LABELS[user.gender]}の上位 {formatMarketPercent(analysis.overallPercentile)}%
         </p>
-        <p className="mt-2 text-xs leading-6 text-[var(--text-sub)]">各スペックのレア度を掛け合わせた概算</p>
+        <p className="mt-2 text-xs leading-6 text-[var(--text-sub)]">各スペックを年収分布に置き換えた概算</p>
       </div>
 
       <div className="mt-5 rounded-[1.3rem] border border-[rgba(26,26,26,0.08)] bg-[rgba(248,247,244,0.9)] px-4 py-4 text-sm leading-7 text-[var(--text-main)]">
