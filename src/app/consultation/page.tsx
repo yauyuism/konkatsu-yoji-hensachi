@@ -58,6 +58,31 @@ const talkExamples = [
   "今の婚活を続けるべきか、一度見直すべきか",
 ];
 
+const consultationPlans = [
+  {
+    title: "プロフィール添削",
+    label: "入口を整えたい人向け",
+    body: "マチアプや婚活プロフィールを見直したい人向けのプランです。自分の魅力が伝わる入口になっているか、合わない人を呼び込んでいないかを整理します。",
+    fit: ["マッチ数を増やしたい", "合わない人ばかり来る", "プロフィール文に自信がない", "写真や文章の方向性を見直したい"],
+    button: "プロフィール添削を見る",
+  },
+  {
+    title: "婚活のセカンドオピニオン",
+    label: "まず一度整理したい人向け",
+    body: "会えるのに進まない理由、婚活疲れの原因、自分に合う出会い方を60分で整理するプランです。マチアプ、相談所、紹介、SNS、外飲みなど、今の婚活の進め方を一緒に見直します。",
+    fit: ["会えるのに進まない", "いい人なのに好きになれない", "相談所に入るべきか迷っている", "自分に合う出会い方が分からない"],
+    button: "60分相談を見る",
+    recommended: true,
+  },
+  {
+    title: "2回セット相談",
+    label: "動いた後まで見てほしい人向け",
+    body: "1回目で婚活の現状を整理し、実際に動いた後の変化や迷いを2回目で見直すプランです。一度話して終わりではなく、次の行動まで整理したい人に向いています。",
+    fit: ["相談後の動き方まで見てほしい", "一度整理してもまた迷いそう", "プロフィールや出会い方を実際に直したい", "継続して婚活の方向性を見直したい"],
+    button: "2回セットを見る",
+  },
+];
+
 const fitItems = [
   "マチアプで会えるけど進まない",
   "いい人なのに好きになれない",
@@ -317,6 +342,57 @@ export default function ConsultationPage() {
               <span>{item}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mt-12 border-t border-[var(--line)] pt-10">
+        <SectionHeading
+          eyebrow="PLANS"
+          title="相談プランは3つあります"
+          description="悩みの深さや、見直したい範囲に合わせて選べるように、3つのプランを用意しています。どれを選べばいいか迷う人は、まずは60分の相談がおすすめです。"
+        />
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          {consultationPlans.map((plan) => (
+            <article
+              key={plan.title}
+              className={`relative rounded-[1.2rem] border bg-white p-5 sm:p-6 ${
+                plan.recommended ? "border-[rgba(232,69,60,0.34)] ring-1 ring-[rgba(232,69,60,0.12)]" : "border-[var(--line)]"
+              }`}
+            >
+              {plan.recommended ? (
+                <span className="absolute right-4 top-4 rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-black text-white">
+                  まずはこれ
+                </span>
+              ) : null}
+              <p className="pr-20 text-xs font-black tracking-[0.14em] text-[var(--accent)]">{plan.label}</p>
+              <h3 className="mt-3 text-xl font-black leading-tight text-[var(--text-main)]">{plan.title}</h3>
+              <p className="mt-4 text-sm leading-8 text-[var(--text-sub)]">{plan.body}</p>
+              <div className="mt-5 rounded-[1rem] bg-[var(--accent-soft)] px-4 py-4">
+                <p className="text-xs font-black tracking-[0.14em] text-[var(--accent)]">向いている人</p>
+                <ul className="mt-3 grid gap-2 text-sm leading-7 text-[var(--text-main)]">
+                  {plan.fit.map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <ConsultationMoshButton
+                placement="plans"
+                className="btn-primary mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 py-3 text-sm font-black"
+              >
+                {plan.button}
+              </ConsultationMoshButton>
+            </article>
+          ))}
+        </div>
+        <div className="mt-6 rounded-[1.2rem] border border-[rgba(26,26,26,0.08)] bg-white p-5 text-sm leading-8 text-[var(--text-main)] sm:p-6 sm:text-base">
+          <p>どのプランも、相手を紹介するサービスではありません。</p>
+          <p className="mt-2">今の婚活を整理し、自分に合う進め方を見つけるための相談です。</p>
+        </div>
+        <div className="mt-6">
+          <ConsultationMoshButton placement="plans">MOSHでプランを見る</ConsultationMoshButton>
         </div>
       </section>
 
