@@ -12,6 +12,7 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(page.getByRole("heading", { name: "こんな状態ではありませんか？" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "この相談でやること" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "実際に相談で話せること" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "相談プランは3つあります" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "よくある質問" })).toBeVisible();
   await expect(page.getByText("結婚相談所のように、条件に合う人を紹介するサービスでもありません。")).toBeVisible();
   await expect(page.getByText("合っていない頑張り方をやめるための相談です。")).toBeVisible();
@@ -20,12 +21,22 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(page.getByText("オンライン", { exact: true })).toBeVisible();
   await expect(page.getByText("MOSH", { exact: true })).toBeVisible();
   await expect(page.getByText("今使っているマチアプが自分に合っているか")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "プロフィール添削" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "婚活のセカンドオピニオン" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "2回セット相談" })).toBeVisible();
+  await expect(page.getByText("まずはこれ")).toBeVisible();
+  await expect(page.getByRole("link", { name: "プロフィール添削を見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "60分相談を見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "2回セットを見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("rel", "noopener noreferrer");
   await expect(page.getByRole("link", { name: "会えるのに進まない理由を診断する" })).toBeVisible();
   await expect(page.getByRole("link", { name: "自分に合う出会い方を診断する" })).toBeVisible();
   await expect(page.getByText("このページは仮リンク先です")).toHaveCount(0);
 
   const moshCtas = page.getByTestId("consultation-mosh-cta");
-  await expect(moshCtas).toHaveCount(2);
+  await expect(moshCtas).toHaveCount(6);
   await expect(moshCtas.first()).toHaveAttribute("href", reservationUrl);
   await expect(moshCtas.first()).toHaveAttribute("target", "_blank");
   await expect(moshCtas.first()).toHaveAttribute("rel", "noopener noreferrer");

@@ -3,7 +3,7 @@
 import { trackEvent } from "@/lib/analytics";
 import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
-type MoshPlacement = "final_cta" | "flow" | "header";
+type MoshPlacement = "final_cta" | "flow" | "header" | "plans";
 type DiagnosisKind = "konkatsu_fatigue" | "deai_fit";
 
 export function FirstViewConsultationLink() {
@@ -25,7 +25,15 @@ export function FirstViewConsultationLink() {
   );
 }
 
-export function ConsultationMoshButton({ children, placement }: { children: string; placement: MoshPlacement }) {
+export function ConsultationMoshButton({
+  children,
+  placement,
+  className,
+}: {
+  children: string;
+  placement: MoshPlacement;
+  className?: string;
+}) {
   const handleClick = () => {
     trackEvent("consultation_lp_mosh_click", {
       placement,
@@ -39,7 +47,10 @@ export function ConsultationMoshButton({ children, placement }: { children: stri
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3.5 text-sm font-black sm:text-base"
+      className={
+        className ??
+        "btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3.5 text-sm font-black sm:text-base"
+      }
     >
       {children}
     </a>
