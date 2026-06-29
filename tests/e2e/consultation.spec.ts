@@ -13,9 +13,16 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(page.getByRole("heading", { name: "この相談でやること" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "実際に相談で話せること" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "相談プランは3つあります" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "進まない原因は、ひとつではありません" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "普通の婚活相談と、この相談の違い" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "相談後に残るもの" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "よくある質問" })).toBeVisible();
   await expect(page.getByText("結婚相談所のように、条件に合う人を紹介するサービスでもありません。")).toBeVisible();
-  await expect(page.getByText("合っていない頑張り方をやめるための相談です。")).toBeVisible();
+  await expect(page.getByText("合っていない頑張り方をやめるための相談です。")).toHaveCount(2);
+  await expect(page.getByText("相手選びの前に、出会い方選び。")).toHaveCount(2);
+  await expect(page.getByText("婚活をもっと頑張らせる相談ではありません。")).toHaveCount(2);
+  await expect(page.getByText("出会い方から見直す")).toBeVisible();
+  await expect(page.getByText("整理する", { exact: true })).toBeVisible();
   await expect(page.getByText("60分のオンライン相談です。料金・空き日程はMOSHで確認できます。")).toBeVisible();
   await expect(page.getByText("相談時間")).toBeVisible();
   await expect(page.getByText("オンライン", { exact: true })).toBeVisible();
