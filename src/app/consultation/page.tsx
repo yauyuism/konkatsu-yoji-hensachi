@@ -1,7 +1,7 @@
 import Link from "next/link";
 
+import { ConsultationDiagnosisLink, ConsultationMoshButton, FirstViewConsultationLink } from "@/components/consultation/ConsultationActions";
 import { buildShareMetadata } from "@/lib/metadata";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 const diagnosisTopUrl = "https://www.shindanlab.jp/";
 
@@ -46,6 +46,18 @@ const organizeCards = [
   },
 ];
 
+const talkExamples = [
+  "今使っているマチアプが自分に合っているか",
+  "相談所に入るべきか、まだ早いのか",
+  "プロフィールで合わない人を呼び込んでいないか",
+  "会ったあとに疲れる理由は何か",
+  "いい人なのに好きになれない理由は何か",
+  "どんな人を好きになりやすいのか",
+  "紹介・SNS・外飲みなどをどう使えばいいか",
+  "次に会う人をどう判断すればいいか",
+  "今の婚活を続けるべきか、一度見直すべきか",
+];
+
 const fitItems = [
   "マチアプで会えるけど進まない",
   "いい人なのに好きになれない",
@@ -84,18 +96,26 @@ const flowItems = [
   },
 ];
 
+const sessionInfoItems = [
+  ["相談時間", "60分"],
+  ["形式", "オンライン"],
+  ["予約・決済", "MOSH"],
+];
+
 const diagnosisCards = [
   {
     title: "婚活疲れ・マチアプ疲れ診断",
     description: "会えるのに進まない理由や、今どこで疲れているのかを診断します。",
     href: "https://www.shindanlab.jp/diagnoses/konkatsu-fatigue",
-    button: "婚活疲れを診断する",
+    button: "会えるのに進まない理由を診断する",
+    diagnosis: "konkatsu_fatigue" as const,
   },
   {
     title: "あなたに合う出会い方診断",
     description: "マチアプ、紹介、SNS、外飲みなど、どんな出会い方が合うかを診断します。",
     href: "https://www.shindanlab.jp/diagnoses/deai-fit",
-    button: "出会い方を診断する",
+    button: "自分に合う出会い方を診断する",
+    diagnosis: "deai_fit" as const,
   },
 ];
 
@@ -135,20 +155,6 @@ export const metadata = buildShareMetadata({
   ogTitle: "婚活のセカンドオピニオン｜婚活診断LAB by やうゆ",
   ogDescription: "会えるのに進まない理由を、相手選びの前に出会い方から整理する相談です。",
 });
-
-function MoshButton({ children }: { children: string }) {
-  return (
-    <a
-      data-testid="consultation-mosh-cta"
-      href={MOSH_SERVICES_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3.5 text-sm font-black sm:text-base"
-    >
-      {children}
-    </a>
-  );
-}
 
 function DiagnosisButton({ children }: { children: string }) {
   return (
@@ -200,13 +206,15 @@ export default function ConsultationPage() {
           <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">婚活のセカンドオピニオン</p>
           <h1 className="mt-4 text-4xl font-black leading-tight text-[var(--text-main)] sm:text-5xl">
             会えるのに進まない理由を、
-            <span className="block text-[var(--accent)]">出会い方から整理する相談です。</span>
+            <span className="block">
+              <span className="text-[var(--accent)]">出会い方から整理</span>します。
+            </span>
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-sub)] sm:text-lg">
             マチアプ疲れ・婚活疲れ・いい人なのに好きになれない違和感を、相手選びの前に「出会い方」から見直します。
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <MoshButton>相談内容を見て申し込む</MoshButton>
+            <FirstViewConsultationLink />
             <DiagnosisButton>無料診断を試す</DiagnosisButton>
           </div>
         </div>
@@ -220,6 +228,23 @@ export default function ConsultationPage() {
             <p className="font-bold text-[var(--text-main)]">合っていない頑張り方をやめるための、婚活の見直し相談です。</p>
           </div>
         </aside>
+      </section>
+
+      <section className="mt-6 grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-[1.2rem] border border-[var(--line)] bg-white p-5 sm:p-6">
+          <p className="text-sm font-black tracking-[0.14em] text-[var(--accent)]">SESSION INFO</p>
+          <p className="mt-3 text-sm leading-8 text-[var(--text-main)]">
+            60分のオンライン相談です。料金・空き日程はMOSHで確認できます。
+          </p>
+        </div>
+        <dl className="grid gap-3 sm:grid-cols-3">
+          {sessionInfoItems.map(([label, value]) => (
+            <div key={label} className="rounded-[1.2rem] border border-[var(--line)] bg-white px-4 py-4">
+              <dt className="text-xs font-bold tracking-[0.14em] text-[var(--text-sub)]">{label}</dt>
+              <dd className="mt-2 text-lg font-black text-[var(--text-main)]">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="mt-12 border-t border-[var(--line)] pt-10">
@@ -251,7 +276,7 @@ export default function ConsultationPage() {
         </p>
       </section>
 
-      <section className="mt-12 border-t border-[var(--line)] pt-10">
+      <section id="service" className="mt-12 scroll-mt-20 border-t border-[var(--line)] pt-10">
         <SectionHeading eyebrow="SERVICE" title="この相談でやること" />
         <div className="mt-6 grid gap-4 text-sm leading-8 text-[var(--text-main)] sm:text-base">
           <p>婚活のセカンドオピニオンでは、相手を紹介することはしません。</p>
@@ -279,6 +304,22 @@ export default function ConsultationPage() {
         </div>
       </section>
 
+      <section className="mt-12 border-t border-[var(--line)] pt-10">
+        <SectionHeading
+          eyebrow="TALK TOPICS"
+          title="実際に相談で話せること"
+          description="相談内容がきれいにまとまっていなくても大丈夫です。今の状況を聞きながら、どこで詰まっているのかを一緒に整理します。"
+        />
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {talkExamples.map((item) => (
+            <div key={item} className="flex gap-3 rounded-[1rem] border border-[rgba(232,69,60,0.12)] bg-white px-4 py-4 text-sm leading-7 text-[var(--text-main)]">
+              <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--accent)]" />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="mt-12 grid gap-8 border-t border-[var(--line)] pt-10 lg:grid-cols-2">
         <div>
           <SectionHeading eyebrow="FIT" title="この相談が向いている人" />
@@ -293,6 +334,7 @@ export default function ConsultationPage() {
           </div>
           <p className="mt-5 rounded-[1rem] bg-white px-4 py-4 text-sm leading-8 text-[var(--text-sub)]">
             この相談は、正解を押しつけるものではありません。今の婚活を一緒に整理し、自分に合う進め方を見つけるための相談です。
+            合う・合わないを確認したうえで、必要な人だけ使ってもらえれば大丈夫です。
           </p>
         </div>
       </section>
@@ -310,6 +352,9 @@ export default function ConsultationPage() {
             </li>
           ))}
         </ol>
+        <div className="mt-6">
+          <ConsultationMoshButton placement="flow">料金・空き日程をMOSHで確認する</ConsultationMoshButton>
+        </div>
       </section>
 
       <section className="mt-12 border-t border-[var(--line)] pt-10">
@@ -323,9 +368,9 @@ export default function ConsultationPage() {
             <article key={card.title} className="rounded-[1.2rem] border border-[var(--line)] bg-white p-5 sm:p-6">
               <h3 className="text-lg font-black leading-tight text-[var(--text-main)]">{card.title}</h3>
               <p className="mt-3 text-sm leading-8 text-[var(--text-sub)]">{card.description}</p>
-              <a href={card.href} className="secondary-button mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-black text-[var(--text-main)]">
+              <ConsultationDiagnosisLink href={card.href} diagnosis={card.diagnosis}>
                 {card.button}
-              </a>
+              </ConsultationDiagnosisLink>
             </article>
           ))}
         </div>
@@ -351,6 +396,7 @@ export default function ConsultationPage() {
           会えるのに進まない理由を、自分の場合で整理してみませんか？
         </h2>
         <div className="mt-6 grid gap-4 text-sm leading-8 text-[var(--text-main)] sm:text-base">
+          <p>診断では見えた違和感を、実際のプロフィール・出会い方・相手選びに落とし込むための相談です。</p>
           <p>婚活がしんどい時、人はすぐに自分を責めます。</p>
           <p>自分に魅力がないのか。理想が高いのか。見る目がないのか。恋愛に向いていないのか。</p>
           <p>でも、そう決める前に、一度だけ見てほしいです。</p>
@@ -358,7 +404,7 @@ export default function ConsultationPage() {
           <p className="font-bold">婚活疲れは、努力不足ではなく、合わない頑張り方を続けているサインかもしれません。</p>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <MoshButton>MOSHで相談を申し込む</MoshButton>
+          <ConsultationMoshButton placement="final_cta">MOSHで相談を申し込む</ConsultationMoshButton>
           <DiagnosisButton>無料診断から試す</DiagnosisButton>
         </div>
       </section>
