@@ -6,12 +6,22 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await page.goto("/consultation");
 
   await expect(page.getByTestId("consultation-page")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "会えるのに進まない理由を、 出会い方から整理する相談です。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "会えるのに進まない理由を、 出会い方から整理します。" })).toBeVisible();
+  await expect(page.getByTestId("consultation-first-cta")).toHaveText("相談内容を見る");
+  await expect(page.getByTestId("consultation-first-cta")).toHaveAttribute("href", "#service");
   await expect(page.getByRole("heading", { name: "こんな状態ではありませんか？" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "この相談でやること" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "実際に相談で話せること" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "よくある質問" })).toBeVisible();
   await expect(page.getByText("結婚相談所のように、条件に合う人を紹介するサービスでもありません。")).toBeVisible();
   await expect(page.getByText("合っていない頑張り方をやめるための相談です。")).toBeVisible();
+  await expect(page.getByText("60分のオンライン相談です。料金・空き日程はMOSHで確認できます。")).toBeVisible();
+  await expect(page.getByText("相談時間")).toBeVisible();
+  await expect(page.getByText("オンライン", { exact: true })).toBeVisible();
+  await expect(page.getByText("MOSH", { exact: true })).toBeVisible();
+  await expect(page.getByText("今使っているマチアプが自分に合っているか")).toBeVisible();
+  await expect(page.getByRole("link", { name: "会えるのに進まない理由を診断する" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "自分に合う出会い方を診断する" })).toBeVisible();
   await expect(page.getByText("このページは仮リンク先です")).toHaveCount(0);
 
   const moshCtas = page.getByTestId("consultation-mosh-cta");
@@ -20,6 +30,7 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(moshCtas.first()).toHaveAttribute("target", "_blank");
   await expect(moshCtas.first()).toHaveAttribute("rel", "noopener noreferrer");
   await expect(moshCtas.last()).toHaveAttribute("href", reservationUrl);
+  await expect(moshCtas.last()).toHaveText("MOSHで相談を申し込む");
 
   await expect(page.getByTestId("consultation-diagnosis-cta").first()).toHaveAttribute("href", "https://www.shindanlab.jp/");
 });
