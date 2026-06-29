@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { getLiveTools } from "@/data/tools";
 import { getCreatorLinks } from "@/lib/creator-links";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
 
 const footerLinkClass =
   "text-sm leading-7 text-[var(--text-sub)] transition-colors hover:text-[var(--text-main)]";
@@ -22,9 +21,9 @@ export function SiteFooter() {
           <p className="mt-3 text-sm leading-7 text-[var(--text-sub)]">
             診断は、あなたを採点するためのものではありません。自分に合わない頑張り方を見直し、自分に合う出会い方を知るための入口です。
           </p>
-          <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className="text-link mt-4 inline-flex">
+          <Link href="/consultation" className="text-link mt-4 inline-flex">
             診断結果を個別に整理する →
-          </a>
+          </Link>
         </div>
 
         <div>
@@ -53,9 +52,9 @@ export function SiteFooter() {
             恋愛・婚活の違和感を言語化する無料診断メディア。個別相談では、マチアプ、相談所、紹介、SNS、外飲みまで含めて婚活の進め方を見直します。
           </p>
           <div className="mt-3 grid gap-1">
-            <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
+            <Link href="/consultation" className={footerLinkClass}>
               60分婚活相談
-            </a>
+            </Link>
             <a href={xUrl} target="_blank" rel="noopener noreferrer" className={footerLinkClass}>
               X: @yauyuism
             </a>

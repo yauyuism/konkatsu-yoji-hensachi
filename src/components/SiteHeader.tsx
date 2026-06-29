@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
-
 export function SiteHeader() {
   return (
     <header className="sticky-header sticky top-0 z-50 border-b border-[color:rgba(229,231,235,0.95)] bg-white/95 backdrop-blur-sm">
@@ -16,9 +14,9 @@ export function SiteHeader() {
           <Link href="/#tool-list" className="transition hover:text-[var(--color-text)]">
             診断一覧
           </Link>
-          <a href={MOSH_SERVICES_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--accent)] transition hover:text-[var(--color-text)]">
+          <Link href="/consultation" className="font-bold text-[var(--accent)] transition hover:text-[var(--color-text)]">
             個別相談
-          </a>
+          </Link>
         </nav>
       </div>
     </header>
