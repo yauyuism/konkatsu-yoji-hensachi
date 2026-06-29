@@ -127,6 +127,38 @@ const sessionInfoItems = [
   ["予約・決済", "MOSH"],
 ];
 
+const stuckFlowSteps = ["出会う", "会う", "疲れる", "進まない", "自分を責める"];
+
+const comparisonCards = [
+  {
+    label: "普通の婚活相談",
+    title: "相手選びを整える",
+    items: ["条件を整理する", "プロフィールを改善する", "会う人数を増やす", "初回で判断する", "相談所やアプリを使いこなす"],
+    note: "もちろん大事。ただ、それだけでは疲れが残る人もいます。",
+    featured: false,
+  },
+  {
+    label: "婚活のセカンドオピニオン",
+    title: "出会い方から見直す",
+    items: ["どこで疲れているかを見る", "自分に合う出会い方を探す", "判断の速度を見直す", "魅力が出る場所を考える", "次に取る行動を整理する"],
+    note: "相手選びの前に、出会い方選び。",
+    featured: true,
+  },
+];
+
+const beforeAfterCards = [
+  {
+    label: "相談前",
+    items: ["会えるのに進まない", "何が悪いのか分からない", "相談所に入るべきか迷う", "いい人なのに好きになれない", "婚活を続けるほど自信がなくなる"],
+    featured: false,
+  },
+  {
+    label: "相談後",
+    items: ["疲れている原因が分かる", "合う出会い方が見える", "プロフィールや入口のズレが分かる", "次に取る行動が決まる", "自分を責めなくてよくなる"],
+    featured: true,
+  },
+];
+
 const diagnosisCards = [
   {
     title: "婚活疲れ・マチアプ疲れ診断",
@@ -223,6 +255,132 @@ function CheckList({ items, subtle = false }: { items: string[]; subtle?: boolea
   );
 }
 
+function DiagramItemList({ items, subtle = false }: { items: string[]; subtle?: boolean }) {
+  return (
+    <ul className="mt-5 grid gap-3">
+      {items.map((item) => (
+        <li key={item} className="flex gap-3 text-sm leading-7 text-[var(--text-main)]">
+          <span className={`mt-2.5 h-2 w-2 shrink-0 rounded-full ${subtle ? "bg-[rgba(26,26,26,0.28)]" : "bg-[var(--accent)]"}`} />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ConsultationStuckFlowDiagram() {
+  return (
+    <section className="mt-10 rounded-[1.5rem] border border-[rgba(232,69,60,0.14)] bg-white p-5 sm:p-6">
+      <SectionHeading
+        eyebrow="STUCK POINT"
+        title="進まない原因は、ひとつではありません"
+        description="詰まりは「相手選び」だけではなく、出会い方・判断速度・入口のズレにあることがあります。"
+      />
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-center">
+        <ol className="grid gap-3 sm:grid-cols-5 sm:gap-2">
+          {stuckFlowSteps.map((step, index) => (
+            <li key={step} className="relative">
+              <div className="rounded-[1rem] border border-[rgba(232,69,60,0.14)] bg-[var(--accent-soft)] px-4 py-4 text-center">
+                <p className="font-numeric text-xs font-black tracking-[0.14em] text-[var(--accent)]">STEP {index + 1}</p>
+                <p className="mt-2 text-base font-black leading-tight text-[var(--text-main)]">{step}</p>
+              </div>
+              {index < stuckFlowSteps.length - 1 ? (
+                <span
+                  aria-hidden="true"
+                  className="mx-auto block h-5 w-px bg-[rgba(232,69,60,0.32)] sm:absolute sm:-right-1 sm:top-1/2 sm:h-px sm:w-2 sm:-translate-y-1/2"
+                />
+              ) : null}
+            </li>
+          ))}
+        </ol>
+        <div className="rounded-[1.1rem] border border-[rgba(26,26,26,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(255,245,240,0.84))] p-5">
+          <p className="text-sm font-black leading-7 text-[var(--text-main)]">見る場所を少し変えると、責める先も変わります。</p>
+          <p className="mt-3 text-sm leading-8 text-[var(--text-sub)]">
+            「自分が悪い」で止めず、どの段階でしんどくなっているかを分けて見る相談です。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ConsultationComparisonDiagram() {
+  return (
+    <section className="mt-12 border-t border-[var(--line)] pt-10">
+      <SectionHeading
+        eyebrow="COMPARE"
+        title="普通の婚活相談と、この相談の違い"
+        description="この相談では、相手を紹介したり、条件だけを整理したりするのではなく、今の婚活がどこでズレているのかを「出会い方」から見直します。"
+      />
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        {comparisonCards.map((card) => (
+          <article
+            key={card.label}
+            className={`rounded-[1.4rem] border p-5 sm:p-6 ${
+              card.featured
+                ? "border-[rgba(232,69,60,0.28)] bg-[linear-gradient(135deg,rgba(255,245,240,0.96),rgba(255,255,255,0.98))]"
+                : "border-[var(--line)] bg-white"
+            }`}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-black tracking-[0.16em] text-[var(--accent)]">{card.label}</p>
+              {card.featured ? (
+                <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-black text-white">この相談で見ること</span>
+              ) : null}
+            </div>
+            <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--text-main)]">{card.title}</h3>
+            <DiagramItemList items={card.items} subtle={!card.featured} />
+            <p className={`mt-5 rounded-[1rem] px-4 py-3 text-sm font-bold leading-7 ${card.featured ? "bg-white text-[var(--accent)]" : "bg-[var(--accent-soft)] text-[var(--text-sub)]"}`}>
+              {card.note}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ConsultationBeforeAfterDiagram() {
+  return (
+    <section className="mt-12 border-t border-[var(--line)] pt-10">
+      <SectionHeading
+        eyebrow="AFTER SESSION"
+        title="相談後に残るもの"
+        description="相談のゴールは、婚活をもっと頑張らせることではありません。今の違和感を整理し、次に何を見直すかをはっきりさせることです。"
+      />
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+        {beforeAfterCards.map((card, index) => (
+          <div key={card.label} className="contents">
+            <article
+              className={`rounded-[1.4rem] border p-5 sm:p-6 ${
+                card.featured
+                  ? "border-[rgba(232,69,60,0.28)] bg-[linear-gradient(135deg,rgba(255,245,240,0.96),rgba(255,255,255,0.98))]"
+                  : "border-[rgba(26,26,26,0.08)] bg-white"
+              }`}
+            >
+              <p className={`text-xs font-black tracking-[0.16em] ${card.featured ? "text-[var(--accent)]" : "text-[var(--text-sub)]"}`}>
+                {card.label}
+              </p>
+              <DiagramItemList items={card.items} subtle={!card.featured} />
+            </article>
+            {index === 0 ? (
+              <div className="flex items-center justify-center" aria-hidden="true">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(232,69,60,0.24)] bg-white text-sm font-black text-[var(--accent)] shadow-[0_12px_30px_rgba(232,69,60,0.10)] lg:h-20 lg:w-20">
+                  整理する
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 rounded-[1.2rem] border border-[rgba(232,69,60,0.14)] bg-white p-5 text-sm leading-8 text-[var(--text-main)] sm:p-6 sm:text-base">
+        <p className="font-black">婚活をもっと頑張らせる相談ではありません。</p>
+        <p className="mt-2">合っていない頑張り方をやめるための相談です。</p>
+      </div>
+    </section>
+  );
+}
+
 export default function ConsultationPage() {
   return (
     <div data-testid="consultation-page" className="screen-shell mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14">
@@ -283,6 +441,8 @@ export default function ConsultationPage() {
         </div>
       </section>
 
+      <ConsultationStuckFlowDiagram />
+
       <section className="mt-12 border-t border-[var(--line)] pt-10">
         <SectionHeading eyebrow="REDEFINE" title="婚活疲れの原因は、相手選びだけではありません。" />
         <div className="mt-6 grid gap-4 text-sm leading-8 text-[var(--text-main)] sm:text-base">
@@ -300,6 +460,8 @@ export default function ConsultationPage() {
           相手選びの前に、出会い方選び。
         </p>
       </section>
+
+      <ConsultationComparisonDiagram />
 
       <section id="service" className="mt-12 scroll-mt-20 border-t border-[var(--line)] pt-10">
         <SectionHeading eyebrow="SERVICE" title="この相談でやること" />
@@ -432,6 +594,8 @@ export default function ConsultationPage() {
           <ConsultationMoshButton placement="flow">料金・空き日程をMOSHで確認する</ConsultationMoshButton>
         </div>
       </section>
+
+      <ConsultationBeforeAfterDiagram />
 
       <section className="mt-12 border-t border-[var(--line)] pt-10">
         <SectionHeading
