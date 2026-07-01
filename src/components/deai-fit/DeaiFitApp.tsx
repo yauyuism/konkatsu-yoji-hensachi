@@ -20,7 +20,7 @@ import {
 import { DEAI_FIT_DISPLAY_META } from "@/lib/deai-fit-display";
 import { getDeaiFitResultUrl, getDeaiFitXShareUrl } from "@/lib/deai-fit-share";
 import { downloadResultImage } from "@/lib/result-image";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL } from "@/lib/service-links";
 
 type DeaiFitStage = "intro" | "question" | "result";
 type AxisBarItem = {
@@ -289,7 +289,7 @@ function DeaiFitShareActions({
         </a>
         <a
           data-testid="deai-fit-consultation-top"
-          href={MOSH_SERVICES_URL}
+          href={CONSULTATION_STORE_URL}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleConsultationClick}
@@ -605,7 +605,7 @@ function DeaiFitConsultationCta({ resultCode, resultLabel }: { resultCode: DeaiF
   };
 
   return (
-    <section data-testid="deai-fit-mosh-cta" className="soft-panel rounded-[1.4rem] border border-[rgba(63,52,46,0.08)] bg-white/72 p-5 sm:p-6">
+    <section data-testid="deai-fit-store-cta" className="soft-panel rounded-[1.4rem] border border-[rgba(63,52,46,0.08)] bg-white/72 p-5 sm:p-6">
       <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">SECOND OPINION</p>
       <h2 className="mt-3 text-2xl font-black leading-tight text-[var(--text-main)] sm:text-3xl">
         自分に合う出会い方を、個別に整理したい人へ。
@@ -619,7 +619,7 @@ function DeaiFitConsultationCta({ resultCode, resultLabel }: { resultCode: DeaiF
         </p>
       </div>
       <a
-        href={MOSH_SERVICES_URL}
+        href={CONSULTATION_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}

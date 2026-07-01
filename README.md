@@ -112,7 +112,7 @@ Playwright は `tests/e2e` にあります。
 
 - `/conditions` の基本フロー
 - `/check` の基本フロー
-- `/diagnoses/konkatsu-fatigue` の基本フローとMOSH導線
+- `/diagnoses/konkatsu-fatigue` の基本フローとSTORES導線
 - `/diagnoses/deai-fit` の基本フロー
 - `/prof` の基本フロー
 - 入力バリデーション

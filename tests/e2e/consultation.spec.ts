@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-const reservationUrl = "https://mosh.jp/yauyuism/services";
+const reservationUrl = "https://yauyuism.stores.jp/";
 
-test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している", async ({ page }) => {
+test("婚活相談LPを表示し、STORES前の説明とCTAが機能している", async ({ page }) => {
   await page.goto("/consultation");
 
   await expect(page.getByTestId("consultation-page")).toBeVisible();
@@ -23,10 +23,10 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(page.getByText("婚活をもっと頑張らせる相談ではありません。")).toHaveCount(2);
   await expect(page.getByText("出会い方から見直す")).toBeVisible();
   await expect(page.getByText("整理する", { exact: true })).toBeVisible();
-  await expect(page.getByText("60分のオンライン相談です。料金・空き日程はMOSHで確認できます。")).toBeVisible();
+  await expect(page.getByText("60分のオンライン相談です。料金・空き日程はSTORESで確認できます。")).toBeVisible();
   await expect(page.getByText("相談時間")).toBeVisible();
   await expect(page.getByText("オンライン", { exact: true })).toBeVisible();
-  await expect(page.getByText("MOSH", { exact: true })).toBeVisible();
+  await expect(page.getByText("STORES", { exact: true })).toBeVisible();
   await expect(page.getByText("今使っているマチアプが自分に合っているか")).toBeVisible();
   await expect(page.getByRole("heading", { name: "プロフィール添削" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "婚活のセカンドオピニオン" })).toBeVisible();
@@ -35,20 +35,20 @@ test("婚活相談LPを表示し、MOSH前の説明とCTAが機能している",
   await expect(page.getByRole("link", { name: "プロフィール添削を見る" })).toHaveAttribute("href", reservationUrl);
   await expect(page.getByRole("link", { name: "60分相談を見る" })).toHaveAttribute("href", reservationUrl);
   await expect(page.getByRole("link", { name: "2回セットを見る" })).toHaveAttribute("href", reservationUrl);
-  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("href", reservationUrl);
-  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("target", "_blank");
-  await expect(page.getByRole("link", { name: "MOSHでプランを見る" })).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("rel", "noopener noreferrer");
   await expect(page.getByRole("link", { name: "会えるのに進まない理由を診断する" })).toBeVisible();
   await expect(page.getByRole("link", { name: "自分に合う出会い方を診断する" })).toBeVisible();
   await expect(page.getByText("このページは仮リンク先です")).toHaveCount(0);
 
-  const moshCtas = page.getByTestId("consultation-mosh-cta");
-  await expect(moshCtas).toHaveCount(6);
-  await expect(moshCtas.first()).toHaveAttribute("href", reservationUrl);
-  await expect(moshCtas.first()).toHaveAttribute("target", "_blank");
-  await expect(moshCtas.first()).toHaveAttribute("rel", "noopener noreferrer");
-  await expect(moshCtas.last()).toHaveAttribute("href", reservationUrl);
-  await expect(moshCtas.last()).toHaveText("MOSHで相談を申し込む");
+  const storeCtas = page.getByTestId("consultation-store-cta");
+  await expect(storeCtas).toHaveCount(6);
+  await expect(storeCtas.first()).toHaveAttribute("href", reservationUrl);
+  await expect(storeCtas.first()).toHaveAttribute("target", "_blank");
+  await expect(storeCtas.first()).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(storeCtas.last()).toHaveAttribute("href", reservationUrl);
+  await expect(storeCtas.last()).toHaveText("STORESで相談を申し込む");
 
   await expect(page.getByTestId("consultation-diagnosis-cta").first()).toHaveAttribute("href", "https://www.shindanlab.jp/");
 });

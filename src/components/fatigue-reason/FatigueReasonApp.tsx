@@ -20,7 +20,7 @@ import {
 import { FATIGUE_REASON_DISPLAY_META } from "@/lib/fatigue-reason-display";
 import { getFatigueReasonResultUrl, getFatigueReasonXShareUrl } from "@/lib/fatigue-reason-share";
 import { downloadResultImage } from "@/lib/result-image";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL } from "@/lib/service-links";
 
 type FatigueReasonStage = "intro" | "question" | "result";
 
@@ -154,7 +154,7 @@ function FatigueConsultationCta({
         婚活をもっと頑張らせる相談ではなく、合っていない頑張り方をやめるための相談です。
       </p>
       <a
-        href={MOSH_SERVICES_URL}
+        href={CONSULTATION_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
         onClick={onClick}
@@ -389,7 +389,7 @@ function FatigueShareActions({
         ) : null}
         <a
           data-testid="fatigue-reason-consultation-quick"
-          href={MOSH_SERVICES_URL}
+          href={CONSULTATION_STORE_URL}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onConsultationClick}

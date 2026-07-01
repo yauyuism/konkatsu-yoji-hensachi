@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ConsultationDiagnosisLink, ConsultationMoshButton, FirstViewConsultationLink } from "@/components/consultation/ConsultationActions";
+import { ConsultationDiagnosisLink, ConsultationStoreButton, FirstViewConsultationLink } from "@/components/consultation/ConsultationActions";
 import { buildShareMetadata } from "@/lib/metadata";
 
 const diagnosisTopUrl = "https://www.shindanlab.jp/";
@@ -104,8 +104,8 @@ const notFitItems = [
 
 const flowItems = [
   {
-    title: "MOSHから申し込み",
-    body: "希望する相談メニューを選び、MOSHからお申し込みください。",
+    title: "STORESから申し込み",
+    body: "希望する相談メニューを選び、STORESからお申し込みください。",
   },
   {
     title: "事前に状況を共有",
@@ -124,7 +124,7 @@ const flowItems = [
 const sessionInfoItems = [
   ["相談時間", "60分"],
   ["形式", "オンライン"],
-  ["予約・決済", "MOSH"],
+  ["予約・決済", "STORES"],
 ];
 
 const stuckFlowSteps = ["出会う", "会う", "疲れる", "進まない", "自分を責める"];
@@ -417,7 +417,7 @@ export default function ConsultationPage() {
         <div className="rounded-[1.2rem] border border-[var(--line)] bg-white p-5 sm:p-6">
           <p className="text-sm font-black tracking-[0.14em] text-[var(--accent)]">SESSION INFO</p>
           <p className="mt-3 text-sm leading-8 text-[var(--text-main)]">
-            60分のオンライン相談です。料金・空き日程はMOSHで確認できます。
+            60分のオンライン相談です。料金・空き日程はSTORESで確認できます。
           </p>
         </div>
         <dl className="grid gap-3 sm:grid-cols-3">
@@ -540,12 +540,12 @@ export default function ConsultationPage() {
                   ))}
                 </ul>
               </div>
-              <ConsultationMoshButton
+              <ConsultationStoreButton
                 placement="plans"
                 className="btn-primary mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 py-3 text-sm font-black"
               >
                 {plan.button}
-              </ConsultationMoshButton>
+              </ConsultationStoreButton>
             </article>
           ))}
         </div>
@@ -554,7 +554,7 @@ export default function ConsultationPage() {
           <p className="mt-2">今の婚活を整理し、自分に合う進め方を見つけるための相談です。</p>
         </div>
         <div className="mt-6">
-          <ConsultationMoshButton placement="plans">MOSHでプランを見る</ConsultationMoshButton>
+          <ConsultationStoreButton placement="plans">STORESでプランを見る</ConsultationStoreButton>
         </div>
       </section>
 
@@ -591,7 +591,7 @@ export default function ConsultationPage() {
           ))}
         </ol>
         <div className="mt-6">
-          <ConsultationMoshButton placement="flow">料金・空き日程をMOSHで確認する</ConsultationMoshButton>
+          <ConsultationStoreButton placement="flow">料金・空き日程をSTORESで確認する</ConsultationStoreButton>
         </div>
       </section>
 
@@ -644,7 +644,7 @@ export default function ConsultationPage() {
           <p className="font-bold">婚活疲れは、努力不足ではなく、合わない頑張り方を続けているサインかもしれません。</p>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <ConsultationMoshButton placement="final_cta">MOSHで相談を申し込む</ConsultationMoshButton>
+          <ConsultationStoreButton placement="final_cta">STORESで相談を申し込む</ConsultationStoreButton>
           <DiagnosisButton>無料診断から試す</DiagnosisButton>
         </div>
       </section>

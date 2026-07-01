@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-const moshServicesUrl = "https://mosh.jp/yauyuism/services";
+const storeUrl = "https://yauyuism.stores.jp/";
 const deaiFitShareVersion = "20260628";
 
 const deaiFitShareCases = [
@@ -233,7 +233,7 @@ test("あなたに合う出会い方診断を最後まで進められる", async
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("rel", "noopener noreferrer");
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", /diagnoses%2Fdeai-fit%2Fresult%2Focqd/);
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", new RegExp(`share%3D${deaiFitShareVersion}`));
-  await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("href", moshServicesUrl);
+  await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("href", storeUrl);
   await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("target", "_blank");
   await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("rel", "noopener noreferrer");
   await expect(page.getByTestId("deai-fit-share-x-bottom")).toHaveAttribute("href", /twitter\.com\/intent\/tweet/);
@@ -244,9 +244,9 @@ test("あなたに合う出会い方診断を最後まで進められる", async
     "/diagnoses/konkatsu-fatigue"
   );
   await expect(page.getByTestId("deai-fit-next-diagnostics").getByRole("link", { name: /プロフィール偏差値診断/ })).toHaveAttribute("href", "/prof");
-  await expect(page.getByTestId("deai-fit-mosh-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
+  await expect(page.getByTestId("deai-fit-store-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
     "href",
-    moshServicesUrl
+    storeUrl
   );
 });
 
@@ -276,7 +276,7 @@ test("結果別URLではタイプ別OGPと診断導線を表示する", async ({
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", /diagnoses%2Fdeai-fit%2Fresult%2Focqn/);
   await expect(page.getByTestId("deai-fit-share-x-top")).toHaveAttribute("href", new RegExp(`share%3D${deaiFitShareVersion}`));
   await expect(page.getByTestId("deai-fit-start-from-share")).toHaveAttribute("href", "/diagnoses/deai-fit");
-  await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("href", moshServicesUrl);
+  await expect(page.getByTestId("deai-fit-consultation-top")).toHaveAttribute("href", storeUrl);
   await expect(page.locator("meta[property='og:title']")).toHaveAttribute("content", "あなたに合う出会い方診断｜条件から広げる紹介活用タイプ");
   await expect(page.locator("meta[property='og:url']")).toHaveAttribute("content", /\/diagnoses\/deai-fit\/result\/ocqn$/);
   await expect(page.locator("meta[property='og:image']")).toHaveAttribute("content", new RegExp(`/og/deai-fit/ocqn\\.png\\?v=${deaiFitShareVersion}`));
@@ -335,9 +335,9 @@ test("通常タイプでは出会い方相談CTAを表示する", async ({ page 
   await answerDiagnosis(page, fcqnAnswers);
 
   await expect(page.getByTestId("deai-fit-result-hero").getByRole("heading", { name: "紹介即決タイプ" })).toBeVisible();
-  await expect(page.getByTestId("deai-fit-mosh-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
+  await expect(page.getByTestId("deai-fit-store-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
     "href",
-    moshServicesUrl
+    storeUrl
   );
 });
 
@@ -347,8 +347,8 @@ test("生活圏タイプでも出会い方相談CTAを表示する", async ({ pa
   await answerDiagnosis(page, fvsnAnswers);
 
   await expect(page.getByTestId("deai-fit-result-hero").getByRole("heading", { name: "生活圏でじわじわ好きになるタイプ" })).toBeVisible();
-  await expect(page.getByTestId("deai-fit-mosh-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
+  await expect(page.getByTestId("deai-fit-store-cta").getByRole("link", { name: "自分に合う出会い方を相談する" })).toHaveAttribute(
     "href",
-    moshServicesUrl
+    storeUrl
   );
 });

@@ -1,4 +1,4 @@
-import { MOSH_SERVICES_URL, NOTE_MEMBERSHIP_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL, NOTE_MEMBERSHIP_URL } from "@/lib/service-links";
 
 export type DeaiFitAnswerValue = "very" | "somewhat" | "neutral" | "notMuch" | "none";
 
@@ -104,7 +104,7 @@ const profileCta: DeaiFitCta = {
   text:
     "あなたの場合は、出会い方そのものより先に「届き方」を整えると変わりやすいかもしれません。文章・写真・並びを見直して、あなたと合う人に届くプロフィールにしたい人は、プロフィール添削で見られます。",
   button: "プロフィール添削を見る",
-  href: MOSH_SERVICES_URL,
+  href: CONSULTATION_STORE_URL,
 };
 
 const consultationCta: DeaiFitCta = {
@@ -112,7 +112,7 @@ const consultationCta: DeaiFitCta = {
   text:
     "自分に合う出会い方を個別に整理したい人へ。マチアプ、相談所、紹介、SNS、外飲みまで含めて、無理しない進め方を一緒に考えます。",
   button: "婚活の見直し相談を見る",
-  href: MOSH_SERVICES_URL,
+  href: CONSULTATION_STORE_URL,
 };
 
 const gardenCta: DeaiFitCta = {

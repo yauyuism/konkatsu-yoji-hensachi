@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const moshServicesUrl = "https://mosh.jp/yauyuism/services";
+const storeUrl = "https://yauyuism.stores.jp/";
 const xUrl = "https://x.com/yauyuism";
 const noteUrl = "https://note.com/yauyuism";
 
@@ -11,7 +11,7 @@ test("トップページの主要導線を表示できる", async ({ page }) => 
   await expect(page.getByRole("link", { name: /婚活診断LAB/ })).toBeVisible();
   await expect(page.getByTestId("home-hero-heading")).toContainText("婚活の違和感を、診断で言語化する。");
   await expect(page.getByTestId("home-hero-cta")).toHaveAttribute("href", "/diagnoses/konkatsu-fatigue");
-  await expect(page.getByTestId("home-hero-consultation-cta")).toHaveAttribute("href", moshServicesUrl);
+  await expect(page.getByTestId("home-hero-consultation-cta")).toHaveAttribute("href", storeUrl);
   await expect(page.getByTestId("home-main-diagnoses")).toBeVisible();
   await expect(page.getByTestId("home-main-diagnoses").getByRole("link", { name: /婚活疲れ・マチアプ疲れの理由診断/ })).toBeVisible();
   await expect(page.getByTestId("home-main-diagnoses").getByRole("link", { name: /あなたに合う出会い方診断/ })).toBeVisible();
@@ -26,7 +26,7 @@ test("トップページの主要導線を表示できる", async ({ page }) => 
   await expect(page.getByRole("img", { name: "やうゆのアイコン" })).toBeVisible();
   await expect(page.getByTestId("home-creator").getByRole("link", { name: "診断結果をもとに相談する" })).toHaveAttribute(
     "href",
-    moshServicesUrl
+    storeUrl
   );
   await expect(page.getByTestId("home-creator").getByRole("link", { name: "Xを見る" })).toHaveAttribute("href", xUrl);
   await expect(page.getByTestId("home-creator").getByRole("link", { name: "noteを見る" })).toHaveAttribute("href", noteUrl);

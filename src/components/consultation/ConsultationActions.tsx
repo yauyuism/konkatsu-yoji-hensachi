@@ -1,9 +1,9 @@
 "use client";
 
 import { trackEvent } from "@/lib/analytics";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL } from "@/lib/service-links";
 
-type MoshPlacement = "final_cta" | "flow" | "header" | "plans";
+type StorePlacement = "final_cta" | "flow" | "header" | "plans";
 type DiagnosisKind = "konkatsu_fatigue" | "deai_fit";
 
 export function FirstViewConsultationLink() {
@@ -25,25 +25,25 @@ export function FirstViewConsultationLink() {
   );
 }
 
-export function ConsultationMoshButton({
+export function ConsultationStoreButton({
   children,
   placement,
   className,
 }: {
   children: string;
-  placement: MoshPlacement;
+  placement: StorePlacement;
   className?: string;
 }) {
   const handleClick = () => {
-    trackEvent("consultation_lp_mosh_click", {
+    trackEvent("consultation_lp_store_click", {
       placement,
     });
   };
 
   return (
     <a
-      data-testid="consultation-mosh-cta"
-      href={MOSH_SERVICES_URL}
+      data-testid="consultation-store-cta"
+      href={CONSULTATION_STORE_URL}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

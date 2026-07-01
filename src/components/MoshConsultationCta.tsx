@@ -1,20 +1,20 @@
 "use client";
 
 import { trackEvent } from "@/lib/analytics";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL } from "@/lib/service-links";
 
-type MoshConsultationCtaKind = "consultation" | "profile" | "deai" | "twoSessions";
+type StoreConsultationCtaKind = "consultation" | "profile" | "deai" | "twoSessions";
 
-type MoshConsultationCtaProps = {
+type StoreConsultationCtaProps = {
   placement: string;
   quizName?: string;
   resultType?: string;
-  ctaKind?: MoshConsultationCtaKind;
+  ctaKind?: StoreConsultationCtaKind;
   variant?: "default" | "compact" | "soft";
   className?: string;
 };
 
-const ctaCopy: Record<MoshConsultationCtaKind, { title: string; body: string[]; button: string }> = {
+const ctaCopy: Record<StoreConsultationCtaKind, { title: string; body: string[]; button: string }> = {
   consultation: {
     title: "診断だけでは分かりきらないこともあります。",
     body: [
@@ -44,14 +44,14 @@ const ctaCopy: Record<MoshConsultationCtaKind, { title: string; body: string[]; 
   },
 };
 
-export function MoshConsultationCta({
+export function StoreConsultationCta({
   placement,
   quizName,
   resultType,
   ctaKind = "consultation",
   variant = "default",
   className = "",
-}: MoshConsultationCtaProps) {
+}: StoreConsultationCtaProps) {
   const copy = ctaCopy[ctaKind];
   const isCompact = variant === "compact";
   const isSoft = variant === "soft";
@@ -67,7 +67,7 @@ export function MoshConsultationCta({
 
   return (
     <section
-      data-testid="mosh-consultation-cta"
+      data-testid="store-consultation-cta"
       className={`${isSoft ? "soft-panel" : "card"} overflow-hidden rounded-[1.4rem] p-5 sm:p-6 ${className}`.trim()}
     >
       <p className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">NEXT STEP</p>
@@ -80,7 +80,7 @@ export function MoshConsultationCta({
         ))}
       </div>
       <a
-        href={MOSH_SERVICES_URL}
+        href={CONSULTATION_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}

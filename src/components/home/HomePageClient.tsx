@@ -19,7 +19,7 @@ import {
 } from "@/data/tools";
 import { trackEvent } from "@/lib/analytics";
 import { getCreatorLinks } from "@/lib/creator-links";
-import { MOSH_SERVICES_URL } from "@/lib/service-links";
+import { CONSULTATION_STORE_URL } from "@/lib/service-links";
 
 function SectionHeading({
   title,
@@ -139,7 +139,7 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
   const handleCreatorConsultationClick = () => {
     trackEvent("creator_section_consultation_click", {
       placement: "creator_section",
-      link_url: MOSH_SERVICES_URL,
+      link_url: CONSULTATION_STORE_URL,
     });
   };
   const handleCreatorSocialClick = (platform: "x" | "note", linkUrl: string) => {
@@ -170,7 +170,7 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
           </Link>
           <a
             data-testid="home-hero-consultation-cta"
-            href={MOSH_SERVICES_URL}
+            href={CONSULTATION_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleHeroConsultationClick}
@@ -374,7 +374,7 @@ export function HomePageClient({ initialHasCompletedAnyTool: _initialHasComplete
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href={MOSH_SERVICES_URL}
+                  href={CONSULTATION_STORE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleCreatorConsultationClick}
