@@ -1,0 +1,22 @@
+# 楽天証券で買える代表的な投資信託の参照データ（教育目的）
+# expense_ratio = 信託報酬（税込・年率, 概算）。ベンチマークと資産クラスは分類用。
+# 数値は目安です。売買前に必ず最新の交付目論見書・月次レポートで確認してください。
+fund_name,expense_ratio,benchmark,asset_class,region_hint,currency_hint
+eMAXIS Slim 全世界株式(オール・カントリー),0.0578,MSCI ACWI,GLOBAL_EQUITY,global,USD_MAJOR
+楽天・オールカントリー株式インデックス,0.0561,MSCI ACWI,GLOBAL_EQUITY,global,USD_MAJOR
+楽天・全世界株式インデックス(楽天VT),0.1920,FTSE Global All Cap,GLOBAL_EQUITY,global,USD_MAJOR
+eMAXIS Slim 米国株式(S&P500),0.0937,S&P500,US_EQUITY,us,USD
+楽天・S&P500インデックス,0.0770,S&P500,US_EQUITY,us,USD
+SBI・V・S&P500インデックス,0.0938,S&P500,US_EQUITY,us,USD
+楽天・全米株式インデックス(楽天VTI),0.1620,CRSP US Total Market,US_EQUITY,us,USD
+eMAXIS Slim 先進国株式インデックス,0.0989,MSCI Kokusai,DEV_EQUITY,dev_ex_jp,USD_MAJOR
+ニッセイNASDAQ100インデックス,0.2035,NASDAQ100,US_TECH,us,USD
+eMAXIS NASDAQ100インデックス,0.4400,NASDAQ100,US_TECH,us,USD
+楽天・NASDAQ-100インデックス,0.1980,NASDAQ100,US_TECH,us,USD
+eMAXIS Slim 新興国株式インデックス,0.1518,MSCI EM,EM_EQUITY,em,EM_MIX
+eMAXIS Slim 国内株式(TOPIX),0.1430,TOPIX,JP_EQUITY,japan,JPY
+楽天・高配当株式・米国ファンド(楽天SCHD),0.1920,Dow Jones US Dividend 100,HIGH_DIV,us,USD
+SBI・V・米国高配当株式(SBI VYM),0.1238,FTSE High Dividend Yield,HIGH_DIV,us,USD
+eMAXIS Slim 先進国債券インデックス,0.1540,FTSE WGBI ex JP,DEV_BOND,dev_ex_jp,USD_MAJOR
+eMAXIS Slim バランス(8資産均等型),0.1430,合成,BALANCED8,global,MIX
+たわらノーロード 先進国債券(為替ヘッジあり),0.2200,FTSE WGBI ex JP hedged,DEV_BOND,dev_ex_jp,JPY_HEDGED

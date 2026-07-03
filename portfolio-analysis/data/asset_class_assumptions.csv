@@ -1,0 +1,17 @@
+# 資産クラス別の想定値（教育目的の前提値 / capital market assumptions）
+# expected_return, volatility は「名目・円建て投資家目線・年率」の長期前提値。
+# 出所は各種CMA（JPモルガン/バンガード等）の公表レンジを丸めた保守的な仮値であり、
+# 将来の実現値を保証するものではありません。必ず自分で最新の前提に更新してください。
+asset_class,label_ja,expected_return,volatility
+GLOBAL_EQUITY,全世界株（オルカン/ACWI）,0.064,0.180
+DEV_EQUITY,先進国株（除く日本/MSCIコクサイ）,0.065,0.185
+US_EQUITY,米国株（S&P500）,0.065,0.190
+US_TECH,米国ハイテク（NASDAQ100）,0.075,0.250
+EM_EQUITY,新興国株,0.070,0.240
+JP_EQUITY,日本株（TOPIX）,0.055,0.180
+HIGH_DIV,高配当株,0.060,0.160
+REIT,REIT（不動産）,0.055,0.190
+DEV_BOND,先進国債券（為替ヘッジ）,0.020,0.050
+JP_BOND,日本債券,0.010,0.030
+GOLD,金（ゴールド）,0.030,0.150
+CASH,現金・短期資産,0.005,0.005

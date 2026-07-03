@@ -1,0 +1,10 @@
+# 保有投信のサンプル（★あなたの実データに置き換えてください★）
+# account_type: NISA_growth(成長投資枠) / NISA_tsumitate(つみたて投資枠) / taxable(特定・一般)
+# book_value=取得金額(円), market_value=評価額(円), monthly_contribution=毎月積立額(円)
+# fund_name は data/fund_reference.csv の名称に一致させると自動分類されます（部分一致でも可）。
+fund_name,account_type,book_value,market_value,monthly_contribution
+eMAXIS Slim 米国株式(S&P500),NISA_tsumitate,1200000,1650000,50000
+eMAXIS Slim 全世界株式(オール・カントリー),NISA_growth,800000,980000,30000
+ニッセイNASDAQ100インデックス,taxable,600000,900000,20000
+eMAXIS Slim 新興国株式インデックス,taxable,300000,315000,0
+楽天・高配当株式・米国ファンド(楽天SCHD),NISA_growth,400000,430000,10000

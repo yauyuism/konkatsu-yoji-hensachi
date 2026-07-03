@@ -1,0 +1,5 @@
+# 生成物（実行のたびに再生成される）
+reports/*
+!reports/.gitkeep
+__pycache__/
+*.pyc
