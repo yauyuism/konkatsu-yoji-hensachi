@@ -24,7 +24,7 @@ const AMEX_DEFAULT_RULES = [
   ['支払手数料', 'OPENAI,ANTHROPIC,CLAUDE,AHREFS,MICROSOFT,SHUTTERSTOCK,RAKKO,X CORP,SHOPIFY,PAYPAL,YOUTUBEPREMIUM,ZOOM,NOTION,CANVA,Ａｐｐｌｅ　ｉＴｕｎｅｓ,クラウドサイン,アドビ'],
   ['旅費交通費', 'モバイルＳｕｉｃａ,モバイルSuica,モバイルＰＡＳＭＯ,ＧＯアプリ,LUUP,CHARGESPOT,タクシー,駐車場,スマートＥＸ,スマートEX,ＥＴＣ,レンタカー,石油,自動車交通'],
   ['福利厚生費', 'UBER EATS,出前館,でまえかん,ｍｅｎｕ'],
-  ['接待交際費', 'MIJIKAYO'],
+  ['接待交際費', 'MIJIKAYO,MAJIKAYO'],
   ['消耗品費', 'アマゾン,ヨドバシ,ビックカメラ,KOKYUNAVI'],
   ['外注費', 'クラウドワークス'],
   ['荷造運賃', 'プラスシッピング'],
