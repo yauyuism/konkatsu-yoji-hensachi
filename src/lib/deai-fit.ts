@@ -102,8 +102,8 @@ export const DEAI_FIT_LETTERS: DeaiFitLetter[] = ["O", "F", "C", "V", "Q", "S", 
 const profileCta: DeaiFitCta = {
   kind: "profile",
   text:
-    "あなたの場合は、出会い方そのものより先に「届き方」を整えると変わりやすいかもしれません。文章・写真・並びを見直して、あなたと合う人に届くプロフィールにしたい人は、プロフィール添削で見られます。",
-  button: "プロフィール添削を見る",
+    "あなたの場合は、出会い方そのものより先に「届き方」を整えると変わりやすいかもしれません。文章・写真・並びの見直しは、60分相談の中で一緒にできます。",
+  button: "プロフィールを相談する",
   href: CONSULTATION_STORE_URL,
 };
 

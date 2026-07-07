@@ -12,7 +12,7 @@ test("婚活相談LPを表示し、STORES前の説明とCTAが機能している
   await expect(page.getByRole("heading", { name: "こんな状態ではありませんか？" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "この相談でやること" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "実際に相談で話せること" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "相談プランは3つあります" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "相談メニューは2つです" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "進まない原因は、ひとつではありません" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "普通の婚活相談と、この相談の違い" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "相談後に残るもの" })).toBeVisible();
@@ -23,18 +23,21 @@ test("婚活相談LPを表示し、STORES前の説明とCTAが機能している
   await expect(page.getByText("婚活をもっと頑張らせる相談ではありません。")).toHaveCount(2);
   await expect(page.getByText("出会い方から見直す")).toBeVisible();
   await expect(page.getByText("整理する", { exact: true })).toBeVisible();
-  await expect(page.getByText("60分のオンライン相談です。料金・空き日程はSTORESで確認できます。")).toBeVisible();
-  await expect(page.getByText("相談時間")).toBeVisible();
-  await expect(page.getByText("オンライン", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("単発の60分オンライン相談と、公式LINEで何度でも相談できる定額プランがあります。空き日程はSTORESで確認できます。")
+  ).toBeVisible();
+  await expect(page.getByText("9,800円（税込）", { exact: true })).toBeVisible();
+  await expect(page.getByText("月額19,800円（税込）", { exact: true })).toBeVisible();
   await expect(page.getByText("STORES", { exact: true })).toBeVisible();
   await expect(page.getByText("今使っているマチアプが自分に合っているか")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "プロフィール添削" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "婚活のセカンドオピニオン" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "2回セット相談" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "リモート婚活相談 60分" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "婚活かけこみ相談し放題" })).toBeVisible();
+  await expect(page.getByText("9,800円（税込）・単発", { exact: true })).toBeVisible();
+  await expect(page.getByText("月額19,800円（税込）・定額", { exact: true })).toBeVisible();
   await expect(page.getByText("まずはこれ")).toBeVisible();
-  await expect(page.getByRole("link", { name: "プロフィール添削を見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByText("結婚相談所の入会金は、3万〜20万円が相場です。")).toBeVisible();
   await expect(page.getByRole("link", { name: "60分相談を見る" })).toHaveAttribute("href", reservationUrl);
-  await expect(page.getByRole("link", { name: "2回セットを見る" })).toHaveAttribute("href", reservationUrl);
+  await expect(page.getByRole("link", { name: "相談し放題を見る" })).toHaveAttribute("href", reservationUrl);
   await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("href", reservationUrl);
   await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("target", "_blank");
   await expect(page.getByRole("link", { name: "STORESでプランを見る" })).toHaveAttribute("rel", "noopener noreferrer");
@@ -43,7 +46,7 @@ test("婚活相談LPを表示し、STORES前の説明とCTAが機能している
   await expect(page.getByText("このページは仮リンク先です")).toHaveCount(0);
 
   const storeCtas = page.getByTestId("consultation-store-cta");
-  await expect(storeCtas).toHaveCount(6);
+  await expect(storeCtas).toHaveCount(5);
   await expect(storeCtas.first()).toHaveAttribute("href", reservationUrl);
   await expect(storeCtas.first()).toHaveAttribute("target", "_blank");
   await expect(storeCtas.first()).toHaveAttribute("rel", "noopener noreferrer");

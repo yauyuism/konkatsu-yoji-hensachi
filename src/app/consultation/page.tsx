@@ -60,26 +60,21 @@ const talkExamples = [
 
 const consultationPlans = [
   {
-    title: "プロフィール添削",
-    label: "入口を整えたい人向け",
-    body: "マチアプや婚活プロフィールを見直したい人向けのプランです。自分の魅力が伝わる入口になっているか、合わない人を呼び込んでいないかを整理します。",
-    fit: ["マッチ数を増やしたい", "合わない人ばかり来る", "プロフィール文に自信がない", "写真や文章の方向性を見直したい"],
-    button: "プロフィール添削を見る",
-  },
-  {
-    title: "婚活のセカンドオピニオン",
+    title: "リモート婚活相談 60分",
     label: "まず一度整理したい人向け",
-    body: "会えるのに進まない理由、婚活疲れの原因、自分に合う出会い方を60分で整理するプランです。マチアプ、相談所、紹介、SNS、外飲みなど、今の婚活の進め方を一緒に見直します。",
-    fit: ["会えるのに進まない", "いい人なのに好きになれない", "相談所に入るべきか迷っている", "自分に合う出会い方が分からない"],
+    price: "9,800円（税込）・単発",
+    body: "会えるのに進まない理由、婚活疲れの原因、自分に合う出会い方をGoogle Meetの60分で整理する単発相談です。プロフィールや写真の見直しも、婚活全体を整理する中で扱えます。",
+    fit: ["会えるのに進まない", "いい人なのに好きになれない", "相談所に入るべきか迷っている", "プロフィールや写真も見直したい"],
     button: "60分相談を見る",
     recommended: true,
   },
   {
-    title: "2回セット相談",
-    label: "動いた後まで見てほしい人向け",
-    body: "1回目で婚活の現状を整理し、実際に動いた後の変化や迷いを2回目で見直すプランです。一度話して終わりではなく、次の行動まで整理したい人に向いています。",
-    fit: ["相談後の動き方まで見てほしい", "一度整理してもまた迷いそう", "プロフィールや出会い方を実際に直したい", "継続して婚活の方向性を見直したい"],
-    button: "2回セットを見る",
+    title: "婚活かけこみ相談し放題",
+    label: "婚活中に何度も迷う人向け",
+    price: "月額19,800円（税込）・定額",
+    body: "この人と会うべきか、2回目に行くべきか、違和感を信じていいのか。婚活中の小さな迷いを、公式LINEで何度でも相談できる定額プランです。回数上限なし・期間縛りなし・いつでも解約できます。",
+    fit: ["婚活中に小さな判断でよく迷う", "メッセージやプロフィールを都度見てほしい", "婚活を一人で抱えるのがしんどい", "継続的に自分の婚活を見てもらいたい"],
+    button: "相談し放題を見る",
   },
 ];
 
@@ -90,7 +85,7 @@ const fitItems = [
   "婚活を頑張るほど自信がなくなる",
   "相談所に入るべきか迷っている",
   "自分に合う出会い方が分からない",
-  "プロフィール添削だけでは足りない気がしている",
+  "プロフィールだけ直しても変わらない気がしている",
   "婚活の進め方を一度客観的に見直したい",
 ];
 
@@ -122,8 +117,8 @@ const flowItems = [
 ];
 
 const sessionInfoItems = [
-  ["相談時間", "60分"],
-  ["形式", "オンライン"],
+  ["60分相談", "9,800円（税込）"],
+  ["相談し放題", "月額19,800円（税込）"],
   ["予約・決済", "STORES"],
 ];
 
@@ -193,7 +188,12 @@ const faqs = [
   },
   {
     question: "プロフィールも見てもらえますか？",
-    answer: "相談内容によっては見られます。プロフィールだけをしっかり見たい場合は、プロフィール添削メニューも検討してください。",
+    answer: "見られます。プロフィールや写真の見直しは、60分相談・相談し放題のどちらでも、婚活全体を整理する中で扱います。",
+  },
+  {
+    question: "60分相談と相談し放題、どちらを選べばいいですか？",
+    answer:
+      "まず一度整理したい人は60分相談がおすすめです。会うべきか、2回目に行くべきかなど、婚活中に何度も迷う人は相談し放題が向いています。60分相談で整理してから、必要になったら相談し放題に切り替える使い方もできます。",
   },
   {
     question: "恋愛経験が少なくても大丈夫ですか？",
@@ -417,7 +417,7 @@ export default function ConsultationPage() {
         <div className="rounded-[1.2rem] border border-[var(--line)] bg-white p-5 sm:p-6">
           <p className="text-sm font-black tracking-[0.14em] text-[var(--accent)]">SESSION INFO</p>
           <p className="mt-3 text-sm leading-8 text-[var(--text-main)]">
-            60分のオンライン相談です。料金・空き日程はSTORESで確認できます。
+            単発の60分オンライン相談と、公式LINEで何度でも相談できる定額プランがあります。空き日程はSTORESで確認できます。
           </p>
         </div>
         <dl className="grid gap-3 sm:grid-cols-3">
@@ -510,10 +510,10 @@ export default function ConsultationPage() {
       <section className="mt-12 border-t border-[var(--line)] pt-10">
         <SectionHeading
           eyebrow="PLANS"
-          title="相談プランは3つあります"
-          description="悩みの深さや、見直したい範囲に合わせて選べるように、3つのプランを用意しています。どれを選べばいいか迷う人は、まずは60分の相談がおすすめです。"
+          title="相談メニューは2つです"
+          description="迷っている人は、まず60分相談。婚活中に何度も迷う人は、相談し放題。60分相談で整理してから、必要になったら相談し放題に切り替えることもできます。"
         />
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {consultationPlans.map((plan) => (
             <article
               key={plan.title}
@@ -528,6 +528,7 @@ export default function ConsultationPage() {
               ) : null}
               <p className="pr-20 text-xs font-black tracking-[0.14em] text-[var(--accent)]">{plan.label}</p>
               <h3 className="mt-3 text-xl font-black leading-tight text-[var(--text-main)]">{plan.title}</h3>
+              <p className="font-numeric mt-2 text-base font-black text-[var(--accent)]">{plan.price}</p>
               <p className="mt-4 text-sm leading-8 text-[var(--text-sub)]">{plan.body}</p>
               <div className="mt-5 rounded-[1rem] bg-[var(--accent-soft)] px-4 py-4">
                 <p className="text-xs font-black tracking-[0.14em] text-[var(--accent)]">向いている人</p>
@@ -550,8 +551,14 @@ export default function ConsultationPage() {
           ))}
         </div>
         <div className="mt-6 rounded-[1.2rem] border border-[rgba(26,26,26,0.08)] bg-white p-5 text-sm leading-8 text-[var(--text-main)] sm:p-6 sm:text-base">
-          <p>どのプランも、相手を紹介するサービスではありません。</p>
+          <p>どちらのメニューも、相手を紹介するサービスではありません。</p>
           <p className="mt-2">今の婚活を整理し、自分に合う進め方を見つけるための相談です。</p>
+        </div>
+        <div className="mt-4 rounded-[1.2rem] border border-[rgba(232,69,60,0.14)] bg-[var(--accent-soft)] p-5 text-sm leading-8 text-[var(--text-main)] sm:p-6 sm:text-base">
+          <p className="font-black">結婚相談所の入会金は、3万〜20万円が相場です。</p>
+          <p className="mt-2">
+            入会してから「合わなかった」と気づく前に、60分相談で「そもそも相談所が自分に合うのか」から整理できます。
+          </p>
         </div>
         <div className="mt-6">
           <ConsultationStoreButton placement="plans">STORESでプランを見る</ConsultationStoreButton>
