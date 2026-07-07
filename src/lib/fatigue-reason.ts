@@ -104,14 +104,14 @@ const consultationCta: FatigueReasonCta = {
 
 const profileCta: FatigueReasonCta = {
   title: "合わない人が入りすぎているかもと思った人へ",
-  text: "文章・写真・並びを見直して、あなたと合う人に届く入口を整えます。",
-  button: "あなたと合う人に届くプロフィール添削を見る",
+  text: "文章・写真・並びを見直して、あなたと合う人に届く入口を整えます。プロフィールの見直しは、60分相談の中で一緒にできます。",
+  button: "プロフィールを相談する",
 };
 
 const resetCta: FatigueReasonCta = {
   title: "一度話して終わりではなく、動いた後の迷いまで整えたい人へ",
-  text: "1回目で整理して、2回目で婚活を自分に合う形へ戻していきます。",
-  button: "2回セットを見る",
+  text: "まず60分相談で立て直しの方向を整理。そのあとの迷いは、公式LINEで何度でも相談できる定額の「相談し放題」で見直せます。",
+  button: "相談し放題を見る",
 };
 
 export const FATIGUE_REASON_QUESTIONS: FatigueReasonQuestion[] = [
