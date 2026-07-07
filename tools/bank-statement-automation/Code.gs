@@ -49,6 +49,7 @@ function onOpen() {
     .addItem('① 初期セットアップ（タブ作成）', 'setupControlPanel')
     .addItem('② 月次シート生成', 'generateMonthlySheets')
     .addItem('③ 貼り付けタブをクリア', 'clearPasteSheets')
+    .addItem('④ AMEX明細を仕分け', 'amexClassify')
     .addToUi();
 }
 
@@ -85,6 +86,9 @@ function setupControlPanel() {
       sh.setTabColor('#4a86e8');
     }
   });
+
+  // AMEX仕分けルールタブ（Amex.gs）
+  if (typeof ensureAmexRuleSheet === 'function') ensureAmexRuleSheet(ss);
 
   // 使い方タブ
   if (!ss.getSheetByName(USAGE_SHEET_NAME)) {
